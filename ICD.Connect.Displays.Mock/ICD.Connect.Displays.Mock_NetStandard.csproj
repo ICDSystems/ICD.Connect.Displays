@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ICD.Connect.Displays_SimplSharp.suo" />
+    <None Remove="ICD.Connect.Displays.Mock_SimplSharp.suo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 
