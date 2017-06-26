@@ -72,7 +72,7 @@
     <Compile Include="ChristieDisplayBuffer.cs" />
     <Compile Include="ChristieDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
+    <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

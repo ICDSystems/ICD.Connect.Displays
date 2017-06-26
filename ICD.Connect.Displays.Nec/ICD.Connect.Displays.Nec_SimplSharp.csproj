@@ -68,7 +68,7 @@
     <Compile Include="NecDisplay.cs" />
     <Compile Include="NecDisplayCommand.cs" />
     <Compile Include="NecDisplaySettings.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
+    <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
