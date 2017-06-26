@@ -73,6 +73,7 @@
     <Compile Include="IDisplayWithAudio.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="IDisplay.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EventArguments\ScalingModeEventArgs.cs" />
     <Compile Include="Settings\AbstractDisplaySettings.cs" />
