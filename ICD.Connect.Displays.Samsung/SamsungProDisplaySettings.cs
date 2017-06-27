@@ -1,4 +1,5 @@
-﻿using ICD.Common.Attributes.Properties;
+﻿using System;
+using ICD.Common.Attributes.Properties;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
@@ -23,6 +24,11 @@ namespace ICD.Connect.Displays.Samsung
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
 		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(SamsungProDisplay); } }
+
+		/// <summary>
 		/// The video wall id for this display.
 		/// </summary>
 		[SettingsProperty(SettingsProperty.ePropertyType.Ipid)]
@@ -38,19 +44,6 @@ namespace ICD.Connect.Displays.Samsung
 
 			if (WallId != 0)
 				writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			SamsungProDisplay output = new SamsungProDisplay();
-			output.ApplySettings(this, factory);
-
-			return output;
 		}
 
 		/// <summary>

@@ -1,3 +1,4 @@
+using System;
 using ICD.Common.Properties;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings;
@@ -19,17 +20,9 @@ namespace ICD.Connect.Displays.Sharp
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
 		/// <summary>
-		/// Creates a new originator instance from the settings.
+		/// Gets the type of the originator for this settings instance.
 		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			SharpProDisplay output = new SharpProDisplay();
-			output.ApplySettings(this, factory);
-
-			return output;
-		}
+		public override Type OriginatorType { get { return typeof(SharpProDisplay); } }
 
 		/// <summary>
 		/// Loads the settings from XML.
