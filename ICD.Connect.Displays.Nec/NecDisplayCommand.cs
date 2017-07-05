@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using ICD.Common.Utils.Extensions;
@@ -410,7 +411,7 @@ namespace ICD.Connect.Displays.Nec
 		private static byte FromAsciiCharacters8(byte[] bytes)
 		{
 			string hex = Encoding.ASCII.GetString(bytes, 0, 2);
-			return byte.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+			return byte.Parse(hex, NumberStyles.HexNumber);
 		}
 
 		/// <summary>
@@ -421,7 +422,7 @@ namespace ICD.Connect.Displays.Nec
 		private static ushort FromAsciiCharacters16(byte[] bytes)
 		{
 			string hex = Encoding.ASCII.GetString(bytes, 0, 4);
-			return ushort.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+			return ushort.Parse(hex, NumberStyles.HexNumber);
 		}
 
 		/// <summary>
