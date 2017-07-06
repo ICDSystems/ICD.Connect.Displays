@@ -10,10 +10,10 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays
 {
@@ -21,7 +21,7 @@ namespace ICD.Connect.Displays
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
-		where T : ISettings, new()
+		where T : AbstractDisplaySettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
 		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
