@@ -1,4 +1,5 @@
-﻿using ICD.Common.EventArguments;
+﻿using System;
+using ICD.Common.EventArguments;
 using ICD.Connect.Devices.Controls;
 
 namespace ICD.Connect.Displays
@@ -101,16 +102,23 @@ namespace ICD.Connect.Displays
 		private void Subscribe(IDisplayWithAudio parent)
 		{
 			parent.OnVolumeChanged += ParentOnVolumeChanged;
+			parent.OnMuteStateChanged += ParentOnMuteStateChanged;
 		}
 
 		private void Unsubscribe(IDisplayWithAudio parent)
 		{
 			parent.OnVolumeChanged -= ParentOnVolumeChanged;
+			parent.OnMuteStateChanged -= ParentOnMuteStateChanged;
 		}
 
 		private void ParentOnVolumeChanged(object sender, FloatEventArgs args)
 		{
 			RawVolume = args.Data;
+		}
+
+		private void ParentOnMuteStateChanged(object sender, BoolEventArgs args)
+		{
+			IsMuted = args.Data;
 		}
 
 		#endregion
