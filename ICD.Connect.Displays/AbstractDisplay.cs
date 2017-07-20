@@ -76,13 +76,20 @@ namespace ICD.Connect.Displays
 				if (value == m_HdmiInput)
 					return;
 
+				int? oldInput = m_HdmiInput;
 				m_HdmiInput = value;
 
 				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
 				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
-				if (handler != null)
-					handler(this, m_HdmiInput);
+				if (handler == null)
+					return;
+
+				if (oldInput.HasValue)
+					handler(this, oldInput.Value, false);
+
+				if (m_HdmiInput.HasValue)
+					handler(this, m_HdmiInput.Value, true);
 			}
 		}
 

@@ -5,7 +5,7 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays
 {
-	public delegate void DisplayHdmiInputDelegate(IDisplay display, int? hdmiInput);
+	public delegate void DisplayHdmiInputDelegate(IDisplay display, int hdmiInput, bool active);
 
 	/// <summary>
 	/// IDisplay provides methods for controlling a TV.

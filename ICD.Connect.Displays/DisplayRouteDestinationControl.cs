@@ -6,6 +6,7 @@ using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
 using ICD.Connect.Routing.EventArguments;
+using ICD.Connect.Routing.Utils;
 
 namespace ICD.Connect.Displays
 {
@@ -15,7 +16,9 @@ namespace ICD.Connect.Displays
 	public sealed class DisplayRouteDestinationControl : AbstractRouteDestinationControl<IDisplay>
 	{
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
-		public override event EventHandler OnActiveInputsChanged;
+		public override event EventHandler<ActiveInputStateChangeEventArgs> OnActiveInputsChanged;
+
+		private readonly SwitcherCache m_Cache;
 
 		/// <summary>
 		/// Constructor.
@@ -25,6 +28,10 @@ namespace ICD.Connect.Displays
 		public DisplayRouteDestinationControl(IDisplay parent, int id)
 			: base(parent, id)
 		{
+			m_Cache = new SwitcherCache();
+			m_Cache.OnSourceDetectionStateChange += CacheOnSourceDetectionStateChange;
+			m_Cache.OnActiveInputsChanged += CacheOnActiveInputsChanged;
+
 			Subscribe(parent);
 		}
 
@@ -101,10 +108,25 @@ namespace ICD.Connect.Displays
 		/// Called when the parent switches HDMI inputs.
 		/// </summary>
 		/// <param name="display"></param>
-		/// <param name="hdmiInput"></param>
-		private void ParentOnHdmiInputChanged(IDisplay display, int? hdmiInput)
+		/// <param name="input"></param>
+		/// <param name="active"></param>
+		private void ParentOnHdmiInputChanged(IDisplay display, int input, bool active)
 		{
-			OnActiveInputsChanged.Raise(this);
+			m_Cache.SetSourceDetectedState(input, eConnectionType.Video | eConnectionType.Audio, active);
+		}
+
+		#endregion
+
+		#region Cache Callbacks
+
+		private void CacheOnActiveInputsChanged(object sender, ActiveInputStateChangeEventArgs args)
+		{
+			OnActiveInputsChanged.Raise(this, new ActiveInputStateChangeEventArgs(args.Input, args.Type, args.Active));
+		}
+
+		private void CacheOnSourceDetectionStateChange(object sender, SourceDetectionStateChangeEventArgs args)
+		{
+			OnSourceDetectionStateChange.Raise(this, new SourceDetectionStateChangeEventArgs(args.Input, args.Type, args.State));
 		}
 
 		#endregion
