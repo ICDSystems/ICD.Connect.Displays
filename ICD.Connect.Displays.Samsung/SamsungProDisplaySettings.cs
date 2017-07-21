@@ -1,8 +1,8 @@
 ﻿using System;
-using ICD.Common.Attributes.Properties;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
+using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.Factories;
 
 namespace ICD.Connect.Displays.Samsung
