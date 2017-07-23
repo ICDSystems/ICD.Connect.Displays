@@ -1,0 +1,36 @@
+﻿using System;
+using ICD.Common.Properties;
+using ICD.Connect.Displays.Settings;
+using ICD.Connect.Settings.Attributes.Factories;
+
+namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
+{
+	public sealed class SonyBraviaDisplaySettings : AbstractDisplayWithAudioSettings
+	{
+		private const string FACTORY_NAME = "SonyBraviaDisplay";
+
+		private const string HDMI_INPUT_COUNT_ELEMENT = "HdmiInputCount";
+
+		/// <summary>
+		/// Gets the originator factory name.
+		/// </summary>
+		public override string FactoryName { get { return FACTORY_NAME; } }
+
+		public int HdmiInputCount { get; set; }
+
+        public override Type OriginatorType { get { return typeof(SonyBraviaDisplay); } }
+
+		/// <summary>
+		/// Loads the settings from XML.
+		/// </summary>
+		/// <param name="xml"></param>
+		/// <returns></returns>
+		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		public static SonyBraviaDisplaySettings FromXml(string xml)
+		{
+			SonyBraviaDisplaySettings output = new SonyBraviaDisplaySettings();
+			ParseXml(output, xml);
+			return output;
+		}
+	}
+}
