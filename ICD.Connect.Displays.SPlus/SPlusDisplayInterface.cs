@@ -239,10 +239,10 @@ namespace ICD.Connect.Displays.SPlus
 				MutedChanged(boolEventArgs.Data ? (ushort)1 : (ushort)0);
 		}
 
-		private void DisplayOnHdmiInputChanged(IDisplay display, int? hdmiInput)
+		private void DisplayOnHdmiInputChanged(IDisplay display, int hdmiInput, bool active)
 		{
 			if (HdmiInputChanged != null)
-				HdmiInputChanged((ushort)(hdmiInput ?? 0));
+				HdmiInputChanged((ushort)hdmiInput);
 		}
 
 		/// <summary>
