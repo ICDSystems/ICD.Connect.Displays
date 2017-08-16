@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ICD.Connect.Displays.projectinfo" />
     <None Remove="ICD.Connect.Displays.Samsung_SimplSharp.suo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
