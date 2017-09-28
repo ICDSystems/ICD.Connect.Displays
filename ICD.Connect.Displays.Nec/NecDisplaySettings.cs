@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Connect.Displays.Settings;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Nec
 {
@@ -24,7 +24,7 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static NecDisplaySettings FromXml(string xml)
 		{
 			NecDisplaySettings output = new NecDisplaySettings();
