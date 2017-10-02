@@ -51,7 +51,7 @@ namespace ICD.Connect.Displays
 			get { return m_Volume; }
 			protected set
 			{
-				if (value == m_Volume)
+				if (Math.Abs(value - m_Volume) < 0.01f)
 					return;
 
 				m_Volume = value;
@@ -60,7 +60,7 @@ namespace ICD.Connect.Displays
 
 				// If the volume went outside of safe limits clamp the volume to a safe value.
 				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
-				if (m_Volume != safeVolume)
+				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
 					SetVolume(safeVolume);
 
 				OnVolumeChanged.Raise(this, new FloatEventArgs(m_Volume));
