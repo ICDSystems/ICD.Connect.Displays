@@ -15,6 +15,7 @@ namespace ICD.Connect.Displays.Christie
 
 		private readonly StringBuilder m_RxData;
 		private readonly Queue<string> m_Queue;
+		private readonly SafeCriticalSection m_QueueSection;
 		private readonly SafeCriticalSection m_ParseSection;
 
 		private static readonly char[] s_Headers =
@@ -33,6 +34,7 @@ namespace ICD.Connect.Displays.Christie
 			m_RxData = new StringBuilder();
 			m_Queue = new Queue<string>();
 
+			m_QueueSection = new SafeCriticalSection();
 			m_ParseSection = new SafeCriticalSection();
 		}
 
@@ -42,7 +44,7 @@ namespace ICD.Connect.Displays.Christie
 		/// <param name="data"></param>
 		public void Enqueue(string data)
 		{
-			m_ParseSection.Execute(() => m_Queue.Enqueue(data));
+			m_QueueSection.Execute(() => m_Queue.Enqueue(data));
 			Parse();
 		}
 
@@ -52,11 +54,18 @@ namespace ICD.Connect.Displays.Christie
 		public void Clear()
 		{
 			m_ParseSection.Enter();
+			m_QueueSection.Enter();
+
+			try
 			{
 				m_RxData.Clear();
 				m_Queue.Clear();
 			}
-			m_ParseSection.Leave();
+			finally
+			{
+				m_ParseSection.Leave();
+				m_QueueSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -70,15 +79,21 @@ namespace ICD.Connect.Displays.Christie
 
 			try
 			{
-				while (m_Queue.Count > 0)
-				{
-					string data = m_Queue.Dequeue();
+				string data = null;
 
+				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
+				{
 					foreach (char c in data)
 					{
+						bool isHeader = s_Headers.Contains(c);
+
 						// Have to start with a header
-						if (!s_Headers.Contains(c) && m_RxData.Length == 0)
+						if (m_RxData.Length == 0 || !isHeader)
 							continue;
+
+						// We hit a second header
+						if (m_RxData.Length > 0)
+							OnCompletedSerial.Raise(this, new StringEventArgs(m_RxData.Pop()));
 
 						m_RxData.Append(c);
 
@@ -102,6 +117,8 @@ namespace ICD.Connect.Displays.Christie
 		/// <returns></returns>
 		private static bool IsComplete(string data)
 		{
+			IcdConsole.PrintLine(StringUtils.ToHexLiteral(data));
+
 			switch (data.First())
 			{
 				case ChristieDisplay.RESPONSE_SUCCESS:
