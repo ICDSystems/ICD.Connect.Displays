@@ -71,7 +71,9 @@
     <Compile Include="ChristieDisplay.cs" />
     <Compile Include="ChristieDisplayBuffer.cs" />
     <Compile Include="ChristieDisplaySettings.cs" />
+    <Compile Include="JSeries\ChristieJSeriesDisplay.cs" />
     <Compile Include="JSeries\ChristieJSeriesDisplayBuffer.cs" />
+    <Compile Include="JSeries\ChristieJSeriesDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
