@@ -75,7 +75,7 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		[PublicAPI]
 		public static void ConfigureComPort(IComPort port)
 		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate19200,
+			port.SetComPortSpec(eComBaudRates.ComspecBaudRate115200,
 								eComDataBits.ComspecDataBits8,
 								eComParityType.ComspecParityNone,
 								eComStopBits.ComspecStopBits1,
