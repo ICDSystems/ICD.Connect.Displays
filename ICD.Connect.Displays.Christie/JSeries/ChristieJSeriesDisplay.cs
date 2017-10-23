@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
@@ -25,8 +26,8 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		private const string POWER_OFF = "(PWR0)";
 		private const string POWER_QUERY = "(PWR?)";
 
-		private const string INPUT_CHANNEL = "(CHA{0})";
-		private const string INPUT_QUERY = "(CHA?)";
+		private const string INPUT_CHANNEL = "(SIN{0})";
+		private const string INPUT_QUERY = "(SIN?)";
 
 		private static readonly Dictionary<bool, string> s_PowerMap = new Dictionary<bool, string>
 		{
@@ -45,7 +46,7 @@ namespace ICD.Connect.Displays.Christie.JSeries
 
 		#region Properties
 
-		public override int InputCount { get { return 99; } }
+		public override int InputCount { get { return 1; } }
 
 		#endregion
 
@@ -97,7 +98,11 @@ namespace ICD.Connect.Displays.Christie.JSeries
 
 		public override void SetHdmiInput(int address)
 		{
-			string command = string.Format(INPUT_CHANNEL, address);
+			if (address != 1)
+				throw new ArgumentOutOfRangeException("address");
+
+			// HDMI 1 is input 4
+			string command = string.Format(INPUT_CHANNEL, 4);
 			SendCommand(command);
 		}
 
