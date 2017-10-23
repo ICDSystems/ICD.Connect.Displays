@@ -191,7 +191,10 @@ namespace ICD.Connect.Displays.Christie.JSeries
 			int code = int.Parse(match.Groups[1].Value);
 			string message = match.Groups[2].Value;
 
-			Log(eSeverity.Error, "Invalid command sent: {0} - Error {1} - {2}", args.Data.Serialize(), code, message);
+			if (args.Data == null)
+				Log(eSeverity.Error, "Error {0} - {1}", code, message);
+			else
+				Log(eSeverity.Error, "Invalid command sent: {0} - Error {1} - {2}", args.Data.Serialize(), code, message);
 		}
 
 		/// <summary>
