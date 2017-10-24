@@ -249,7 +249,13 @@ namespace ICD.Connect.Displays.Christie.JSeries
 			if (!response.StartsWith("(PWR!"))
 				return;
 
-			bool responsePower = response == "(PWR!1)";
+			bool isPoweredOff = response == "(PWR!0)";
+			bool isPowered = response == "(PWR!1)";
+
+			if (!isPoweredOff && !isPowered)
+				return;
+
+			bool responsePower = isPowered;
 
 			if (m_RequestedPowerStatus == null)
 			{
