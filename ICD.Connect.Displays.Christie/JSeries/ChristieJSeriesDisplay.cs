@@ -89,11 +89,13 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		public override void PowerOn()
 		{
 			SendCommand(POWER_ON);
+			SendCommand(POWER_QUERY);
 		}
 
 		public override void PowerOff()
 		{
 			SendCommand(POWER_OFF);
+			SendCommand(POWER_QUERY);
 		}
 
 		public override void SetHdmiInput(int address)
@@ -104,6 +106,8 @@ namespace ICD.Connect.Displays.Christie.JSeries
 			// HDMI 1 is input 4
 			string command = string.Format(INPUT_CHANNEL, 4);
 			SendCommand(command);
+
+			SendCommand(INPUT_QUERY);
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
