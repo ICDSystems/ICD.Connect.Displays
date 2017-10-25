@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
@@ -18,42 +19,80 @@ namespace ICD.Connect.Displays.Christie.JSeries
 {
 	public sealed class ChristieJSeriesDisplay : AbstractDisplay<ChristieJSeriesDisplaySettings>
 	{
-		#region Constants
+		private const string POWER = "(PWR{0})";
+		private const string INPUT = "(SIN{0})";
 
-		private const int MAX_RETRY_ATTEMPTS = 50;
+		private const char QUERY = '?';
 
-		private const string POWER_ON = "(PWR1)";
-		private const string POWER_OFF = "(PWR0)";
-		private const string POWER_QUERY = "(PWR?)";
+		// No kidding
+		private const int INPUT_HDMI_1 = 4;
 
-		private const string INPUT_CHANNEL = "(SIN{0})";
-		private const string INPUT_QUERY = "(SIN?)";
-
-		private static readonly Dictionary<bool, string> s_PowerMap = new Dictionary<bool, string>
+		public enum ePowerState
 		{
-			{true, POWER_ON},
-			{false, POWER_OFF}
-		};
+			PowerOff = 0,
+			PowerOn = 1,
+			Cooldown = 10,
+			Warmup = 11,
+			AutoShutdown1 = 20,
+			AutoShutdown2 = 21,
+			AutoShutdown3 = 22,
+			EmergencyShutdown = 23
+		}
 
-		#endregion
+		private const long POWER_HEARTBEAT_INTERVAL = 2 * 1000;
 
-		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
-		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
-
-		private bool? m_RequestedPowerStatus;
-		private int? m_RequestedInput;
-		private eScalingMode? m_RequestedAspect;
+		private readonly SafeTimer m_PowerHeartbeatTimer;
+		private ePowerState m_PowerState;
 
 		#region Properties
 
 		public override int InputCount { get { return 1; } }
 
+		public ePowerState PowerState
+		{
+			get { return m_PowerState; }
+			set
+			{
+				if (value == m_PowerState)
+					return;
+
+				m_PowerState = value;
+
+				Log(eSeverity.Informational, "PowerState set to {0}", m_PowerState);
+
+				IsPowered = m_PowerState == ePowerState.PowerOn;
+
+				if (m_PowerState == ePowerState.PowerOn || m_PowerState == ePowerState.PowerOff)
+					StopPowerHeartbeat();
+				else
+					ResetPowerHeartbeat();
+			}
+		}
+
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public ChristieJSeriesDisplay()
+		{
+			m_PowerHeartbeatTimer = SafeTimer.Stopped(PowerHeartbeatCallback);
+		}
 
 		#region Methods
 
 		/// <summary>
-		///     Sets and configures the port for communication with the physical display.
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			m_PowerHeartbeatTimer.Stop();
+
+			base.DisposeFinal(disposing);
+		}
+
+		/// <summary>
+		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
 		public void SetPort(ISerialPort port)
 		{
@@ -61,16 +100,19 @@ namespace ICD.Connect.Displays.Christie.JSeries
 				ConfigureComPort(port as IComPort);
 
 			ISerialBuffer buffer = new ChristieJSeriesDisplayBuffer();
-			RateLimitedQueue queue = new RateLimitedQueue(100);
+			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
+
+			if (port != null)
+				SendCommand(string.Format(POWER, QUERY));
 		}
 
 		/// <summary>
-		///     Configures a com port for communication with the physical display.
+		/// Configures a com port for communication with the physical display.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
@@ -88,14 +130,14 @@ namespace ICD.Connect.Displays.Christie.JSeries
 
 		public override void PowerOn()
 		{
-			SendCommand(POWER_ON);
-			SendCommand(POWER_QUERY);
+			SendCommand(string.Format(POWER, (int)ePowerState.PowerOn));
+			SendCommand(string.Format(POWER, QUERY));
 		}
 
 		public override void PowerOff()
 		{
-			SendCommand(POWER_OFF);
-			SendCommand(POWER_QUERY);
+			SendCommand(string.Format(POWER, (int)ePowerState.PowerOff));
+			SendCommand(string.Format(POWER, QUERY));
 		}
 
 		public override void SetHdmiInput(int address)
@@ -103,20 +145,39 @@ namespace ICD.Connect.Displays.Christie.JSeries
 			if (address != 1)
 				throw new ArgumentOutOfRangeException("address");
 
-			// HDMI 1 is input 4
-			string command = string.Format(INPUT_CHANNEL, 4);
-			SendCommand(command);
-
-			SendCommand(INPUT_QUERY);
+			SendCommand(string.Format(INPUT, INPUT_HDMI_1));
+			SendCommand(string.Format(INPUT, QUERY));
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
 		{
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		private void SendCommand(string data)
 		{
 			SendCommand(new SerialData(data));
+		}
+
+		/// <summary>
+		/// Called each time the power heartbeat timer elapses.
+		/// </summary>
+		private void PowerHeartbeatCallback()
+		{
+			SendCommand(string.Format(POWER, QUERY));
+		}
+
+		private void StopPowerHeartbeat()
+		{
+			m_PowerHeartbeatTimer.Stop();
+		}
+
+		private void ResetPowerHeartbeat()
+		{
+			m_PowerHeartbeatTimer.Reset(POWER_HEARTBEAT_INTERVAL, POWER_HEARTBEAT_INTERVAL);
 		}
 
 		#endregion
@@ -124,7 +185,7 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		#region Settings
 
 		/// <summary>
-		///     Override to apply properties to the settings instance.
+		/// Override to apply properties to the settings instance.
 		/// </summary>
 		/// <param name="settings"></param>
 		protected override void CopySettingsFinal(ChristieJSeriesDisplaySettings settings)
@@ -148,7 +209,7 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		}
 
 		/// <summary>
-		///     Override to apply settings to the instance.
+		/// Override to apply settings to the instance.
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
@@ -172,6 +233,21 @@ namespace ICD.Connect.Displays.Christie.JSeries
 
 		#region Private Methods
 
+		/// <summary>
+		/// Called when a command times out.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
+		{
+			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize());
+		}
+
+		/// <summary>
+		/// Called when we get a response from the device.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
 			string data = args.Response;
@@ -179,10 +255,10 @@ namespace ICD.Connect.Displays.Christie.JSeries
 			if (data.Contains("ERR"))
 				ParseError(args);
 
-			else if (data.Contains("PWR"))
+			else if (data.Contains("PWR!"))
 				PowerQueryResponse(args.Response);
 
-			else if (data.Contains("CHA"))
+			else if (data.Contains("CHA!"))
 				InputQueryResponse(args.Response);
 		}
 
@@ -206,150 +282,80 @@ namespace ICD.Connect.Displays.Christie.JSeries
 				Log(eSeverity.Error, "Invalid command sent: {0} - Error {1} - {2}", args.Data.Serialize(), code, message);
 		}
 
-		/// <summary>
-		/// Called when a command times out.
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
-		{
-			RetryCommand(args.Data.Serialize());
-		}
-
 		private void InputQueryResponse(string response)
 		{
-			if (!response.StartsWith("(CHA!"))
+			string result = GetValue(response);
+			if (result == null)
 				return;
-
-			response = response.Substring(5).TrimEnd(')');
 
 			int responseInput;
-			if (!StringUtils.TryParse(response, out responseInput))
+			if (!StringUtils.TryParse(result, out responseInput))
 				return;
 
-			if (m_RequestedInput == null)
-			{
-				HdmiInput = responseInput;
-				ResetRetryCount(INPUT_QUERY);
-			}
-			else
-			{
-				string command = string.Format(INPUT_CHANNEL, m_RequestedInput.Value);
-				if (m_RequestedInput == responseInput || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
-				{
-					HdmiInput = responseInput;
-					ResetRetryCount(command);
-				}
-				else
-				{
-					IncrementRetryCount(command);
-					SerialQueue.EnqueuePriority(new SerialData(command));
-				}
-			}
+			// HDMI 1 is 4 :/
+			HdmiInput = responseInput == 4 ? 1 : (int?)null;
 		}
 
 		private void PowerQueryResponse(string response)
 		{
-			if (!response.StartsWith("(PWR!"))
+			string result = GetValue(response);
+			if (result == null)
 				return;
 
-			bool isPoweredOff = response == "(PWR!0)";
-			bool isPowered = response == "(PWR!1)";
-
-			if (!isPoweredOff && !isPowered)
+			int responsePower;
+			if (!StringUtils.TryParse(result, out responsePower))
 				return;
 
-			bool responsePower = isPowered;
-
-			if (m_RequestedPowerStatus == null)
-			{
-				IsPowered = responsePower;
-				ResetRetryCount(POWER_QUERY);
-			}
-			else
-			{
-				string command = s_PowerMap[m_RequestedPowerStatus.Value];
-				if (m_RequestedPowerStatus == responsePower || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
-				{
-					IsPowered = responsePower;
-					ResetRetryCount(command);
-				}
-				else
-				{
-					IncrementRetryCount(command);
-					SerialQueue.EnqueuePriority(new SerialData(command));
-				}
-			}
+			PowerState = (ePowerState)responsePower;
 		}
 
-		private void RetryCommand(string command)
+		/// <summary>
+		/// Gets the value from the given response. Returns null if not a response.
+		/// </summary>
+		/// <param name="response"></param>
+		/// <returns></returns>
+		private static string GetValue(string response)
 		{
-			//Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data));
-			IncrementRetryCount(command);
-			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
-			{
-				SerialQueue.EnqueuePriority(new SerialData(command));
-			}
-			else
-			{
-				Log(eSeverity.Error, "Command {0} hit the retry limit.", StringUtils.ToMixedReadableHexLiteral(command));
-				ResetRetryCount(command);
-			}
+			int start = response.IndexOf('!');
+			if (start < 0)
+				return null;
+
+			response = response.Substring(start + 1);
+			
+			if (response.EndsWith(")"))
+				response = response.Substring(0, response.Length - 1);
+
+			return response;
 		}
 
-		private void IncrementRetryCount(string command)
-		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				if (m_RetryCounts.ContainsKey(command))
-					m_RetryCounts[command]++;
-				else
-					m_RetryCounts.Add(command, 1);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
-		}
-
-		private void ResetRetryCount(string command)
-		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				m_RetryCounts.Remove(command);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
-		}
-
-		private int GetRetryCount(string command)
-		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				return m_RetryCounts.ContainsKey(command) ? m_RetryCounts[command] : 0;
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
-		}
-
+		/// <summary>
+		/// Queries the current state of the device.
+		/// </summary>
 		protected override void QueryState()
 		{
-			SendCommand(POWER_QUERY);
+			base.QueryState();
+
+			SendCommand(string.Format(POWER, QUERY));
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(INPUT_QUERY);
+			SendCommand(string.Format(INPUT, QUERY));
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Power State", PowerState);
 		}
 
 		#endregion
