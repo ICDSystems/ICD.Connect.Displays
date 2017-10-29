@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Connect.Displays.Settings;
-using ICD.Connect.Settings.Attributes.Factories;
+using ICD.Connect.Settings.Attributes;
 
 namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
 {
@@ -25,7 +25,7 @@ namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static SonyBraviaDisplaySettings FromXml(string xml)
 		{
 			SonyBraviaDisplaySettings output = new SonyBraviaDisplaySettings();

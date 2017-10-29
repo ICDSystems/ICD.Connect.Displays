@@ -1,15 +1,14 @@
 ﻿using System;
-using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Displays;
 using ICD.Common.Properties;
+using ICD.Common.Services.Logging;
+using ICD.Common.Utils;
+using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Displays.EventArguments;
-using ICD.Common.Services.Logging;
-using ICD.Common.Utils;
 using ICD.Connect.Settings.Core;
-using ICD.Connect.Protocol.Extensions;
 
 namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
 {
@@ -107,7 +106,6 @@ namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
 			SonyBraviaCommand command = SonyBraviaCommand.Control(VOLUME_FUNCTION, ((uint)raw).ToString());
 			SendCommand(command, VolumeComparer);
 		}
-
 
 		/// <summary>
 		/// Prevents multiple volume commands from being queued.
