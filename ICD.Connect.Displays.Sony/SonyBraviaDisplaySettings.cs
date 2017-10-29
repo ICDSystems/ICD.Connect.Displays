@@ -9,16 +9,12 @@ namespace ICD.Connect.Displays.Sony
 	{
 		private const string FACTORY_NAME = "SonyBraviaDisplay";
 
-		private const string HDMI_INPUT_COUNT_ELEMENT = "HdmiInputCount";
-
 		/// <summary>
 		/// Gets the originator factory name.
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
 
-		public int HdmiInputCount { get; set; }
-
-        public override Type OriginatorType { get { return typeof(SonyBraviaDisplay); } }
+		public override Type OriginatorType { get { return typeof(SonyBraviaDisplay); } }
 
 		/// <summary>
 		/// Loads the settings from XML.

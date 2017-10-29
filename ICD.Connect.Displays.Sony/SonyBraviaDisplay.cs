@@ -20,14 +20,12 @@ namespace ICD.Connect.Displays.Sony
 		private const string INPUT_FUNCTION = "INPT";
 		private const string IRCODE_FUNCTION = "IRCC";
 
-		private int m_InputCount;
-
 		#region Properties
 
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
-		public override int InputCount { get { return m_InputCount; } }
+		public override int InputCount { get { return 4; } }
 
 		#endregion
 
@@ -244,8 +242,6 @@ namespace ICD.Connect.Displays.Sony
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.HdmiInputCount = m_InputCount;
-
 			if (SerialQueue != null && SerialQueue.Port != null)
 				settings.Port = SerialQueue.Port.Id;
 			else
@@ -258,8 +254,7 @@ namespace ICD.Connect.Displays.Sony
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
-
-			m_InputCount = 0;
+			
 			SetPort(null);
 		}
 
@@ -271,8 +266,6 @@ namespace ICD.Connect.Displays.Sony
 		protected override void ApplySettingsFinal(SonyBraviaDisplaySettings settings, IDeviceFactory factory)
 		{
 			base.ApplySettingsFinal(settings, factory);
-
-			m_InputCount = settings.HdmiInputCount;
 
 			ISerialPort port = null;
 
