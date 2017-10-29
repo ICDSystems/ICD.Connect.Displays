@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard1.6</TargetFramework>
+	<RootNamespace>ICD.Connect.Displays.Christie</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <None Remove="ICD.Connect.Displays.Christie_SimplSharp.suo" />
+    <None Remove="ICD.Connect.Displays.projectinfo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
 

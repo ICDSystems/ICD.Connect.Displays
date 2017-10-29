@@ -3,7 +3,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
-using ICD.Connect.Settings.Attributes.Factories;
 
 namespace ICD.Connect.Displays.Samsung
 {
@@ -49,7 +48,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static SamsungProDisplaySettings FromXml(string xml)
 		{
 			byte? wallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT);

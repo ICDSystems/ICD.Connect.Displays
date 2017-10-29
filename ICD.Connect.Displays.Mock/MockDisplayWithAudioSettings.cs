@@ -1,9 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 using ICD.Connect.Displays.Settings;
-using ICD.Connect.Settings;
-using ICD.Connect.Settings.Attributes.Factories;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Mock
 {
@@ -29,7 +27,7 @@ namespace ICD.Connect.Displays.Mock
 		/// </summary>
 		/// <param name="xml"></param>
 		/// <returns></returns>
-		[PublicAPI, XmlDeviceSettingsFactoryMethod(FACTORY_NAME)]
+		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static MockDisplayWithAudioSettings FromXml(string xml)
 		{
 			MockDisplayWithAudioSettings output = new MockDisplayWithAudioSettings();

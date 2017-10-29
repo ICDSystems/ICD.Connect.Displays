@@ -1,5 +1,4 @@
 ﻿using ICD.Connect.Displays.EventArguments;
-using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.EventArguments;
 
 namespace ICD.Connect.Displays.Mock

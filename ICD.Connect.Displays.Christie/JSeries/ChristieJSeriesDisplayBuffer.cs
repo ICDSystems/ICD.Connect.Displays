@@ -1,33 +1,32 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.SerialBuffers;
 
-namespace ICD.Connect.Displays.Sharp
+namespace ICD.Connect.Displays.Christie.JSeries
 {
-	public sealed class SharpProSerialBuffer : ISerialBuffer
+	public sealed class ChristieJSeriesDisplayBuffer : ISerialBuffer
 	{
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
 
-		private readonly StringBuilder m_RxData;
-		private readonly SafeCriticalSection m_ParseSection;
-
 		private readonly Queue<string> m_Queue;
 		private readonly SafeCriticalSection m_QueueSection;
+		private readonly SafeCriticalSection m_ParseSection;
+
+		private string m_RxData;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public SharpProSerialBuffer()
+		public ChristieJSeriesDisplayBuffer()
 		{
-			m_RxData = new StringBuilder();
-			m_ParseSection = new SafeCriticalSection();
-
+			m_RxData = string.Empty;
 			m_Queue = new Queue<string>();
+
 			m_QueueSection = new SafeCriticalSection();
+			m_ParseSection = new SafeCriticalSection();
 		}
 
 		/// <summary>
@@ -50,8 +49,8 @@ namespace ICD.Connect.Displays.Sharp
 
 			try
 			{
+				m_RxData = string.Empty;
 				m_Queue.Clear();
-				m_RxData.Clear();
 			}
 			finally
 			{
@@ -72,22 +71,27 @@ namespace ICD.Connect.Displays.Sharp
 			try
 			{
 				string data = null;
+
 				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
 				{
+					bool escape = m_RxData.EndsWith('\\');
+
 					foreach (char c in data)
 					{
-						m_RxData.Append(c);
-
-						string stringData = m_RxData.ToString();
-
-						// Ignore the "wait" response
-						stringData = stringData.Replace("WAIT" + SharpProDisplay.RETURN, string.Empty);
-
-						if (string.IsNullOrEmpty(stringData) || !stringData.EndsWith(SharpProDisplay.RETURN))
+						// Data starts with a (
+						if (m_RxData.Length == 0 && c != '(')
 							continue;
 
-						string output = m_RxData.Pop();
-						OnCompletedSerial.Raise(this, new StringEventArgs(output));
+						m_RxData += c;
+
+						// Data ends with a )
+						if (c == ')' && !escape)
+						{
+							OnCompletedSerial.Raise(this, new StringEventArgs(m_RxData));
+							m_RxData = string.Empty;
+						}
+
+						escape = c == '\\';
 					}
 				}
 			}

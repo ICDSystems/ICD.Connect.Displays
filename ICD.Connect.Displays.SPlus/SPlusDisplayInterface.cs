@@ -1,5 +1,5 @@
 ﻿using System;
-using ICD.Common.EventArguments;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Displays.EventArguments;
@@ -239,10 +239,10 @@ namespace ICD.Connect.Displays.SPlus
 				MutedChanged(boolEventArgs.Data ? (ushort)1 : (ushort)0);
 		}
 
-		private void DisplayOnHdmiInputChanged(IDisplay display, int? hdmiInput)
+		private void DisplayOnHdmiInputChanged(IDisplay display, int hdmiInput, bool active)
 		{
 			if (HdmiInputChanged != null)
-				HdmiInputChanged((ushort)(hdmiInput ?? 0));
+				HdmiInputChanged((ushort)hdmiInput);
 		}
 
 		/// <summary>
