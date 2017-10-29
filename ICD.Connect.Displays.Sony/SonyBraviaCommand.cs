@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Utils;
 using ICD.Connect.Protocol.Data;
 
-namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
+namespace ICD.Connect.Displays.Sony
 {
 	/// <summary>
 	/// Sony bravia communication is done with fixed length commands:

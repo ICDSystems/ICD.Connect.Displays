@@ -3,7 +3,7 @@ using ICD.Common.Properties;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
+namespace ICD.Connect.Displays.Sony
 {
 	public sealed class SonyBraviaDisplaySettings : AbstractDisplayWithAudioSettings
 	{

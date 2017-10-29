@@ -10,7 +10,7 @@ using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings.Core;
 
-namespace RSD.SimplSharp.Common.Displays.DisplayDevices.Sony
+namespace ICD.Connect.Displays.Sony
 {
 	public sealed class SonyBraviaDisplay : AbstractDisplayWithAudio<SonyBraviaDisplaySettings>
 	{
