@@ -6,6 +6,7 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings.Core;
@@ -37,6 +38,9 @@ namespace ICD.Connect.Displays.Sony
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
 		{
+			if (port is IComPort)
+				ConfigureComPort(port as IComPort);
+
 			ISerialBuffer buffer = new DelimiterSerialBuffer(SonyBraviaCommand.FOOTER);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -44,6 +48,26 @@ namespace ICD.Connect.Displays.Sony
 			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
+
+			if (port != null)
+				SendCommand(SonyBraviaCommand.Enquiry(POWER_FUNCTION));
+		}
+
+		/// <summary>
+		/// Configures a com port for communication with the physical display.
+		/// </summary>
+		/// <param name="port"></param>
+		[PublicAPI]
+		public static void ConfigureComPort(IComPort port)
+		{
+			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
+			                    eComDataBits.ComspecDataBits8,
+			                    eComParityType.ComspecParityNone,
+			                    eComStopBits.ComspecStopBits1,
+			                    eComProtocolType.ComspecProtocolRS232,
+			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
+			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
+			                    false);
 		}
 
 		public override void PowerOn()
