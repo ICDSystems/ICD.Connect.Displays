@@ -279,10 +279,11 @@ namespace ICD.Connect.Displays.Sharp
 			ISerialPort port = null;
 
 			if (settings.Port != null)
+			{
 				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-			if (port == null)
-				Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+				if (port == null)
+					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+			}
 
 			SetPort(port);
 		}
