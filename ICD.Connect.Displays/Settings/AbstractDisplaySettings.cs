@@ -1,5 +1,6 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Settings
@@ -8,7 +9,7 @@ namespace ICD.Connect.Displays.Settings
 	{
 		private const string PORT_ELEMENT = "Port";
 
-		[SettingsProperty(SettingsProperty.ePropertyType.PortId)]
+		[SettingsProperty(SettingsProperty.ePropertyType.Id, typeof(ISerialPort))]
 		public int? Port { get; set; }
 
 		/// <summary>
