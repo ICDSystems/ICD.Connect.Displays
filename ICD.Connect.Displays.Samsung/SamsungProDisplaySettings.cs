@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Samsung
 {
@@ -28,7 +29,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// <summary>
 		/// The video wall id for this display.
 		/// </summary>
-		[SettingsProperty(SettingsProperty.ePropertyType.Ipid)]
+		[IpIdSettingsProperty]
 		public byte WallId { get; set; }
 
 		/// <summary>
@@ -39,8 +40,7 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			base.WriteElements(writer);
 
-			if (WallId != 0)
-				writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
+			writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
 		}
 
 		/// <summary>
@@ -51,11 +51,9 @@ namespace ICD.Connect.Displays.Samsung
 		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
 		public static SamsungProDisplaySettings FromXml(string xml)
 		{
-			byte? wallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT);
-
 			SamsungProDisplaySettings output = new SamsungProDisplaySettings
 			{
-				WallId = wallId == null ? (byte)0 : (byte)wallId
+				WallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT) ?? 0
 			};
 
 			ParseXml(output, xml);

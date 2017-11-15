@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings.Attributes;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Settings
 {
@@ -9,7 +9,7 @@ namespace ICD.Connect.Displays.Settings
 	{
 		private const string PORT_ELEMENT = "Port";
 
-		[SettingsProperty(SettingsProperty.ePropertyType.Id, typeof(ISerialPort))]
+		[OriginatorIdSettingsProperty(typeof(ISerialPort))]
 		public int? Port { get; set; }
 
 		/// <summary>
@@ -20,8 +20,7 @@ namespace ICD.Connect.Displays.Settings
 		{
 			base.WriteElements(writer);
 
-			if (Port != null)
-				writer.WriteElementString(PORT_ELEMENT, IcdXmlConvert.ToString((int)Port));
+			writer.WriteElementString(PORT_ELEMENT, Port == null ? null : IcdXmlConvert.ToString((int)Port));
 		}
 
 		/// <summary>
