@@ -7,10 +7,12 @@ using ICD.Common.Utils;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Panasonic
 {
@@ -314,6 +316,27 @@ namespace ICD.Connect.Displays.Panasonic
 					break;
 			}
 		}
+
+        /// <summary>
+        ///     Override to apply settings to the instance.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="factory"></param>
+        protected override void ApplySettingsFinal(PanasonicDisplaySettings settings, IDeviceFactory factory)
+        {
+            base.ApplySettingsFinal(settings, factory);
+
+            ISerialPort port = null;
+
+            if (settings.Port != null)
+            {
+                port = factory.GetPortById((int)settings.Port) as ISerialPort;
+                if (port == null)
+                    Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+            }
+
+            SetPort(port);
+        }
 
 		#endregion
 	}
