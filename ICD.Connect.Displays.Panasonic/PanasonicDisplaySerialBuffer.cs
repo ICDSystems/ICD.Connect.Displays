@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
@@ -12,15 +10,16 @@ namespace ICD.Connect.Displays.Panasonic
 	public sealed class PanasonicDisplaySerialBuffer : ISerialBuffer
 	{
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
+
 		private readonly Queue<string> m_Queue;
-		private readonly List<byte> m_RxData;
+		private string m_RxData;
 		private readonly SafeCriticalSection m_QueueSection;
 		private readonly SafeCriticalSection m_ParseSection;
 
 		public PanasonicDisplaySerialBuffer()
 		{
 			m_Queue = new Queue<string>();
-			m_RxData = new List<byte>();
+			m_RxData = string.Empty;
 			m_QueueSection = new SafeCriticalSection();
 			m_ParseSection = new SafeCriticalSection();
 		}
@@ -38,7 +37,7 @@ namespace ICD.Connect.Displays.Panasonic
 
 			try
 			{
-				m_RxData.Clear();
+			    m_RxData = string.Empty;
 				m_Queue.Clear();
 			}
 			finally
@@ -52,30 +51,37 @@ namespace ICD.Connect.Displays.Panasonic
 		{
 			if (!m_ParseSection.TryEnter())
 				return;
+
 			try
 			{
 				string data = string.Empty;
 				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
 				{
-					byte[] bytes = StringUtils.ToBytes(data);
-					m_RxData.AddRange(bytes);
+				    m_RxData += data;
 
-					while (m_RxData.Any() && m_RxData[0] != 0x02)
-						m_RxData.RemoveAt(0);
+				    while (true)
+				    {
+				        // Find the header
+				        int firstHeader = m_RxData.IndexOf((char)0x02);
+				        if (firstHeader < 0)
+				        {
+				            m_RxData = string.Empty;
+				            break;
+				        }
 
-					if (!m_RxData.Any())
-						continue;
+				        if (firstHeader > 0)
+				            m_RxData = m_RxData.Substring(firstHeader);
 
-					int idx;
-					for (idx = 1; idx < m_RxData.Count; idx++)
-					{
-						if (m_RxData[idx] != 0x03)
-							continue;
-						string command = Encoding.ASCII.GetString(m_RxData.ToArray(), 0, idx + 1);
-						OnCompletedSerial.Raise(this, new StringEventArgs(command));
-						m_RxData.RemoveRange(0, idx + 1);
-						break;
-					}
+                        // Find the footer
+				        int firstFooter = m_RxData.IndexOf((char)0x03);
+				        if (firstFooter < 0)
+				            break;
+
+				        string command = m_RxData.Substring(0, firstFooter + 1);
+                        OnCompletedSerial.Raise(this, new StringEventArgs(command));
+                        
+				        m_RxData = m_RxData.Substring(firstFooter + 1);
+				    }
 				}
 			}
 			finally

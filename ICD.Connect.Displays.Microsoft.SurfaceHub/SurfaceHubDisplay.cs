@@ -23,6 +23,7 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         private const string VOLUME_UP = "Volume+\n";
         private const string VOLUME_DOWN = "Volume-\n";
         private const string VOLUME_SET = "Volume={0}\n";
+
         private const string MUTE_ON = "AudioMute+\n";
         private const string MUTE_OFF = "AudioMute-\n";
 
@@ -138,7 +139,7 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         /// <param name="raw"></param>
         protected override void VolumeSetRawFinal(float raw)
         {
-            SendNonFormattedCommand(string.Format(VOLUME_SET, (int)(Math.Floor(raw))));
+            SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw));
         }
 
         /// <summary>
@@ -210,8 +211,10 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         /// <param name="args"></param>
         private void ParseError(SerialResponseEventArgs args)
         {
-            Log(eSeverity.Error, args.Response);
+            Log(eSeverity.Error,"Unexpected response: " + args.Response);
         }
+
+
 
         /// <summary>
         ///     Override to apply settings to the instance.
@@ -235,6 +238,30 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         }
 
         /// <summary>
+        ///     Override to apply properties to the settings instance.
+        /// </summary>
+        /// <param name="settings"></param>
+        protected override void CopySettingsFinal(SurfaceHubDisplaySettings settings)
+        {
+            base.CopySettingsFinal(settings);
+
+            if (SerialQueue != null && SerialQueue.Port != null)
+                settings.Port = SerialQueue.Port.Id;
+            else
+                settings.Port = null;
+        }
+
+        /// <summary>
+        ///     Override to clear the instance settings.
+        /// </summary>
+        protected override void ClearSettingsFinal()
+        {
+            base.ClearSettingsFinal();
+
+            SetPort(null);
+        }
+
+        /// <summary>
         ///     Sets and configures the port for communication with the physical display.
         /// </summary>
         public void SetPort(ISerialPort port)
@@ -242,8 +269,8 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
             if (port is IComPort)
                 ConfigureComPort(port as IComPort);
 
-            ISerialBuffer buffer = new SurfaceHubDisplaySerialBuffer();
-            RateLimitedQueue queue = new RateLimitedQueue(100);
+            ISerialBuffer buffer = new DelimiterSerialBuffer((char)0x0A);
+            SerialQueue queue = new SerialQueue();
             queue.SetPort(port);
             queue.SetBuffer(buffer);
             queue.Timeout = 10 * 1000;

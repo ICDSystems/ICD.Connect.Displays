@@ -218,7 +218,7 @@ namespace ICD.Connect.Displays
 			message = string.Format(message, args);
 			message = string.Format("{0} - {1}", this, message);
 
-			ServiceProvider.GetService<ILoggerService>().AddEntry(severity, message);
+			Logger.AddEntry(severity, message);
 		}
 
 		#endregion

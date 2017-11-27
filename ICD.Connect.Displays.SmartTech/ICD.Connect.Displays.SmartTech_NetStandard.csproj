@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <RootNamespace>ICD.Connect.Displays.SmartTech</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;STANDARD;NETSTANDARD1_6</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
   </ItemGroup>

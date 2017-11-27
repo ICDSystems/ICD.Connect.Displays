@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
 using ICD.Common.Utils.Extensions;
@@ -43,6 +42,8 @@ namespace ICD.Connect.Displays.SmartTech
         private const string MUTE_ON = "set mute=on";
         private const string MUTE_OFF = "set mute=off";
         private const string MUTE_RESPONSE = "mute=";
+
+        private const char CARR_RETURN = (char)0x0D;
         #endregion
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace ICD.Connect.Displays.SmartTech
             if (port is IComPort)
                 ConfigureComPort(port as IComPort);
 
-            ISerialBuffer buffer = new DelimiterSerialBuffer(0x0D);
+            ISerialBuffer buffer = new DelimiterSerialBuffer(CARR_RETURN);
             SerialQueue queue = new SerialQueue();
             queue.SetPort(port);
             queue.SetBuffer(buffer);
@@ -157,7 +158,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="raw"></param>
         protected override void VolumeSetRawFinal(float raw)
         {
-            SendNonFormattedCommand(string.Format(VOLUME_SET, (int)Math.Floor(raw)), VolumeComparer);
+            SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw), VolumeComparer);
         }
 
         /// <summary>
@@ -183,7 +184,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="args"></param>
         protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
         {
-            Logger.AddEntry(eSeverity.Alert, "Command Timed Out: " + args.Data.Serialize());
+            Log(eSeverity.Alert, "Command Timed Out: " + args.Data.Serialize());
         }
 
         /// <summary>
@@ -242,7 +243,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="comparer"></param>
         private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
         {
-            SendCommand(new SerialData(data + (char)0x0D), (a, b) => comparer(a.Serialize(), b.Serialize()));
+            SendCommand(new SerialData(data + CARR_RETURN), (a, b) => comparer(a.Serialize(), b.Serialize()));
         }
 
         /// <summary>
@@ -252,6 +253,7 @@ namespace ICD.Connect.Displays.SmartTech
         private void ParseSuccess(SerialResponseEventArgs args)
         {
             string response = args.Data.Serialize();
+            response = response.TrimEnd(CARR_RETURN);
 
             if (response.StartsWith(POWER_RESPONSE))
             {
@@ -304,22 +306,22 @@ namespace ICD.Connect.Displays.SmartTech
             switch (response.Substring(ASPECT_RESPONSE.Length).ToLower())
             {
                 case "real":
-                    LookupAspectAndSetScalingMode(ASPECT_REAL, response);
+                    LookupAspectAndSetScalingMode(ASPECT_REAL);
                     break;
                 case "normal":
-                    LookupAspectAndSetScalingMode(ASPECT_NORMAL, response);
+                    LookupAspectAndSetScalingMode(ASPECT_NORMAL);
                     break;
                 case "full":
-                    LookupAspectAndSetScalingMode(ASPECT_FULL, response);
+                    LookupAspectAndSetScalingMode(ASPECT_FULL);
                     break;
                 case "wide":
-                    LookupAspectAndSetScalingMode(ASPECT_WIDE, response);
+                    LookupAspectAndSetScalingMode(ASPECT_WIDE);
                     break;
                 case "dynamic":
-                    LookupAspectAndSetScalingMode(ASPECT_DYNAMIC, response);
+                    LookupAspectAndSetScalingMode(ASPECT_DYNAMIC);
                     break;
                 case "zoom":
-                    LookupAspectAndSetScalingMode(ASPECT_ZOOM, response);
+                    LookupAspectAndSetScalingMode(ASPECT_ZOOM);
                     break;
                 default:
                     LogUnexpectedResponse(response);
@@ -336,16 +338,13 @@ namespace ICD.Connect.Displays.SmartTech
             switch (response.Substring(INPUT_RESPONSE.Length).ToLower())
             {
                 case "hdmi1":
-                    HdmiInput = s_InputMap.ContainsValue(INPUT_HDMI1)
-                              ? s_InputMap.GetKey(INPUT_HDMI1)
-                              : (int?)null;
+                    HdmiInput = 1;
                     break;
                 case "hdmi2":
-                    HdmiInput = s_InputMap.ContainsValue(INPUT_HDMI2)
-                              ? s_InputMap.GetKey(INPUT_HDMI2)
-                              : (int?)null;
+                    HdmiInput = 2;
                     break;
                 default:
+                    HdmiInput = null;
                     LogUnexpectedResponse(response);
                     break;
             }
@@ -374,8 +373,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// Digs through the scaling mode dictionary for the correct aspect, and sets the scaling mode to the appropriate eScalingMode
         /// </summary>
         /// <param name="aspect">The matching aspect string in the dictionary to search for</param>
-        /// <param name="response"></param>
-        private void LookupAspectAndSetScalingMode(string aspect, string response)
+        private void LookupAspectAndSetScalingMode(string aspect)
         {
             ScalingMode = s_ScalingModeMap.ContainsValue(aspect)
                         ? s_ScalingModeMap.GetKey(aspect)
@@ -393,7 +391,7 @@ namespace ICD.Connect.Displays.SmartTech
 
         private void LogUnexpectedResponse(string response)
         {
-            Logger.AddEntry(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
+            Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
         }
 
 
@@ -437,10 +435,11 @@ namespace ICD.Connect.Displays.SmartTech
             ISerialPort port = null;
 
             if (settings.Port != null)
+            {
                 port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-            if (port == null)
-                Logger.AddEntry(eSeverity.Error, "No Com Port with id {0}", settings.Port);
+                if (port == null)
+                    Log(eSeverity.Error, "No Com Port with id {0}", settings.Port);
+            }
 
             SetPort(port);
         }

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <RootNamespace>ICD.Connect.Displays.Microsoft.SurfaceHub</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;STANDARD;NETSTANDARD1_6</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+    <EmbeddedResource Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+    <None Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ICD.Connect.Displays.Microsoft.projectinfo" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
+    <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
+  </ItemGroup>
+
+</Project>
