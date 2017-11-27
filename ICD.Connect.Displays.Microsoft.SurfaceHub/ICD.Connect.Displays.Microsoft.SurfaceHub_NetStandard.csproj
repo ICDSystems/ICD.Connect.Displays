@@ -11,11 +11,15 @@
 
   <ItemGroup>
     <Compile Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+    <Compile Remove="SIMPLSharpLogs\**" />
     <EmbeddedResource Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+    <EmbeddedResource Remove="SIMPLSharpLogs\**" />
     <None Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
+    <None Remove="SIMPLSharpLogs\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ObfuscationSettings.cs" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
