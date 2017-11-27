@@ -29,6 +29,7 @@ namespace ICD.Connect.Displays.Panasonic
 
         private const string VOLUME_UP = "\x02ADZZ;AUU\x03";
         private const string VOLUME_DOWN = "\x02ADZZ;AUD\x03";
+        private const string QUERY_VOLUME = "\x02ADZZ;QAV\x03";
 
         private const string VOLUME_SET_TEMPLATE = "\x02ADZZ;AVL:{0}\x03";
 
@@ -130,15 +131,13 @@ namespace ICD.Connect.Displays.Panasonic
         public override void VolumeUpIncrement()
         {
             SendNonFormattedCommand(VOLUME_UP);
-            // query volume
-            // query mute
+            SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         public override void VolumeDownIncrement()
         {
             SendNonFormattedCommand(VOLUME_DOWN);
-            // query volume
-            // query mute
+            SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         protected override void VolumeSetRawFinal(float raw)
@@ -230,38 +229,35 @@ namespace ICD.Connect.Displays.Panasonic
             string response = args.Data.Serialize();
             string command = ExtractCommand(response);
 
-            switch (command)
+            int newVol;
+            if (StringUtils.TryParse(command, out newVol))
             {
-                case "PON":
-                    IsPowered = true;
-                    break;
-                case "POF":
-                    IsPowered = false;
-                    break;
-                /*
-            case "AUU":
-                Volume++;
+                Volume = newVol;
                 IsMuted = false;
-                break;
-            case "AUD":
-                Volume--;
-                IsMuted = false;
-                break;
-                 */
-
-                //case volume
-
-                case "AMT":
-                    string param = ExtractParameter(response, 1);
-                    IsMuted = param == "1";
-                    break;
-                case "IIS":
-                    HdmiInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
-                    break;
-                case "VSE":
-                    ScalingMode = GetScalingMode(ExtractParameter(response, 1));
-                    break;
             }
+            else
+            {
+                switch (command)
+                {
+                    case "PON":
+                        IsPowered = true;
+                        break;
+                    case "POF":
+                        IsPowered = false;
+                        break;
+                    case "AMT":
+                        string param = ExtractParameter(response, 1);
+                        IsMuted = param == "1";
+                        break;
+                    case "IIS":
+                        HdmiInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
+                        break;
+                    case "VSE":
+                        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
+                        break;
+                } 
+            }
+            
         }
 
         /// <summary>
