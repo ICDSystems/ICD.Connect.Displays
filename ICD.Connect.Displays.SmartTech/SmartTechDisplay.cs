@@ -194,16 +194,18 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="args"></param>
         protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
         {
+            Logger.AddEntry(eSeverity.Debug, "Recieved Response: {0}", args.Response);
+            var response = args.Response.Trim('\n', '\r');
             if (args.Response.StartsWith(POWER_RESPONSE) ||
                 args.Response.StartsWith(ASPECT_RESPONSE) ||
                 args.Response.StartsWith(INPUT_RESPONSE) ||
                 args.Response.StartsWith(VOLUME_RESPONSE) ||
                 args.Response.StartsWith(MUTE_RESPONSE))
             {
-                ParseSuccess(args);
+                ParseSuccess(response);
             }
             else
-                ParseError(args);
+                ParseError(response);
         }
 
         #endregion
@@ -243,16 +245,15 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="comparer"></param>
         private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
         {
+            Logger.AddEntry(eSeverity.Debug, "Sending Command: {0}", data);
             SendCommand(new SerialData(data + CARR_RETURN), (a, b) => comparer(a.Serialize(), b.Serialize()));
         }
 
         /// <summary>
         /// Called when a command executes correctly.
         /// </summary>
-        /// <param name="args"></param>
-        private void ParseSuccess(SerialResponseEventArgs args)
+        private void ParseSuccess(string response)
         {
-            string response = args.Data.Serialize();
             response = response.TrimEnd(CARR_RETURN);
 
             if (response.StartsWith(POWER_RESPONSE))
@@ -280,7 +281,6 @@ namespace ICD.Connect.Displays.SmartTech
         /// <summary>
         /// Handles responses for power states
         /// </summary>
-        /// <param name="response"></param>
         private void ParsePowerResponse(string response)
         {
             switch (response.Substring(POWER_RESPONSE.Length).ToLower())
@@ -356,6 +356,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="response"></param>
         private void ParseVolumeResponse(string response)
         {
+            Logger.AddEntry(eSeverity.Debug, "New Volume Is: {0}", response.Substring(VOLUME_RESPONSE.Length));
             Volume = int.Parse(response.Substring(VOLUME_RESPONSE.Length));
             IsMuted = false;
         }
@@ -383,10 +384,9 @@ namespace ICD.Connect.Displays.SmartTech
         /// <summary>
         /// Called when a command fails.
         /// </summary>
-        /// <param name="args"></param>
-        private void ParseError(SerialResponseEventArgs args)
+        private void ParseError(string response)
         {
-            Log(eSeverity.Error, args.Response);
+            Log(eSeverity.Error, response);
         }
 
         private void LogUnexpectedResponse(string response)
