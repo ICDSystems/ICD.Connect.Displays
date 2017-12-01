@@ -195,12 +195,12 @@ namespace ICD.Connect.Displays.SmartTech
         protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
         {
             Logger.AddEntry(eSeverity.Debug, "Recieved Response: {0}", args.Response);
-            var response = args.Response.Trim('\n', '\r');
-            if (args.Response.StartsWith(POWER_RESPONSE) ||
-                args.Response.StartsWith(ASPECT_RESPONSE) ||
-                args.Response.StartsWith(INPUT_RESPONSE) ||
-                args.Response.StartsWith(VOLUME_RESPONSE) ||
-                args.Response.StartsWith(MUTE_RESPONSE))
+            var response = args.Response.Trim('\n', '\r', ' ', '>');
+            if (response.StartsWith(POWER_RESPONSE) ||
+				response.StartsWith(ASPECT_RESPONSE) ||
+                response.StartsWith(INPUT_RESPONSE) ||
+                response.StartsWith(VOLUME_RESPONSE) ||
+                response.StartsWith(MUTE_RESPONSE))
             {
                 ParseSuccess(response);
             }
