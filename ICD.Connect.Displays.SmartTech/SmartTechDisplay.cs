@@ -195,7 +195,7 @@ namespace ICD.Connect.Displays.SmartTech
         protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
         {
             Logger.AddEntry(eSeverity.Debug, "Recieved Response: {0}", args.Response);
-            var response = args.Response.Trim('\n', '\r');
+            var response = args.Response.Trim().Trim('>').Trim();
             if (args.Response.StartsWith(POWER_RESPONSE) ||
                 args.Response.StartsWith(ASPECT_RESPONSE) ||
                 args.Response.StartsWith(INPUT_RESPONSE) ||
