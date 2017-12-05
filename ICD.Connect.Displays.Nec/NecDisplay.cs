@@ -37,7 +37,9 @@ namespace ICD.Connect.Displays.Nec
 		private const ushort UNMUTE = 0x00;
 		private const ushort MUTE = 0x01;
 
-		private const ushort INPUT_HDMI_1 = 0x04;
+		private const ushort INPUT_HDMI_1 = 0x11;
+	    private const ushort INPUT_HDMI_2 = 0x12;
+	    private const ushort INPUT_HDMI_3 = 0x13;
 
 		// Commands are kinda weird, need to send a specific array of bytes
 		private static readonly byte[] s_PowerQuery = {0x30, 0x31, 0x44, 0x36};
@@ -64,7 +66,9 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		private static readonly Dictionary<int, ushort> s_InputMap = new Dictionary<int, ushort>
 		{
-			{1, INPUT_HDMI_1}
+			{1, INPUT_HDMI_1},
+            {2, INPUT_HDMI_2},
+            {3, INPUT_HDMI_3}
 		};
 
 		/// <summary>
