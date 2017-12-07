@@ -6,7 +6,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;STANDARD;NETSTANDARD1_6</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;STANDARD</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE;STANDARD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
