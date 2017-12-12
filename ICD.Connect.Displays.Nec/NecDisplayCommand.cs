@@ -10,7 +10,7 @@ namespace ICD.Connect.Displays.Nec
 {
 	public sealed class NecDisplayCommand : ISerialData
 	{
-		private const byte START_HEADER = 0x01;
+		public const byte START_HEADER = 0x01;
 		private const byte RESERVED = 0x30;
 		private const byte MONITOR_ID_ALL = 0x2A;
 		private const byte CONTROLLER_ID = 0x30;
@@ -23,7 +23,7 @@ namespace ICD.Connect.Displays.Nec
 		public const byte SET_PARAMETER_REPLY = 0x46;
 
 		private const byte START_MESSAGE = 0x02;
-		private const byte END_MESSAGE = 0x03;
+		public const byte END_MESSAGE = 0x03;
 
 		private const byte NULL_RESPONSE = 0x87;
 		private const byte ERROR_RESPONSE = 0x01;

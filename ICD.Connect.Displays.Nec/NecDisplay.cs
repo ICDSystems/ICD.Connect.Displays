@@ -86,7 +86,7 @@ namespace ICD.Connect.Displays.Nec
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
 
-			ISerialBuffer buffer = new DelimiterSerialBuffer((char)NecDisplayCommand.DELIMITER);
+			ISerialBuffer buffer = new BoundedSerialBuffer(NecDisplayCommand.START_HEADER, NecDisplayCommand.END_MESSAGE);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);

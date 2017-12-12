@@ -64,7 +64,6 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="PanasonicDisplay.cs" />
-    <Compile Include="PanasonicDisplaySerialBuffer.cs" />
     <Compile Include="PanasonicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />

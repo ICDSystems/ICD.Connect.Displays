@@ -80,7 +80,7 @@ namespace ICD.Connect.Displays.Panasonic
             if (port is IComPort)
                 ConfigureComPort(port as IComPort);
 
-            ISerialBuffer buffer = new PanasonicDisplaySerialBuffer();
+            ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
             SerialQueue queue = new SerialQueue();
             queue.SetPort(port);
             queue.SetBuffer(buffer);
