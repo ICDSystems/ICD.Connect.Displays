@@ -19,12 +19,16 @@ namespace ICD.Connect.Displays.SmartTech
     public sealed class SmartTechDisplay : AbstractDisplayWithAudio<SmartTechDisplaySettings>
     {
         #region Commands
+
         private const string POWER_ON = "set powerstate=on";
         private const string POWER_OFF = "set powerstate=standby";
         private const string POWER_RESPONSE = "powerstate=";
 
+		// The inputs are literally the ones listed on the display when changing channel
+		// VGA1, VGA2, DVI, DPORT, DVD/HD, S-VIDEO, VIDEO
         private const string INPUT_HDMI1 = "set input=HDMI1";
         private const string INPUT_HDMI2 = "set input=HDMI2";
+		private const string INPUT_HDMI3 = "set input=HDMI3/PC";
         private const string INPUT_RESPONSE = "input=";
 
         private const string ASPECT_REAL = "set aspectratio=real";
@@ -45,6 +49,7 @@ namespace ICD.Connect.Displays.SmartTech
         private const string MUTE_RESPONSE = "mute=";
 
         private const char CARR_RETURN = (char)0x0D;
+
         #endregion
 
         /// <summary>
@@ -65,7 +70,8 @@ namespace ICD.Connect.Displays.SmartTech
         private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
 		{
 			{1, INPUT_HDMI1},
-            {2, INPUT_HDMI2}
+            {2, INPUT_HDMI2},
+			{3, INPUT_HDMI3}
 		};
 
         #region Methods
@@ -347,6 +353,9 @@ namespace ICD.Connect.Displays.SmartTech
                 case "hdmi2":
                     HdmiInput = 2;
                     break;
+				case "hdmi3/pc":
+		            HdmiInput = 3;
+		            break;
                 default:
                     HdmiInput = null;
                     LogUnexpectedResponse(response);
