@@ -25,11 +25,11 @@ namespace ICD.Connect.Displays.SmartTech
         private const string POWER_RESPONSE = "powerstate=";
         private const string POWER_GET = "get powerstate";
 
-		// The inputs are literally the ones listed on the display when changing channel
-		// VGA1, VGA2, DVI, DPORT, DVD/HD, S-VIDEO, VIDEO
+        // The inputs are literally the ones listed on the display when changing channel
+        // VGA1, VGA2, DVI, DPORT, DVD/HD, S-VIDEO, VIDEO
         private const string INPUT_HDMI1 = "set input=HDMI1";
         private const string INPUT_HDMI2 = "set input=HDMI2";
-		private const string INPUT_HDMI3 = "set input=HDMI3/PC";
+        private const string INPUT_HDMI3 = "set input=HDMI3/PC";
         private const string INPUT_RESPONSE = "input=";
         private const string INPUT_GET = "get input";
 
@@ -104,6 +104,10 @@ namespace ICD.Connect.Displays.SmartTech
         {
             base.QueryState();
             SendNonFormattedCommand(POWER_GET);
+
+            if (!IsPowered)
+                return;
+
             SendNonFormattedCommand(INPUT_GET);
             SendNonFormattedCommand(ASPECT_GET);
             SendNonFormattedCommand(VOLUME_GET);
@@ -276,7 +280,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <summary>
         /// Called when a command executes correctly.
         /// </summary>
-		/// <param name="response"></param>
+        /// <param name="response"></param>
         private void ParseSuccess(string response)
         {
             response = response.TrimEnd(CARR_RETURN);
@@ -368,9 +372,9 @@ namespace ICD.Connect.Displays.SmartTech
                 case "hdmi2":
                     HdmiInput = 2;
                     break;
-				case "hdmi3/pc":
-		            HdmiInput = 3;
-		            break;
+                case "hdmi3/pc":
+                    HdmiInput = 3;
+                    break;
                 default:
                     HdmiInput = null;
                     LogUnexpectedResponse(response);
