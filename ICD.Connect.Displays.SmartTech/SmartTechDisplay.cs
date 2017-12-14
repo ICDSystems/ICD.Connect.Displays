@@ -261,7 +261,7 @@ namespace ICD.Connect.Displays.SmartTech
         /// <summary>
         /// Called when a command executes correctly.
         /// </summary>
-        /// <param name="args"></param>
+		/// <param name="response"></param>
         private void ParseSuccess(string response)
         {
             response = response.TrimEnd(CARR_RETURN);
