@@ -23,6 +23,7 @@ namespace ICD.Connect.Displays.SmartTech
         private const string POWER_ON = "set powerstate=on";
         private const string POWER_OFF = "set powerstate=standby";
         private const string POWER_RESPONSE = "powerstate=";
+        private const string POWER_GET = "get powerstate";
 
 		// The inputs are literally the ones listed on the display when changing channel
 		// VGA1, VGA2, DVI, DPORT, DVD/HD, S-VIDEO, VIDEO
@@ -30,6 +31,7 @@ namespace ICD.Connect.Displays.SmartTech
         private const string INPUT_HDMI2 = "set input=HDMI2";
 		private const string INPUT_HDMI3 = "set input=HDMI3/PC";
         private const string INPUT_RESPONSE = "input=";
+        private const string INPUT_GET = "get input";
 
         private const string ASPECT_REAL = "set aspectratio=real";
         private const string ASPECT_NORMAL = "set aspectratio=normal";
@@ -38,15 +40,18 @@ namespace ICD.Connect.Displays.SmartTech
         private const string ASPECT_DYNAMIC = "set aspectratio=dynamic";
         private const string ASPECT_ZOOM = "set aspectratio=zoom";
         private const string ASPECT_RESPONSE = "aspectratio=";
+        private const string ASPECT_GET = "get aspectratio";
 
         private const string VOLUME_UP = "set volume+1";
         private const string VOLUME_DOWN = "set volume-1";
         private const string VOLUME_SET = "set volume={0}";
         private const string VOLUME_RESPONSE = "volume=";
+        private const string VOLUME_GET = "get volume";
 
         private const string MUTE_ON = "set mute=on";
         private const string MUTE_OFF = "set mute=off";
         private const string MUTE_RESPONSE = "mute=";
+        private const string MUTE_GET = "get mute";
 
         private const char CARR_RETURN = (char)0x0D;
 
@@ -93,6 +98,16 @@ namespace ICD.Connect.Displays.SmartTech
 
             if (port != null)
                 QueryState();
+        }
+
+        protected override void QueryState()
+        {
+            base.QueryState();
+            SendNonFormattedCommand(POWER_GET);
+            SendNonFormattedCommand(INPUT_GET);
+            SendNonFormattedCommand(ASPECT_GET);
+            SendNonFormattedCommand(VOLUME_GET);
+            SendNonFormattedCommand(MUTE_GET);
         }
 
         /// <summary>
