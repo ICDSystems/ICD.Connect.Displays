@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Services.Logging;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -194,12 +195,16 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="args"></param>
         protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
         {
-            var response = args.Response.Trim().Trim('>').Trim().ToLower();
-            if (args.Response.StartsWith(POWER_RESPONSE) ||
-                args.Response.StartsWith(ASPECT_RESPONSE) ||
-                args.Response.StartsWith(INPUT_RESPONSE) ||
-                args.Response.StartsWith(VOLUME_RESPONSE) ||
-                args.Response.StartsWith(MUTE_RESPONSE))
+            string response = args.Response.Trim().Trim('>').Trim().ToLower();
+            if (StringUtils.IsNullOrWhitespace(response))
+            {
+                return;
+            }
+            if (response.StartsWith(POWER_RESPONSE) ||
+                response.StartsWith(ASPECT_RESPONSE) ||
+                response.StartsWith(INPUT_RESPONSE) ||
+                response.StartsWith(VOLUME_RESPONSE) ||
+                response.StartsWith(MUTE_RESPONSE))
             {
                 ParseSuccess(response);
             }
