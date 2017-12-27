@@ -176,7 +176,7 @@ namespace ICD.Connect.Displays
 		/// Toggles mute.
 		/// </summary>
 		public virtual void MuteToggle()
-		{
+	    {
 			if (IsMuted)
 				MuteOff();
 			else
@@ -189,6 +189,8 @@ namespace ICD.Connect.Displays
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
+            if (!IsPowered)
+                return;
 			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
 			VolumeSetRawFinal(raw);
 		}

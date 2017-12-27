@@ -130,18 +130,24 @@ namespace ICD.Connect.Displays.Panasonic
 
         public override void VolumeUpIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_UP);
             SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         public override void VolumeDownIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_DOWN);
             SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         protected override void VolumeSetRawFinal(float raw)
         {
+            if (!IsPowered)
+                return;
             string setVolCommand = GenerateSetVolumeCommand((int)raw);
             SendNonFormattedCommand(setVolCommand);
         }

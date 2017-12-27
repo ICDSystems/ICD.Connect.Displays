@@ -137,11 +137,15 @@ namespace ICD.Connect.Displays.Nec
 
 		public override void VolumeUpIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
@@ -171,6 +175,8 @@ namespace ICD.Connect.Displays.Nec
 		/// <param name="raw"></param>
 		protected override void VolumeSetRawFinal(float raw)
 		{
+            if (!IsPowered)
+                return;
 			SendCommand(NecDisplayCommand.SetParameterCommand(VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
 		}
 

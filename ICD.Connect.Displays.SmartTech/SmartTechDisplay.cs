@@ -167,6 +167,8 @@ namespace ICD.Connect.Displays.SmartTech
         /// </summary>
         public override void VolumeUpIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_UP, VolumeComparer);
         }
 
@@ -175,6 +177,8 @@ namespace ICD.Connect.Displays.SmartTech
         /// </summary>
         public override void VolumeDownIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_DOWN, VolumeComparer);
         }
 
@@ -184,6 +188,8 @@ namespace ICD.Connect.Displays.SmartTech
         /// <param name="raw"></param>
         protected override void VolumeSetRawFinal(float raw)
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw), VolumeComparer);
         }
 

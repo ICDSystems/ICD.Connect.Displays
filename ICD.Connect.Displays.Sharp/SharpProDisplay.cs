@@ -194,6 +194,8 @@ namespace ICD.Connect.Displays.Sharp
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
+            if (!IsPowered)
+                return;
 			string command = GetCommand(VOLUME, ((ushort)raw).ToString());
 
 			SendCommand(command, CommandComparer);
@@ -219,11 +221,15 @@ namespace ICD.Connect.Displays.Sharp
 
 		public override void VolumeUpIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 

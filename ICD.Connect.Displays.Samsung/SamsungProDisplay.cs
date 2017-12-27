@@ -163,11 +163,15 @@ namespace ICD.Connect.Displays.Samsung
 
 		public override void VolumeUpIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
+            if (!IsPowered)
+                return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 

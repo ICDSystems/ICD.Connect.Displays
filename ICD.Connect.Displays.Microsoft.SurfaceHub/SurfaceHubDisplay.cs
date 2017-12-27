@@ -122,6 +122,8 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         /// </summary>
         public override void VolumeUpIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_UP);
         }
 
@@ -130,6 +132,8 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         /// </summary>
         public override void VolumeDownIncrement()
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(VOLUME_DOWN);
         }
 
@@ -139,6 +143,8 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         /// <param name="raw"></param>
         protected override void VolumeSetRawFinal(float raw)
         {
+            if (!IsPowered)
+                return;
             SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw));
         }
 
