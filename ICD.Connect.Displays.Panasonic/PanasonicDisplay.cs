@@ -23,28 +23,31 @@ namespace ICD.Connect.Displays.Panasonic
 
         private const string POWER_ON = "\x02ADZZ;PON\x03";
         private const string POWER_OFF = "\x02ADZZ;POF\x03";
+	    private const string QUERY_POWER = "\x02ADZZ;QPW\x03";
 
-        private const string MUTE_ON = "\x02ADZZ;AMT:1\x03";
+		private const string MUTE_ON = "\x02ADZZ;AMT:1\x03";
         private const string MUTE_OFF = "\x02ADZZ;AMT:0\x03";
 
-        private const string VOLUME_UP = "\x02ADZZ;AUU\x03";
+		private const string VOLUME_UP = "\x02ADZZ;AUU\x03";
         private const string VOLUME_DOWN = "\x02ADZZ;AUD\x03";
         private const string QUERY_VOLUME = "\x02ADZZ;QAV\x03";
 
         private const string VOLUME_SET_TEMPLATE = "\x02ADZZ;AVL:{0}\x03";
 
         private const string INPUT_HDMI = "\x02ADZZ;IIS:HD1\x03";
+	    private const string QUERY_INPUT = "\x02ADZZ;QIN\x03";
 
-        private const string ASPECT_AUTO = "\x02ADZZ;VSE:0\x03";
+		private const string ASPECT_AUTO = "\x02ADZZ;VSE:0\x03";
         private const string ASPECT_4_X3 = "\x02ADZZ;VSE:1\x03";
         private const string ASPECT_16_X9 = "\x02ADZZ;VSE:2\x03";
         private const string ASPECT_NATIVE = "\x02ADZZ;VSE:5\x03";
         private const string ASPECT_FULL = "\x02ADZZ;VSE:6\x03";
+	    private const string QUERY_ASPECT = "\x02ADZZ;QSE\x03";
 
-        /// <summary>
-        /// Maps scaling mode to command.
-        /// </summary>
-        private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
+		/// <summary>
+		/// Maps scaling mode to command.
+		/// </summary>
+		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
             new Dictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, ASPECT_16_X9},
@@ -105,6 +108,18 @@ namespace ICD.Connect.Displays.Panasonic
                                 eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
                                 false);
         }
+
+	    protected override void QueryState()
+	    {
+		    base.QueryState();
+			SendNonFormattedCommand(QUERY_POWER);
+		    if (!IsPowered)
+			    return;
+
+			SendNonFormattedCommand(QUERY_VOLUME);
+			SendNonFormattedCommand(QUERY_INPUT);
+		    SendNonFormattedCommand(QUERY_ASPECT);
+		}
 
         [PublicAPI]
         public override void PowerOn()
