@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <None Remove="ICD.Connect.Displays.Microsoft.projectinfo" />
+    <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
 
   <ItemGroup>
