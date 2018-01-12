@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	<OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<RootNamespace>ICD.Connect.Displays.Panasonic</RootNamespace>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<Deterministic>false</Deterministic>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,7 +25,7 @@
 
   <ItemGroup>
     <Compile Remove="ObfuscationSettings.cs" />
-    <Compile Remove="Properties\AssemblyInfo.cs" />
+    
   </ItemGroup>
 
   <ItemGroup>
