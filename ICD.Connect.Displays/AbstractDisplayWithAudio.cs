@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -176,7 +176,7 @@ namespace ICD.Connect.Displays
 		/// Toggles mute.
 		/// </summary>
 		public virtual void MuteToggle()
-	    {
+		{
 			if (IsMuted)
 				MuteOff();
 			else
@@ -189,8 +189,8 @@ namespace ICD.Connect.Displays
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-            if (!IsPowered)
-                return;
+			if (!IsPowered)
+				return;
 			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
 			VolumeSetRawFinal(raw);
 		}

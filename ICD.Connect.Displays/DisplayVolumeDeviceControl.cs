@@ -112,9 +112,9 @@ namespace ICD.Connect.Displays
 
 		private void ParentOnVolumeChanged(object sender, FloatEventArgs args)
 		{
-		    var senderAsPowerControl = sender as IPowerDeviceControl;
-		    if (senderAsPowerControl != null && !senderAsPowerControl.IsPowered)
-		        return;
+			IPowerDeviceControl senderAsPowerControl = sender as IPowerDeviceControl;
+			if (senderAsPowerControl != null && !senderAsPowerControl.IsPowered)
+				return;
 
 			RawVolume = args.Data;
 		}

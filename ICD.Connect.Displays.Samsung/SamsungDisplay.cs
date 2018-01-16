@@ -157,8 +157,8 @@ namespace ICD.Connect.Displays.Samsung
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!IsPowered)
-                return;
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME + (char)(ushort)raw, VolumeComparer);
 		}
 
@@ -175,15 +175,15 @@ namespace ICD.Connect.Displays.Samsung
 
 		public override void VolumeUpIncrement()
 		{
-            if (!IsPowered)
-                return;
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME_UP);
 		}
 
 		public override void VolumeDownIncrement()
 		{
-            if (!IsPowered)
-                return;
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME_DOWN);
 		}
 
