@@ -28,7 +28,7 @@ namespace ICD.Connect.Displays.Panasonic
 		public static PanasonicDisplaySettings FromXml(string xml)
 		{
 			PanasonicDisplaySettings output = new PanasonicDisplaySettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

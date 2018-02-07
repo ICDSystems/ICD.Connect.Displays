@@ -27,7 +27,7 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
         public static SurfaceHubDisplaySettings FromXml(string xml)
         {
             SurfaceHubDisplaySettings output = new SurfaceHubDisplaySettings();
-            ParseXml(output, xml);
+            output.ParseXml(xml);
             return output;
         }
     }

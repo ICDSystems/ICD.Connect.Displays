@@ -27,7 +27,7 @@ namespace ICD.Connect.Displays.SmartTech
         public static SmartTechDisplaySettings FromXml(string xml)
         {
             SmartTechDisplaySettings output = new SmartTechDisplaySettings();
-            ParseXml(output, xml);
+            output.ParseXml(xml);
             return output;
         }
     }

@@ -28,7 +28,7 @@ namespace ICD.Connect.Displays.Nec
 		public static NecDisplaySettings FromXml(string xml)
 		{
 			NecDisplaySettings output = new NecDisplaySettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

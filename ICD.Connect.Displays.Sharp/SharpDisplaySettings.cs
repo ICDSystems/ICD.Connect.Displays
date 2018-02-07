@@ -31,7 +31,7 @@ namespace ICD.Connect.Displays.Sharp
 		public static SharpDisplaySettings FromXml(string xml)
 		{
 			SharpDisplaySettings output = new SharpDisplaySettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

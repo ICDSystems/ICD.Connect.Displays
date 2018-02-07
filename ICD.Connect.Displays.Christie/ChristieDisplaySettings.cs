@@ -28,7 +28,7 @@ namespace ICD.Connect.Displays.Christie
 		public static ChristieDisplaySettings FromXml(string xml)
 		{
 			ChristieDisplaySettings output = new ChristieDisplaySettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}
