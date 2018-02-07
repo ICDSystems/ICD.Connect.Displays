@@ -31,7 +31,7 @@ namespace ICD.Connect.Displays.Mock
 		public static MockDisplayWithAudioSettings FromXml(string xml)
 		{
 			MockDisplayWithAudioSettings output = new MockDisplayWithAudioSettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}

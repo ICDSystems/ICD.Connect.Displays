@@ -26,36 +26,22 @@ namespace ICD.Connect.Displays.Settings
 		{
 			base.WriteElements(writer);
 
-			if (VolumeSafetyMin != null)
-				writer.WriteElementString(MIN_VOLUME_ELEMENT, IcdXmlConvert.ToString((float)VolumeSafetyMin));
-
-			if (VolumeSafetyMax != null)
-				writer.WriteElementString(MAX_VOLUME_ELEMENT, IcdXmlConvert.ToString((float)VolumeSafetyMax));
-
-			if (VolumeDefault != null)
-				writer.WriteElementString(DEFAULT_VOLUME_ELEMENT, IcdXmlConvert.ToString((float)VolumeDefault));
+			writer.WriteElementString(MIN_VOLUME_ELEMENT, IcdXmlConvert.ToString(VolumeSafetyMin));
+			writer.WriteElementString(MAX_VOLUME_ELEMENT, IcdXmlConvert.ToString(VolumeSafetyMax));
+			writer.WriteElementString(DEFAULT_VOLUME_ELEMENT, IcdXmlConvert.ToString(VolumeDefault));
 		}
 
 		/// <summary>
-		/// Parses the xml and applies the properties to the instance.
+		/// Updates the settings from xml.
 		/// </summary>
-		/// <param name="instance"></param>
 		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractDisplayWithAudioSettings instance, string xml)
+		public override void ParseXml(string xml)
 		{
-			int? minVolume = XmlUtils.TryReadChildElementContentAsInt(xml, MIN_VOLUME_ELEMENT);
-			if (minVolume != null)
-				instance.VolumeSafetyMin = (float)minVolume;
+			base.ParseXml(xml);
 
-			int? maxVolume = XmlUtils.TryReadChildElementContentAsInt(xml, MAX_VOLUME_ELEMENT);
-			if (maxVolume != null)
-				instance.VolumeSafetyMax = (float)maxVolume;
-
-			int? defaultVolume = XmlUtils.TryReadChildElementContentAsInt(xml, DEFAULT_VOLUME_ELEMENT);
-			if (defaultVolume != null)
-				instance.VolumeDefault = (float)defaultVolume;
-
-			AbstractDisplaySettings.ParseXml(instance, xml);
+			VolumeSafetyMin = XmlUtils.TryReadChildElementContentAsInt(xml, MIN_VOLUME_ELEMENT);
+			VolumeSafetyMax = XmlUtils.TryReadChildElementContentAsInt(xml, MAX_VOLUME_ELEMENT);
+			VolumeDefault = XmlUtils.TryReadChildElementContentAsInt(xml, DEFAULT_VOLUME_ELEMENT);
 		}
 	}
 }

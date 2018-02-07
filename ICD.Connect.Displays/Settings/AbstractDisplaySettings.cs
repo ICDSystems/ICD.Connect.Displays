@@ -24,15 +24,14 @@ namespace ICD.Connect.Displays.Settings
 		}
 
 		/// <summary>
-		/// Parses the xml and applies the properties to the instance.
+		/// Updates the settings from xml.
 		/// </summary>
-		/// <param name="instance"></param>
 		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractDisplaySettings instance, string xml)
+		public override void ParseXml(string xml)
 		{
-			instance.Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
+			base.ParseXml(xml);
 
-			AbstractDeviceSettings.ParseXml(instance, xml);
+			Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace ICD.Connect.Displays.Samsung
 		public static SamsungDisplaySettings FromXml(string xml)
 		{
 			SamsungDisplaySettings output = new SamsungDisplaySettings();
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 	}
