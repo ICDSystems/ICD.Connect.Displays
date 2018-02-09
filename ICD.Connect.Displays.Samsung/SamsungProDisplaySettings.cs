@@ -1,5 +1,4 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
@@ -10,6 +9,7 @@ namespace ICD.Connect.Displays.Samsung
 	/// <summary>
 	/// Settings for the SamsungProDisplay device.
 	/// </summary>
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings
 	{
 		private const string FACTORY_NAME = "SamsungProDisplay";
@@ -44,20 +44,14 @@ namespace ICD.Connect.Displays.Samsung
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static SamsungProDisplaySettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			SamsungProDisplaySettings output = new SamsungProDisplaySettings
-			{
-				WallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT) ?? 0
-			};
+			base.ParseXml(xml);
 
-			output.ParseXml(xml);
-			return output;
+			WallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT) ?? 0;
 		}
 	}
 }
