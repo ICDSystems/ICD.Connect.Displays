@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Displays.EventArguments;
+﻿using ICD.Connect.API.Attributes;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 
 namespace ICD.Connect.Displays.Mock
@@ -7,6 +8,7 @@ namespace ICD.Connect.Displays.Mock
 	/// Mock display device for testing control systems.
 	/// TODO - Currently we're inheriting from some device that communicates over serial. Break this up.
 	/// </summary>
+	[ApiClass(typeof(ProxyDisplayWithAudio))]
 	public sealed class MockDisplayWithAudio : AbstractDisplayWithAudio<MockDisplayWithAudioSettings>
 	{
 		/// <summary>

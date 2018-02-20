@@ -8,12 +8,8 @@ namespace ICD.Connect.Displays
 {
 	public interface IDisplayWithAudio : IDisplay
 	{
-		/// <summary>
-		/// Gets the volume control for this display.
-		/// </summary>
-		IVolumeDeviceControl VolumeControl { get; }
-
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
+
 		event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
 		#region Properties
@@ -63,10 +59,13 @@ namespace ICD.Connect.Displays
 		void SetVolume(float raw);
 
 		void VolumeUpIncrement();
+
 		void VolumeDownIncrement();
 
 		void MuteOn();
+
 		void MuteOff();
+
 		void MuteToggle();
 
 		#endregion

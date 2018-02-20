@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Attributes;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
@@ -19,6 +20,7 @@ namespace ICD.Connect.Displays
 	/// <summary>
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
+	[ApiClass(typeof(ProxyDisplay))]
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
 		where T : AbstractDisplaySettings, new()
 	{
