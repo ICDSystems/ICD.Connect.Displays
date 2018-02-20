@@ -37,6 +37,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
+		[ApiProperty("InputCount", "Gets the HDMI input count for the display.")]
 		public abstract int InputCount { get; }
 
 		/// <summary>
@@ -47,6 +48,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
+		[ApiProperty("IsPowered", "Gets the powered state for the display.")]
 		public virtual bool IsPowered
 		{
 			get { return m_IsPowered; }
@@ -69,6 +71,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Gets the current hdmi input address.
 		/// </summary>
+		[ApiProperty("HdmiInput", "Gets the current HDMI input for the display.")]
 		public int? HdmiInput
 		{
 			get { return m_HdmiInput; }
@@ -97,6 +100,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Gets the scaling mode.
 		/// </summary>
+		[ApiProperty("ScalingMode", "Gets the scaling mode for the display.")]
 		public eScalingMode ScalingMode
 		{
 			get { return m_ScalingMode; }
@@ -148,9 +152,16 @@ namespace ICD.Connect.Displays
 			SerialQueue.Enqueue(command, comparer);
 		}
 
+		[ApiMethod("PowerOn", "Powers the display.")]
 		public abstract void PowerOn();
+
+		[ApiMethod("PowerOff", "Powers off the display.")]
 		public abstract void PowerOff();
+
+		[ApiMethod("SetHdmiInput", "Sets the HDMI input for the display.")]
 		public abstract void SetHdmiInput(int address);
+
+		[ApiMethod("SetScalingMode", "Sets the scaling mode for the display.")]
 		public abstract void SetScalingMode(eScalingMode mode);
 
 		/// <summary>
