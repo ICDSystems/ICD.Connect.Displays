@@ -11,16 +11,16 @@ namespace ICD.Connect.Displays
 		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
 		[ApiProperty("Volume", "Gets the volume of the display.")]
-		public float Volume { get; }
+		public float Volume { get; private set; }
 
 		[ApiProperty("IsMuted", "Gets the muted state of the display.")]
-		public bool IsMuted { get; }
+		public bool IsMuted { get; private set; }
 
 		[ApiProperty("VolumeDeviceMin", "Gets the min volume of the display.")]
-		public float VolumeDeviceMin { get; }
+		public float VolumeDeviceMin { get; private set; }
 
 		[ApiProperty("VolumeDeviceMax", "Gets the max volume of the display.")]
-		public float VolumeDeviceMax { get; }
+		public float VolumeDeviceMax { get; private set; }
 
 		[ApiProperty("VolumeSafetyMin", "Gets/sets the min safety volume.")]
 		public float? VolumeSafetyMin { get; set; }

@@ -15,16 +15,16 @@ namespace ICD.Connect.Displays
 		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
 
 		[ApiProperty("IsPowered", "Gets the powered state for the display.")]
-		public bool IsPowered { get; }
+		public bool IsPowered { get; private set; }
 
 		[ApiProperty("InputCount", "Gets the HDMI input count for the display.")]
-		public int InputCount { get; }
+		public int InputCount { get; private set; }
 
 		[ApiProperty("HdmiInput", "Gets the current HDMI input for the display.")]
-		public int? HdmiInput { get; }
+		public int? HdmiInput { get; private set; }
 
 		[ApiProperty("ScalingMode", "Gets the scaling mode for the display.")]
-		public eScalingMode ScalingMode { get; }
+		public eScalingMode ScalingMode { get; private set; }
 
 		[ApiMethod("PowerOn", "Powers the display.")]
 		public void PowerOn()

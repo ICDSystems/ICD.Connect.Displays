@@ -71,14 +71,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractDisplay.cs" />
+    <Compile Include="AbstractProxyDisplay.cs" />
     <Compile Include="DisplayRouteDestinationControl.cs" />
     <Compile Include="DisplayVolumeDeviceControl.cs" />
     <Compile Include="AbstractDisplayWithAudio.cs" />
     <Compile Include="IDisplayWithAudio.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="IDisplay.cs" />
+    <Compile Include="IProxyDisplay.cs" />
+    <Compile Include="IProxyDisplayWithAudio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EventArguments\ScalingModeEventArgs.cs" />
+    <Compile Include="ProxyDisplay.cs" />
+    <Compile Include="ProxyDisplayWithAudio.cs" />
     <Compile Include="Settings\AbstractDisplaySettings.cs" />
     <Compile Include="Settings\AbstractDisplayWithAudioSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
