@@ -1,4 +1,6 @@
-﻿using ICD.Common.Utils.EventArguments;
+﻿using System;
+using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.Controls;
 
 namespace ICD.Connect.Displays
@@ -7,7 +9,7 @@ namespace ICD.Connect.Displays
 	/// TODO - Right now this is a simple shim of IDisplayWithAudio. Eventually we should have a specific
 	/// volume control for each display type, which contains the actual command building and parsing logic.
 	/// </summary>
-	public sealed class DisplayVolumeDeviceControl : AbstractVolumeDeviceControl<IDisplayWithAudio>
+	public sealed class DisplayVolumeDeviceControl : AbstractVolumeRawLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
 	{
 		#region Properties
 
@@ -19,17 +21,32 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// The min volume.
 		/// </summary>
-		public override float RawVolumeMin { get { return Parent.VolumeDeviceMin; } }
+		protected override float VolumeRawMinAbsolute { get { return Parent.VolumeDeviceMin; } }
 
 		/// <summary>
 		/// The max volume.
 		/// </summary>
-		public override float RawVolumeMax { get { return Parent.VolumeDeviceMax; } }
+		protected override float VolumeRawMaxAbsolute { get { return Parent.VolumeDeviceMax; } }
 
 		/// <summary>
-		/// The volume the control is set to when the device comes online.
+		/// Safety Min Volume Set on the device
 		/// </summary>
-		public override float? RawVolumeDefault { get { return Parent.VolumeDefault; } set { Parent.VolumeDefault = value; } }
+		public override float? VolumeRawMin { get { return Parent.VolumeSafetyMin; }}
+
+		/// <summary>
+		/// Safety Max Volume Set on the device
+		/// </summary>
+		public override float? VolumeRawMax { get { return Parent.VolumeSafetyMax; }}
+
+		public override float VolumeRaw
+		{
+			get { return Parent.Volume; }
+		}
+
+		public bool VolumeIsMuted
+		{
+			get { return Parent.IsMuted; }
+		}
 
 		#endregion
 
@@ -43,6 +60,12 @@ namespace ICD.Connect.Displays
 		{
 			Subscribe(parent);
 		}
+
+		#region Events
+
+		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
+
+		#endregion
 
 		#region Methods
 
@@ -61,7 +84,7 @@ namespace ICD.Connect.Displays
 		/// Sets the raw volume. This will be clamped to the min/max and safety min/max.
 		/// </summary>
 		/// <param name="volume"></param>
-		public override void SetRawVolume(float volume)
+		public override void SetVolumeRaw(float volume)
 		{
 			Parent.SetVolume(volume);
 		}
@@ -70,7 +93,7 @@ namespace ICD.Connect.Displays
 		/// Sets the mute state.
 		/// </summary>
 		/// <param name="mute"></param>
-		public override void SetMute(bool mute)
+		public void SetVolumeMute(bool mute)
 		{
 			if (mute)
 				Parent.MuteOn();
@@ -78,10 +101,15 @@ namespace ICD.Connect.Displays
 				Parent.MuteOff();
 		}
 
+		public void VolumeMuteToggle()
+		{
+			Parent.MuteToggle();
+		}
+
 		/// <summary>
 		/// Increments the raw volume once.
 		/// </summary>
-		public override void RawVolumeIncrement()
+		public override void VolumeLevelIncrement()
 		{
 			Parent.VolumeUpIncrement();
 		}
@@ -89,7 +117,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Decrements the raw volume once.
 		/// </summary>
-		public override void RawVolumeDecrement()
+		public override void VolumeLevelDecrement()
 		{
 			Parent.VolumeDownIncrement();
 		}
@@ -116,12 +144,12 @@ namespace ICD.Connect.Displays
 			if (senderAsPowerControl != null && !senderAsPowerControl.IsPowered)
 				return;
 
-			RawVolume = args.Data;
+			VolumeFeedback(args.Data);
 		}
 
 		private void ParentOnMuteStateChanged(object sender, BoolEventArgs args)
 		{
-			IsMuted = args.Data;
+			OnMuteStateChanged.Raise(this, args);
 		}
 
 		#endregion
