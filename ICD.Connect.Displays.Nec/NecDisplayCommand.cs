@@ -12,7 +12,7 @@ namespace ICD.Connect.Displays.Nec
 	{
 		public const byte START_HEADER = 0x01;
 		private const byte RESERVED = 0x30;
-		private const byte MONITOR_ID_ALL = 0x2A;
+		public const byte MONITOR_ID_ALL = 0x2A;
 		private const byte CONTROLLER_ID = 0x30;
 
 		public const byte COMMAND = 0x41;
@@ -206,14 +206,15 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="bytes"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand Command(IEnumerable<byte> bytes)
+		public static NecDisplayCommand Command(byte monitorId, IEnumerable<byte> bytes)
 		{
 			byte[] message = new[] {START_MESSAGE}.Concat(bytes)
 			                                      .Concat(new[] {END_MESSAGE})
 			                                      .ToArray();
-			byte[] header = GetHeader(COMMAND, (byte)message.Length);
+			byte[] header = GetHeader(monitorId, COMMAND, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -221,13 +222,14 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command to get the given parameter.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="page"></param>
 		/// <param name="code"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand GetParameterCommand(byte page, byte code)
+		public static NecDisplayCommand GetParameterCommand(byte monitorId, byte page, byte code)
 		{
 			byte[] message = GetParameterMessage(page, code);
-			byte[] header = GetHeader(GET_PARAMETER, (byte)message.Length);
+			byte[] header = GetHeader(monitorId, GET_PARAMETER, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -239,10 +241,10 @@ namespace ICD.Connect.Displays.Nec
 		/// <param name="code"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand SetParameterCommand(byte page, byte code, ushort value)
+		public static NecDisplayCommand SetParameterCommand(byte monitorId, byte page, byte code, ushort value)
 		{
 			byte[] message = SetParameterMessage(page, code, value);
-			byte[] header = GetHeader(SET_PARAMETER, (byte)message.Length);
+			byte[] header = GetHeader(monitorId, SET_PARAMETER, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -339,10 +341,11 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Creates the header string.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="messageType"></param>
 		/// <param name="messageLength"></param>
 		/// <returns></returns>
-		private static byte[] GetHeader(byte messageType, byte messageLength)
+		private static byte[] GetHeader(byte monitorId, byte messageType, byte messageLength)
 		{
 			byte[] lengthBytes = ToAsciiCharacters(messageLength);
 
@@ -350,7 +353,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				START_HEADER,
 				RESERVED,
-				MONITOR_ID_ALL,
+				monitorId,
 				CONTROLLER_ID,
 				messageType,
 				lengthBytes[0],
