@@ -236,6 +236,7 @@ namespace ICD.Connect.Displays.Nec
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
+			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize().Replace("\r", "\\r"));
 		}
 
 		/// <summary>
