@@ -75,7 +75,7 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				if (!IsResponse)
-					throw new InvalidOperationException();
+					return false;
 				return FromAsciiCharacters8(new[] {m_Message[1], m_Message[2]}) == ERROR_RESPONSE;
 			}
 		}
