@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Nec
@@ -33,6 +35,8 @@ namespace ICD.Connect.Displays.Nec
 		private readonly byte[] m_Header;
 		private readonly byte[] m_Message;
 
+		private ILoggerService m_logger = ServiceProvider.TryGetService<ILoggerService>();
+
 		#region Properties
 
 		/// <summary>
@@ -48,8 +52,8 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				return MessageType == GET_PARAMETER_REPLY ||
-				       MessageType == SET_PARAMETER_REPLY ||
-				       MessageType == COMMAND_REPLY;
+					   MessageType == SET_PARAMETER_REPLY ||
+					   MessageType == COMMAND_REPLY;
 			}
 		}
 
@@ -63,7 +67,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					return false;
-				return FromAsciiCharacters8(new[] {m_Message[1], m_Message[2]}) == NULL_RESPONSE;
+				return FromAsciiCharacters8(new[] { m_Message[1], m_Message[2] }) == NULL_RESPONSE;
 			}
 		}
 
@@ -76,7 +80,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					return false;
-				return FromAsciiCharacters8(new[] {m_Message[1], m_Message[2]}) == ERROR_RESPONSE;
+				return FromAsciiCharacters8(new[] { m_Message[1], m_Message[2] }) == ERROR_RESPONSE;
 			}
 		}
 
@@ -88,7 +92,7 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				int offset = IsResponse ? 2 : 0;
-				return FromAsciiCharacters8(new[] {m_Message[1 + offset], m_Message[2 + offset]});
+				return FromAsciiCharacters8(new[] { m_Message[1 + offset], m_Message[2 + offset] });
 			}
 		}
 
@@ -100,7 +104,7 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				int offset = IsResponse ? 2 : 0;
-				return FromAsciiCharacters8(new[] {m_Message[3 + offset], m_Message[4 + offset]});
+				return FromAsciiCharacters8(new[] { m_Message[3 + offset], m_Message[4 + offset] });
 			}
 		}
 
@@ -113,7 +117,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					throw new InvalidOperationException();
-				return FromAsciiCharacters8(new[] {m_Message[7], m_Message[8]});
+				return FromAsciiCharacters8(new[] { m_Message[7], m_Message[8] });
 			}
 		}
 
@@ -126,7 +130,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					throw new InvalidOperationException();
-				return FromAsciiCharacters16(new[] {m_Message[9], m_Message[10], m_Message[11], m_Message[12]});
+				return FromAsciiCharacters16(new[] { m_Message[9], m_Message[10], m_Message[11], m_Message[12] });
 			}
 		}
 
@@ -140,11 +144,11 @@ namespace ICD.Connect.Displays.Nec
 				switch (MessageType)
 				{
 					case SET_PARAMETER:
-						return FromAsciiCharacters16(new[] {m_Message[5], m_Message[6], m_Message[7], m_Message[8]});
+						return FromAsciiCharacters16(new[] { m_Message[5], m_Message[6], m_Message[7], m_Message[8] });
 
 					case GET_PARAMETER_REPLY:
 					case SET_PARAMETER_REPLY:
-						return FromAsciiCharacters16(new[] {m_Message[13], m_Message[14], m_Message[15], m_Message[16]});
+						return FromAsciiCharacters16(new[] { m_Message[13], m_Message[14], m_Message[15], m_Message[16] });
 
 					default:
 						throw new InvalidOperationException();
@@ -211,9 +215,9 @@ namespace ICD.Connect.Displays.Nec
 		/// <returns></returns>
 		public static NecDisplayCommand Command(byte monitorId, IEnumerable<byte> bytes)
 		{
-			byte[] message = new[] {START_MESSAGE}.Concat(bytes)
-			                                      .Concat(new[] {END_MESSAGE})
-			                                      .ToArray();
+			byte[] message = new[] { START_MESSAGE }.Concat(bytes)
+												  .Concat(new[] { END_MESSAGE })
+												  .ToArray();
 			byte[] header = GetHeader(monitorId, COMMAND, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
@@ -272,8 +276,8 @@ namespace ICD.Connect.Displays.Nec
 			byte checksum = GetChecksum(m_Header.Concat(m_Message));
 
 			return m_Header.Concat(m_Message)
-			               .Append(checksum)
-			               .Append(DELIMITER);
+						   .Append(checksum)
+						   .Append(DELIMITER);
 		}
 
 		/// <summary>
@@ -281,7 +285,16 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public IEnumerable<byte> GetMessageWithoutStartEndCodes()
 		{
-			return m_Message.Skip(1).Take(m_Message.Length - 2).ToArray();
+			int startIndex = m_Message.FindIndex(b => b == 0x02);
+			int endIndex = m_Message.FindIndex(b => b == 0x03);
+
+			if (startIndex == -1 || endIndex == -1)
+			{
+				LogError(string.Format("Command message {0} is missing start and/or end character.", m_Message));
+				return null;
+			}
+
+			return m_Message.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToArray();
 		}
 
 		#endregion
@@ -436,6 +449,12 @@ namespace ICD.Connect.Displays.Nec
 		private static byte GetChecksum(IEnumerable<byte> data)
 		{
 			return data.Skip(1).Aggregate((byte)0, (current, next) => (byte)(current ^ next));
+		}
+
+		private void LogError(string error)
+		{
+			if(m_logger != null)
+				m_logger.AddEntry(eSeverity.Error, error);
 		}
 
 		#endregion
