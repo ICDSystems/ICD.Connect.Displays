@@ -203,7 +203,7 @@ namespace ICD.Connect.Displays.Nec
 				data = data.Take(data.Length - 1).ToArray();
 
 			byte[] header = data.Take(7).ToArray();
-			byte[] message = data.Skip(7).Take(data.Length - 8).ToArray();
+			byte[] message = data.Skip(7).ToArray();
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -286,8 +286,8 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public IEnumerable<byte> GetMessageWithoutStartEndCodes()
 		{
-			int startIndex = m_Message.FindIndex(b => b == (byte)0x02);
-			int endIndex = m_Message.FindIndex(b => b == (byte)0x03);
+			int startIndex = m_Message.FindIndex(b => b == START_MESSAGE);
+			int endIndex = m_Message.FindIndex(b => b == END_MESSAGE);
 
 			if (startIndex != -1 && endIndex != -1)
 				return m_Message.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToArray();
