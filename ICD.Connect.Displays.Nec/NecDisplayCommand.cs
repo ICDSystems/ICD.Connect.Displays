@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -35,7 +36,7 @@ namespace ICD.Connect.Displays.Nec
 		private readonly byte[] m_Header;
 		private readonly byte[] m_Message;
 
-		private ILoggerService m_logger = ServiceProvider.TryGetService<ILoggerService>();
+		public ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#region Properties
 
@@ -285,16 +286,16 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public IEnumerable<byte> GetMessageWithoutStartEndCodes()
 		{
-			int startIndex = m_Message.FindIndex(b => b == 0x02);
-			int endIndex = m_Message.FindIndex(b => b == 0x03);
+			int startIndex = m_Message.FindIndex(b => b == (byte)0x02);
+			int endIndex = m_Message.FindIndex(b => b == (byte)0x03);
 
-			if (startIndex == -1 || endIndex == -1)
-			{
-				LogError(string.Format("Command message {0} is missing start and/or end character.", m_Message));
-				return null;
-			}
+			if (startIndex != -1 && endIndex != -1)
+				return m_Message.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToArray();
 
-			return m_Message.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToArray();
+			Logger.AddEntry(eSeverity.Error,
+			                "Command message {0} is missing start and/or end character.",
+			                StringUtils.ArrayFormat(m_Message));
+			return null;
 		}
 
 		#endregion
@@ -449,12 +450,6 @@ namespace ICD.Connect.Displays.Nec
 		private static byte GetChecksum(IEnumerable<byte> data)
 		{
 			return data.Skip(1).Aggregate((byte)0, (current, next) => (byte)(current ^ next));
-		}
-
-		private void LogError(string error)
-		{
-			if(m_logger != null)
-				m_logger.AddEntry(eSeverity.Error, error);
 		}
 
 		#endregion
