@@ -3,7 +3,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	public delegate void DisplayHdmiInputDelegate(IDisplay display, int hdmiInput, bool active);
 

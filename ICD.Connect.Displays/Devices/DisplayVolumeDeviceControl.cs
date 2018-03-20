@@ -3,7 +3,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.Controls;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// TODO - Right now this is a simple shim of IDisplayWithAudio. Eventually we should have a specific

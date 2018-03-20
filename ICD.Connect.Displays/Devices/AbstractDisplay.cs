@@ -14,7 +14,7 @@ using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// AbstractDisplay represents the base class for all TV displays.
