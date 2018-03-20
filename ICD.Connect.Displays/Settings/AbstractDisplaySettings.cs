@@ -5,7 +5,7 @@ using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Settings
 {
-	public abstract class AbstractDisplaySettings : AbstractDeviceSettings
+	public abstract class AbstractDisplaySettings : AbstractDeviceSettings, IDisplaySettings
 	{
 		private const string PORT_ELEMENT = "Port";
 

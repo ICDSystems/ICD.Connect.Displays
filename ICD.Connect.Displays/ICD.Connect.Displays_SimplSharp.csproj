@@ -81,6 +81,8 @@
     <Compile Include="EventArguments\ScalingModeEventArgs.cs" />
     <Compile Include="Settings\AbstractDisplaySettings.cs" />
     <Compile Include="Settings\AbstractDisplayWithAudioSettings.cs" />
+    <Compile Include="Settings\IDisplaySettings.cs" />
+    <Compile Include="Settings\IDisplayWithAudioSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

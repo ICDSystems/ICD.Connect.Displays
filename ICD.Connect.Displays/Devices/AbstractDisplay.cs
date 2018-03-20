@@ -20,7 +20,7 @@ namespace ICD.Connect.Displays.Devices
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
-		where T : AbstractDisplaySettings, new()
+		where T : IDisplaySettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
 		public event DisplayHdmiInputDelegate OnHdmiInputChanged;

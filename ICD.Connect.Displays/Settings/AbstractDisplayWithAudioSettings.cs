@@ -3,7 +3,7 @@ using ICD.Common.Utils.Xml;
 
 namespace ICD.Connect.Displays.Settings
 {
-	public abstract class AbstractDisplayWithAudioSettings : AbstractDisplaySettings
+	public abstract class AbstractDisplayWithAudioSettings : AbstractDisplaySettings, IDisplayWithAudioSettings
 	{
 		private const string MIN_VOLUME_ELEMENT = "MinVolume";
 		private const string MAX_VOLUME_ELEMENT = "MaxVolume";

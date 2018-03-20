@@ -14,7 +14,7 @@ using ICD.Connect.Settings.Core;
 namespace ICD.Connect.Displays.Devices
 {
 	public abstract class AbstractDisplayWithAudio<T> : AbstractDisplay<T>, IDisplayWithAudio
-		where T : AbstractDisplayWithAudioSettings, new()
+		where T : IDisplayWithAudioSettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
 		public event EventHandler<FloatEventArgs> OnVolumeChanged;
