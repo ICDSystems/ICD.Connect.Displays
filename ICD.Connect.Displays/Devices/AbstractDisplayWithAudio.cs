@@ -9,6 +9,7 @@ using ICD.Connect.API.Attributes;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Core;
 

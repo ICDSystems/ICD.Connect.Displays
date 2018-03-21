@@ -1,6 +1,7 @@
 ﻿using ICD.Connect.API.Attributes;
 ﻿using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Protocol.EventArguments;
 
 namespace ICD.Connect.Displays.Mock

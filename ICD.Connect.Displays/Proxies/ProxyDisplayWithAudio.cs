@@ -2,7 +2,7 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Attributes;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Proxies
 {
 	public sealed class ProxyDisplayWithAudio : AbstractProxyDisplay, IProxyDisplayWithAudio
 	{

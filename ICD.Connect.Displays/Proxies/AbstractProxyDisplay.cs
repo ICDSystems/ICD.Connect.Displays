@@ -2,9 +2,10 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Proxies
 {
 	public abstract class AbstractProxyDisplay : AbstractProxyDevice, IProxyDisplay
 	{

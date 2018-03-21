@@ -10,6 +10,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
