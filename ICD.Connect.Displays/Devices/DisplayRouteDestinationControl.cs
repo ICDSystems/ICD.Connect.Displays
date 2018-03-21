@@ -8,7 +8,7 @@ using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
 using ICD.Connect.Routing.EventArguments;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// Simple IRouteDestinationControl for IDisplays.

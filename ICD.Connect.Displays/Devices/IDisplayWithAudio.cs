@@ -4,7 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Devices.Controls;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	public interface IDisplayWithAudio : IDisplay
 	{
