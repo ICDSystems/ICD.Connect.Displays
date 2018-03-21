@@ -2,6 +2,7 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Samsung;
 using ICD.Connect.Displays.Sharp;
