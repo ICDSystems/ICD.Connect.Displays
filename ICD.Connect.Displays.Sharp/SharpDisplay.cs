@@ -5,6 +5,8 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
@@ -61,6 +63,26 @@ namespace ICD.Connect.Displays.Sharp
 		public const string SCALING_MODE_ZOOM = WIDE + "30  " + RETURN; // Zoom AV
 		public const string SCALING_MODE_QUERY = WIDE + QUERY + RETURN;
 		private const int MAX_RETRY_ATTEMPTS = 20;
+
+		private bool m_WarmingUp;
+		private readonly IcdTimer m_WarmupRepeatPowerQueryTimer = new IcdTimer();
+		private const long TIMER_MS = 3 * 1000;
+
+		private bool WarmingUp
+		{
+			get
+			{
+				return m_WarmingUp;
+			}
+			set
+			{
+				m_WarmingUp = value;
+				if (value)
+				{
+					m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
+				}
+			}
+		}
 
 		/// <summary>
 		///     Maps the Sharp view mode to the command.
@@ -136,6 +158,7 @@ namespace ICD.Connect.Displays.Sharp
 		public override void PowerOn()
 		{
 			SendCommand(POWER_ON);
+			WarmingUp = true;
 			SendCommand(POWER_QUERY);
 		}
 
@@ -145,6 +168,7 @@ namespace ICD.Connect.Displays.Sharp
 			PowerOnCommand();
 
 			SendCommand(POWER_OFF);
+			WarmingUp = false;
 			SendCommand(POWER_QUERY);
 		}
 
@@ -292,11 +316,21 @@ namespace ICD.Connect.Displays.Sharp
 			}
 
 			SetPort(port);
+
+			m_WarmupRepeatPowerQueryTimer.OnElapsed += WarmupRepeatPowerQueryTimerOnElapsed;
 		}
 
 		#endregion
 
 		#region Private Methods
+
+		private void WarmupRepeatPowerQueryTimerOnElapsed(object sender, EventArgs eventArgs)
+		{
+			SendCommand(POWER_QUERY);
+			if(m_WarmingUp)
+				m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
+		}
+
 
 		public void SendCommand(string data)
 		{
@@ -374,6 +408,8 @@ namespace ICD.Connect.Displays.Sharp
 			{
 				case POWER_QUERY:
 					IsPowered = responseValue == 1;
+					if (IsPowered)
+						WarmingUp = false;
 					break;
 
 				case VOLUME_QUERY:

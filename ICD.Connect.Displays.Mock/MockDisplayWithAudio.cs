@@ -1,4 +1,5 @@
 ﻿using ICD.Connect.API.Attributes;
+﻿using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 

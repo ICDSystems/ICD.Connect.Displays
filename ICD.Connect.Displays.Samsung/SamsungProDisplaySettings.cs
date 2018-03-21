@@ -29,7 +29,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// <summary>
 		/// The video wall id for this display.
 		/// </summary>
-		[IpIdSettingsProperty]
+		[CrestronByteSettingsProperty]
 		public byte WallId { get; set; }
 
 		/// <summary>

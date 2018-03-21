@@ -15,14 +15,14 @@ using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
 	[ApiClass(typeof(ProxyDisplay))]
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
-		where T : AbstractDisplaySettings, new()
+		where T : IDisplaySettings, new()
 	{
 		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
 		public event DisplayHdmiInputDelegate OnHdmiInputChanged;

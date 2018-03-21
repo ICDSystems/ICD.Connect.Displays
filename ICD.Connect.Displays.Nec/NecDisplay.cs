@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
@@ -76,6 +77,16 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public override int InputCount { get { return s_InputMap.Count; } }
 
+		public byte MonitorId { get; set; }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public NecDisplay()
+		{
+			MonitorId = NecDisplayCommand.MONITOR_ID_ALL;
+		}
+
 		#region Methods
 
 		/// <summary>
@@ -117,22 +128,22 @@ namespace ICD.Connect.Displays.Nec
 
 		public override void PowerOn()
 		{
-			SendCommand(NecDisplayCommand.Command(s_PowerControl.Concat(s_PowerOn)));
+			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOn)));
 		}
 
 		public override void PowerOff()
 		{
-			SendCommand(NecDisplayCommand.Command(s_PowerControl.Concat(s_PowerOff)));
+			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOff)));
 		}
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(NecDisplayCommand.SetParameterCommand(INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendCommand(NecDisplayCommand.SetParameterCommand(ASPECT_PAGE, ASPECT_CODE, s_ScalingModeMap[mode]));
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE, s_ScalingModeMap[mode]));
 		}
 
 		public override void VolumeUpIncrement()
@@ -154,7 +165,7 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public override void MuteOn()
 		{
-			SendCommand(NecDisplayCommand.SetParameterCommand(MUTE_PAGE, MUTE_CODE, MUTE));
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, MUTE_PAGE, MUTE_CODE, MUTE));
 		}
 
 		/// <summary>
@@ -162,7 +173,7 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public override void MuteOff()
 		{
-			SendCommand(NecDisplayCommand.SetParameterCommand(MUTE_PAGE, MUTE_CODE, UNMUTE));
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, MUTE_PAGE, MUTE_CODE, UNMUTE));
 		}
 
 		#endregion
@@ -177,7 +188,7 @@ namespace ICD.Connect.Displays.Nec
 		{
             if (!IsPowered)
                 return;
-			SendCommand(NecDisplayCommand.SetParameterCommand(VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
 		}
 
 		/// <summary>
@@ -188,15 +199,15 @@ namespace ICD.Connect.Displays.Nec
 			base.QueryState();
 
 			// Query the state of the device
-			SendCommand(NecDisplayCommand.Command(s_PowerQuery));
+			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerQuery));
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(NecDisplayCommand.GetParameterCommand(VOLUME_PAGE, VOLUME_CODE));
-			SendCommand(NecDisplayCommand.GetParameterCommand(INPUT_PAGE, INPUT_CODE));
-			SendCommand(NecDisplayCommand.GetParameterCommand(ASPECT_PAGE, ASPECT_CODE));
-			SendCommand(NecDisplayCommand.GetParameterCommand(MUTE_PAGE, MUTE_CODE));
+			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE));
+			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE));
+			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE));
+			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, MUTE_PAGE, MUTE_CODE));
 		}
 
 		/// <summary>
@@ -236,6 +247,7 @@ namespace ICD.Connect.Displays.Nec
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
+			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize().Replace("\r", "\\r"));
 		}
 
 		/// <summary>
@@ -343,6 +355,8 @@ namespace ICD.Connect.Displays.Nec
 				settings.Port = SerialQueue.Port.Id;
 			else
 				settings.Port = null;
+
+			settings.MonitorId = MonitorId;
 		}
 
 		/// <summary>
@@ -351,6 +365,8 @@ namespace ICD.Connect.Displays.Nec
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
+
+			MonitorId = NecDisplayCommand.MONITOR_ID_ALL;
 
 			SetPort(null);
 		}
@@ -363,6 +379,8 @@ namespace ICD.Connect.Displays.Nec
 		protected override void ApplySettingsFinal(NecDisplaySettings settings, IDeviceFactory factory)
 		{
 			base.ApplySettingsFinal(settings, factory);
+
+			MonitorId = settings.MonitorId ?? NecDisplayCommand.MONITOR_ID_ALL;
 
 			ISerialPort port = null;
 
