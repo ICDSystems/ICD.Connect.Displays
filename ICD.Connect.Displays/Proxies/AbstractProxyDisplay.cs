@@ -2,6 +2,7 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Proxies;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 
