@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Proxies;
@@ -17,25 +21,82 @@ namespace ICD.Connect.Displays.Proxies
 
 		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
 
+		private bool m_IsPowered;
+		private int? m_HdmiInput;
+		private eScalingMode m_ScalingMode;
+
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered { get; private set; }
+		public bool IsPowered
+		{
+			get { return m_IsPowered; }
+			[UsedImplicitly]
+			private set
+			{
+				if (value == m_IsPowered)
+					return;
+
+				m_IsPowered = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+
+				OnIsPoweredChanged.Raise(this, new BoolEventArgs(m_IsPowered));
+			}
+		}
 
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
-		public int InputCount { get; private set; }
+		public int InputCount { get; [UsedImplicitly] private set; }
 
 		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput { get; private set; }
+		public int? HdmiInput
+		{
+			get { return m_HdmiInput; }
+			[UsedImplicitly]
+			private set
+			{
+				if (value == m_HdmiInput)
+					return;
+
+				int? oldInput = m_HdmiInput;
+				m_HdmiInput = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+
+				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
+				if (handler == null)
+					return;
+
+				if (oldInput.HasValue)
+					handler(this, oldInput.Value, false);
+
+				if (m_HdmiInput.HasValue)
+					handler(this, m_HdmiInput.Value, true);
+			}
+		}
 
 		/// <summary>
 		/// Gets the scaling mode.
 		/// </summary>
-		public eScalingMode ScalingMode { get; private set; }
+		public eScalingMode ScalingMode
+		{
+			get { return m_ScalingMode; }
+			[UsedImplicitly] private set
+			{
+				if (value == m_ScalingMode)
+					return;
+
+				m_ScalingMode = value;
+
+				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", StringUtils.NiceName(m_ScalingMode));
+
+				OnScalingModeChanged.Raise(this, new ScalingModeEventArgs(m_ScalingMode));
+			}
+		}
 
 		public void PowerOn()
 		{
