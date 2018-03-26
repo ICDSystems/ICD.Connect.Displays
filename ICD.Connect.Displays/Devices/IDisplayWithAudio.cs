@@ -61,21 +61,40 @@ namespace ICD.Connect.Displays.Devices
 
 		#region Methods
 
+		/// <summary>
+		/// Sets the raw volume.
+		/// </summary>
+		/// <param name="raw"></param>
 		[ApiMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, DisplayWithAudioApi.HELP_METHOD_SET_VOLUME)]
 		void SetVolume(float raw);
 
+		/// <summary>
+		/// Increments the volume once.
+		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_UP_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_UP_INCREMENT)]
 		void VolumeUpIncrement();
 
+		/// <summary>
+		/// Decrements the volume once.
+		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_DOWN_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_DOWN_INCREMENT)]
 		void VolumeDownIncrement();
 
+		/// <summary>
+		/// Mutes the display.
+		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_ON, DisplayWithAudioApi.HELP_METHOD_MUTE_ON)]
 		void MuteOn();
 
+		/// <summary>
+		/// Unmutes the display.
+		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_OFF, DisplayWithAudioApi.HELP_METHOD_MUTE_OFF)]
 		void MuteOff();
 
+		/// <summary>
+		/// Toggles the mute state of the display.
+		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE, DisplayWithAudioApi.HELP_METHOD_MUTE_TOGGLE)]
 		void MuteToggle();
 

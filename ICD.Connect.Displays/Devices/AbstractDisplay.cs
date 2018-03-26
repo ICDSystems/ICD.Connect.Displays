@@ -146,12 +146,26 @@ namespace ICD.Connect.Displays.Devices
 			SerialQueue.Enqueue(command, comparer);
 		}
 
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public abstract void PowerOn();
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public abstract void PowerOff();
 
+		/// <summary>
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// </summary>
+		/// <param name="address"></param>
 		public abstract void SetHdmiInput(int address);
 
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public abstract void SetScalingMode(eScalingMode mode);
 
 		/// <summary>

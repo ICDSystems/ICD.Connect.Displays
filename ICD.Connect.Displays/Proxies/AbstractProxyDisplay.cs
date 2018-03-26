@@ -92,27 +92,41 @@ namespace ICD.Connect.Displays.Proxies
 
 				m_ScalingMode = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", StringUtils.NiceName(m_ScalingMode));
+				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
 
 				OnScalingModeChanged.Raise(this, new ScalingModeEventArgs(m_ScalingMode));
 			}
 		}
 
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public void PowerOn()
 		{
 			throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public void PowerOff()
 		{
 			throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// </summary>
+		/// <param name="address"></param>
 		public void SetHdmiInput(int address)
 		{
 			throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public void SetScalingMode(eScalingMode mode)
 		{
 			throw new NotImplementedException();
