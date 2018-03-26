@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Attributes;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
-using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Devices
 {
-	[ApiClass(typeof(ProxyDisplayWithAudio))]
 	public abstract class AbstractDisplayWithAudio<T> : AbstractDisplay<T>, IDisplayWithAudio
 		where T : IDisplayWithAudioSettings, new()
 	{
@@ -39,19 +35,16 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Override if the display volume minimum is not 0.
 		/// </summary>
-		[ApiProperty("VolumeDeviceMin", "Gets the min volume of the display.")]
 		public virtual float VolumeDeviceMin { get { return 0; } }
 
 		/// <summary>
 		/// Override if the display volume maximum is not 100.
 		/// </summary>
-		[ApiProperty("VolumeDeviceMax", "Gets the min volume of the display.")]
 		public virtual float VolumeDeviceMax { get { return 100; } }
 
 		/// <summary>
 		/// Gets the raw volume of the display.
 		/// </summary>
-		[ApiProperty("Volume", "Gets the volume of the display.")]
 		public float Volume
 		{
 			get { return m_Volume; }
@@ -76,7 +69,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
-		[ApiProperty("IsMuted", "Gets the muted state of the display.")]
 		public bool IsMuted
 		{
 			get { return m_IsMuted; }
@@ -96,7 +88,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Prevents the device from going below this volume.
 		/// </summary>
-		[ApiProperty("VolumeSafetyMin", "Gets/sets the min safety volume.")]
 		public float? VolumeSafetyMin
 		{
 			get { return m_VolumeSafetyMin; }
@@ -111,7 +102,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Prevents the device from going above this volume.
 		/// </summary>
-		[ApiProperty("VolumeSafetyMax", "Gets/sets the max safety volume.")]
 		public float? VolumeSafetyMax
 		{
 			get { return m_VolumeSafetyMax; }
@@ -126,7 +116,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// The default volume to use when the display powers on.
 		/// </summary>
-		[ApiProperty("VolumeDefault", "Gets/sets the default volume.")]
 		public float? VolumeDefault
 		{
 			get { return m_VolumeDefault; }
@@ -174,19 +163,16 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Enables mute.
 		/// </summary>
-		[ApiMethod("MuteOn", "Mutes the display.")]
 		public abstract void MuteOn();
 
 		/// <summary>
 		/// Disables mute.
 		/// </summary>
-		[ApiMethod("MuteOff", "Unmutes the display.")]
 		public abstract void MuteOff();
 
 		/// <summary>
 		/// Toggles mute.
 		/// </summary>
-		[ApiMethod("MuteToggle", "Toggles the display mute state.")]
 		public virtual void MuteToggle()
 		{
 			if (IsMuted)
@@ -199,7 +185,6 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the raw volume.
 		/// </summary>
 		/// <param name="raw"></param>
-		[ApiMethod("SetVolume", "Sets the display volume.")]
 		public void SetVolume(float raw)
 		{
 			if (!IsPowered)
@@ -211,13 +196,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Increments the raw volume.
 		/// </summary>
-		[ApiMethod("VolumeUpIncrement", "Increments the display volume.")]
 		public abstract void VolumeUpIncrement();
 
 		/// <summary>
 		/// Decrements the raw volume.
 		/// </summary>
-		[ApiMethod("VolumeDownIncrement", "Decrements the display volume.")]
 		public abstract void VolumeDownIncrement();
 
 		#endregion

@@ -5,12 +5,10 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Attributes;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
-using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
@@ -21,7 +19,6 @@ namespace ICD.Connect.Displays.Devices
 	/// <summary>
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
-	[ApiClass(typeof(ProxyDisplay))]
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
 		where T : IDisplaySettings, new()
 	{
@@ -38,7 +35,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
-		[ApiProperty("InputCount", "Gets the HDMI input count for the display.")]
 		public abstract int InputCount { get; }
 
 		/// <summary>
@@ -49,7 +45,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		[ApiProperty("IsPowered", "Gets the powered state for the display.")]
 		public virtual bool IsPowered
 		{
 			get { return m_IsPowered; }
@@ -72,7 +67,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the current hdmi input address.
 		/// </summary>
-		[ApiProperty("HdmiInput", "Gets the current HDMI input for the display.")]
 		public int? HdmiInput
 		{
 			get { return m_HdmiInput; }
@@ -101,7 +95,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the scaling mode.
 		/// </summary>
-		[ApiProperty("ScalingMode", "Gets the scaling mode for the display.")]
 		public eScalingMode ScalingMode
 		{
 			get { return m_ScalingMode; }
@@ -153,16 +146,12 @@ namespace ICD.Connect.Displays.Devices
 			SerialQueue.Enqueue(command, comparer);
 		}
 
-		[ApiMethod("PowerOn", "Powers the display.")]
 		public abstract void PowerOn();
 
-		[ApiMethod("PowerOff", "Powers off the display.")]
 		public abstract void PowerOff();
 
-		[ApiMethod("SetHdmiInput", "Sets the HDMI input for the display.")]
 		public abstract void SetHdmiInput(int address);
 
-		[ApiMethod("SetScalingMode", "Sets the scaling mode for the display.")]
 		public abstract void SetScalingMode(eScalingMode mode);
 
 		/// <summary>

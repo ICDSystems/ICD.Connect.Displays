@@ -1,11 +1,12 @@
 ﻿using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
-using ICD.Connect.Devices.Controls;
+using ICD.Connect.API.Attributes;
+using ICD.Connect.Displays.Proxies;
 
 namespace ICD.Connect.Displays.Devices
 {
+	[ApiClass(typeof(ProxyDisplayWithAudio))]
 	public interface IDisplayWithAudio : IDisplay
 	{
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
@@ -17,55 +18,65 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the current volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
 		float Volume { get; }
 
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED, DisplayWithAudioApi.HELP_PROPERTY_IS_MUTED)]
 		bool IsMuted { get; }
 
 		/// <summary>
 		/// The min volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEVICE_MIN)]
 		float VolumeDeviceMin { get; }
 
 		/// <summary>
 		/// The max volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEVICE_MAX)]
 		float VolumeDeviceMax { get; }
 
 		/// <summary>
 		/// Prevents the device from going below this volume.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MIN)]
 		float? VolumeSafetyMin { get; set; }
 
 		/// <summary>
 		/// Prevents the device from going above this volume.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MAX)]
 		float? VolumeSafetyMax { get; set; }
 
 		/// <summary>
 		/// The volume the device is set to when powered.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEFAULT)]
 		float? VolumeDefault { get; set; }
 
 		#endregion
 
 		#region Methods
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, DisplayWithAudioApi.HELP_METHOD_SET_VOLUME)]
 		void SetVolume(float raw);
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_UP_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_UP_INCREMENT)]
 		void VolumeUpIncrement();
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_DOWN_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_DOWN_INCREMENT)]
 		void VolumeDownIncrement();
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_ON, DisplayWithAudioApi.HELP_METHOD_MUTE_ON)]
 		void MuteOn();
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_OFF, DisplayWithAudioApi.HELP_METHOD_MUTE_OFF)]
 		void MuteOff();
 
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE, DisplayWithAudioApi.HELP_METHOD_MUTE_TOGGLE)]
 		void MuteToggle();
 
 		#endregion

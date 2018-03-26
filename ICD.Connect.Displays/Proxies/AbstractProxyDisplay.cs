@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
-using ICD.Connect.API.Attributes;
-using ICD.Connect.Devices;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Proxies;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -16,37 +17,41 @@ namespace ICD.Connect.Displays.Proxies
 
 		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
 
-		[ApiProperty("IsPowered", "Gets the powered state for the display.")]
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
 		public bool IsPowered { get; private set; }
 
-		[ApiProperty("InputCount", "Gets the HDMI input count for the display.")]
+		/// <summary>
+		/// Gets the number of HDMI inputs.
+		/// </summary>
 		public int InputCount { get; private set; }
 
-		[ApiProperty("HdmiInput", "Gets the current HDMI input for the display.")]
+		/// <summary>
+		/// Gets the Hdmi input.
+		/// </summary>
 		public int? HdmiInput { get; private set; }
 
-		[ApiProperty("ScalingMode", "Gets the scaling mode for the display.")]
+		/// <summary>
+		/// Gets the scaling mode.
+		/// </summary>
 		public eScalingMode ScalingMode { get; private set; }
 
-		[ApiMethod("PowerOn", "Powers the display.")]
 		public void PowerOn()
 		{
 			throw new NotImplementedException();
 		}
 
-		[ApiMethod("PowerOff", "Powers off the display.")]
 		public void PowerOff()
 		{
 			throw new NotImplementedException();
 		}
 
-		[ApiMethod("SetHdmiInput", "Sets the HDMI input for the display.")]
 		public void SetHdmiInput(int address)
 		{
 			throw new NotImplementedException();
 		}
 
-		[ApiMethod("SetScalingMode", "Sets the scaling mode for the display.")]
 		public void SetScalingMode(eScalingMode mode)
 		{
 			throw new NotImplementedException();
