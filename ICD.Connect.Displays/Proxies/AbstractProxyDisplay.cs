@@ -103,7 +103,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void PowerOn()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayApi.METHOD_POWER_ON);
 		}
 
 		/// <summary>
@@ -111,7 +111,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void PowerOff()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayApi.METHOD_POWER_OFF);
 		}
 
 		/// <summary>
@@ -120,7 +120,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// <param name="address"></param>
 		public void SetHdmiInput(int address)
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayApi.METHOD_SET_HDMI_INPUT, address);
 		}
 
 		/// <summary>
@@ -129,7 +129,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// <param name="mode"></param>
 		public void SetScalingMode(eScalingMode mode)
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayApi.METHOD_SET_SCALING_MODE, mode);
 		}
 
 		#region Console
