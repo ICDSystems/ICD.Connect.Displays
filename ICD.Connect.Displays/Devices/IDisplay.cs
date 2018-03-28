@@ -12,7 +12,7 @@ namespace ICD.Connect.Displays.Devices
 	/// <summary>
 	/// IDisplay provides methods for controlling a TV.
 	/// </summary>
-	[ApiClass(typeof(ProxyDisplay))]
+	[ApiClass(typeof(ProxyDisplay), typeof(IDevice))]
 	public interface IDisplay : IDevice
 	{
 		#region Events

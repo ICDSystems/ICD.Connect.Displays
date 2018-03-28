@@ -6,7 +6,7 @@ using ICD.Connect.Displays.Proxies;
 
 namespace ICD.Connect.Displays.Devices
 {
-	[ApiClass(typeof(ProxyDisplayWithAudio))]
+	[ApiClass(typeof(ProxyDisplayWithAudio), typeof(IDisplay))]
 	public interface IDisplayWithAudio : IDisplay
 	{
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
