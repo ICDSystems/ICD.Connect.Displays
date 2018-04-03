@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ICD.Connect.Displays.Microsoft.SurfaceHub</RootNamespace>
+	<AssemblyName>ICD.Connect.Displays.Microsoft.SurfaceHub</AssemblyName>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<Deterministic>true</Deterministic>
   </PropertyGroup>
