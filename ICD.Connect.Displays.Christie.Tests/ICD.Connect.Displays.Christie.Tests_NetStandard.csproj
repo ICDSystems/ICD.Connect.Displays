@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-	<RootNamespace>ICD.Common.Utils.Tests</RootNamespace>
+	<RootNamespace>ICD.Connect.Displays.Christie.Tests</RootNamespace>
+	<AssemblyName>ICD.Connect.Displays.Christie.Tests</AssemblyName>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<Deterministic>true</Deterministic>
   </PropertyGroup>
