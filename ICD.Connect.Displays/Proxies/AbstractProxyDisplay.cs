@@ -5,7 +5,9 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Info;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Proxies.Devices;
 using ICD.Connect.Displays.Devices;
@@ -24,6 +26,8 @@ namespace ICD.Connect.Displays.Proxies
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
 		private eScalingMode m_ScalingMode;
+
+		#region Properties
 
 		/// <summary>
 		/// Gets the powered state.
@@ -98,6 +102,10 @@ namespace ICD.Connect.Displays.Proxies
 			}
 		}
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		/// Powers the TV.
 		/// </summary>
@@ -130,6 +138,24 @@ namespace ICD.Connect.Displays.Proxies
 		public void SetScalingMode(eScalingMode mode)
 		{
 			CallMethod(DisplayApi.METHOD_SET_SCALING_MODE, mode);
+		}
+
+		#endregion
+
+		/// <summary>
+		/// Override to build initialization commands on top of the current class info.
+		/// </summary>
+		/// <param name="command"></param>
+		protected override void Initialize(ApiClassInfo command)
+		{
+			base.Initialize(command);
+
+			ApiCommandBuilder.UpdateCommand(command)
+			                 .GetProperty(DisplayApi.PROPERTY_IS_POWERED)
+			                 .GetProperty(DisplayApi.PROPERTY_INPUT_COUNT)
+			                 .GetProperty(DisplayApi.PROPERTY_HDMI_INPUT)
+			                 .GetProperty(DisplayApi.PROPERTY_SCALING_MODE)
+			                 .Complete();
 		}
 
 		#region Console
