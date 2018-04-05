@@ -132,6 +132,10 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public static float GetVolumeAsPercentage(float volume, float min, float max)
 		{
+			// Avoid divide by zero
+			if (min.Equals(max))
+				return 0.0f;
+
 			return MathUtils.MapRange(min, max, 0.0f, 1.0f, volume);
 		}
 	}
