@@ -216,8 +216,7 @@ namespace ICD.Connect.Displays.SPlus
 				return;
 
 			ushort volume = (ushort)args.Data;
-			ushort percentage =
-				(ushort)MathUtils.MapRange(m_Display.VolumeDeviceMin, m_Display.VolumeDeviceMax, 0.0f, 100.0f, volume);
+			ushort percentage = (ushort)(m_Display.GetVolumeAsPercentage() * ushort.MaxValue);
 
 			VolumeChanged(percentage, volume);
 		}
