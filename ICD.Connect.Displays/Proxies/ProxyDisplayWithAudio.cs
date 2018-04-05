@@ -20,6 +20,8 @@ namespace ICD.Connect.Displays.Proxies
 		private float m_Volume;
 		private bool m_IsMuted;
 
+		#region Properties
+
 		/// <summary>
 		/// Gets the current volume.
 		/// </summary>
@@ -83,6 +85,10 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public float? VolumeDefault { get; set; }
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
@@ -131,6 +137,8 @@ namespace ICD.Connect.Displays.Proxies
 		{
 			throw new NotImplementedException();
 		}
+
+		#endregion
 
 		#region Console
 
