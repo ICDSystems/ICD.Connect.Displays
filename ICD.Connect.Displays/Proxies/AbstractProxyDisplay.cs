@@ -158,6 +158,35 @@ namespace ICD.Connect.Displays.Proxies
 			                 .Complete();
 		}
 
+		/// <summary>
+		/// Updates the proxy with a property result.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="result"></param>
+		protected override void ParseProperty(string name, ApiResult result)
+		{
+			base.ParseProperty(name, result);
+
+			switch (name)
+			{
+				case DisplayApi.PROPERTY_IS_POWERED:
+					IsPowered = result.GetValue<bool>();
+					break;
+
+				case DisplayApi.PROPERTY_INPUT_COUNT:
+					InputCount = result.GetValue<int>();
+					break;
+
+				case DisplayApi.PROPERTY_HDMI_INPUT:
+					HdmiInput = result.GetValue<int?>();
+					break;
+
+				case DisplayApi.PROPERTY_SCALING_MODE:
+					ScalingMode = result.GetValue<eScalingMode>();
+					break;
+			}
+		}
+
 		#region Console
 
 		/// <summary>
