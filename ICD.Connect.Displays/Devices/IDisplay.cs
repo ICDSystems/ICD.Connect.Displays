@@ -17,8 +17,22 @@ namespace ICD.Connect.Displays.Devices
 	{
 		#region Events
 
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
+		[ApiEvent(DisplayApi.EVENT_IS_POWERED, DisplayApi.HELP_EVENT_IS_POWERED)]
 		event EventHandler<BoolEventArgs> OnIsPoweredChanged;
+
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
+		[ApiEvent(DisplayApi.EVENT_HDMI_INPUT, DisplayApi.HELP_EVENT_HDMI_INPUT)]
 		event DisplayHdmiInputDelegate OnHdmiInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
+		[ApiEvent(DisplayApi.EVENT_SCALING_MODE, DisplayApi.HELP_EVENT_SCALING_MODE)]
 		event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
 
 		#endregion

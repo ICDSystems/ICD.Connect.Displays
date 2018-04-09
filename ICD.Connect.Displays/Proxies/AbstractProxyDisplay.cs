@@ -17,10 +17,19 @@ namespace ICD.Connect.Displays.Proxies
 {
 	public abstract class AbstractProxyDisplay : AbstractProxyDevice, IProxyDisplay
 	{
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
 
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
 		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
 
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
 		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
 
 		private bool m_IsPowered;
@@ -151,6 +160,9 @@ namespace ICD.Connect.Displays.Proxies
 			base.Initialize(command);
 
 			ApiCommandBuilder.UpdateCommand(command)
+			                 .SubscribeEvent(DisplayApi.EVENT_IS_POWERED)
+			                 .SubscribeEvent(DisplayApi.EVENT_HDMI_INPUT)
+			                 .SubscribeEvent(DisplayApi.EVENT_SCALING_MODE)
 			                 .GetProperty(DisplayApi.PROPERTY_IS_POWERED)
 			                 .GetProperty(DisplayApi.PROPERTY_INPUT_COUNT)
 			                 .GetProperty(DisplayApi.PROPERTY_HDMI_INPUT)

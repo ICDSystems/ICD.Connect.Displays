@@ -5,7 +5,9 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API;
 using ICD.Connect.API.Commands;
+using ICD.Connect.API.Info;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 
@@ -13,8 +15,14 @@ namespace ICD.Connect.Displays.Proxies
 {
 	public sealed class ProxyDisplayWithAudio : AbstractProxyDisplay, IProxyDisplayWithAudio
 	{
+		/// <summary>
+		/// Raised when the volume changes.
+		/// </summary>
 		public event EventHandler<FloatEventArgs> OnVolumeChanged;
 
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
 		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
 		private float m_Volume;
@@ -86,6 +94,74 @@ namespace ICD.Connect.Displays.Proxies
 		public float? VolumeDefault { get; set; }
 
 		#endregion
+
+		/// <summary>
+		/// Override to release resources.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnVolumeChanged = null;
+			OnMuteStateChanged = null;
+
+			base.DisposeFinal(disposing);
+		}
+
+		/// <summary>
+		/// Override to build initialization commands on top of the current class info.
+		/// </summary>
+		/// <param name="command"></param>
+		protected override void Initialize(ApiClassInfo command)
+		{
+			base.Initialize(command);
+
+			ApiCommandBuilder.UpdateCommand(command)
+			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_VOLUME)
+			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_IS_MUTED)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN)
+							 .Complete();
+		}
+
+		/// <summary>
+		/// Updates the proxy with a property result.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="result"></param>
+		protected override void ParseProperty(string name, ApiResult result)
+		{
+			base.ParseProperty(name, result);
+
+			switch (name)
+			{
+				case DisplayWithAudioApi.PROPERTY_VOLUME:
+					Volume = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_IS_MUTED:
+					IsMuted = result.GetValue<bool>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT:
+					VolumeDefault = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX:
+					VolumeDeviceMax = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN:
+					VolumeDeviceMin = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX:
+					VolumeSafetyMax = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN:
+					VolumeSafetyMin = result.GetValue<float>();
+					break;
+			}
+		}
 
 		#region Methods
 

@@ -2,6 +2,9 @@
 {
 	public static class DisplayWithAudioApi
 	{
+		public const string EVENT_VOLUME = "OnVolumeChanged";
+		public const string EVENT_IS_MUTED = "OnMuteStateChanged";
+
 		public const string PROPERTY_VOLUME = "Volume";
 		public const string PROPERTY_IS_MUTED = "IsMuted";
 		public const string PROPERTY_VOLUME_DEVICE_MIN = "VolumeDeviceMin";
@@ -16,6 +19,9 @@
 		public const string METHOD_MUTE_ON = "MuteOn";
 		public const string METHOD_MUTE_OFF = "MuteOff";
 		public const string METHOD_MUTE_TOGGLE = "MuteToggle";
+
+		public const string HELP_EVENT_VOLUME = "Raised when the volume changes.";
+		public const string HELP_EVENT_IS_MUTED = "Raised when the mute state changes.";
 
 		public const string HELP_PROPERTY_VOLUME = "Gets the volume of the display.";
 		public const string HELP_PROPERTY_IS_MUTED = "Gets the muted state of the display.";

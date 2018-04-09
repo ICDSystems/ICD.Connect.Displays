@@ -9,8 +9,16 @@ namespace ICD.Connect.Displays.Devices
 	[ApiClass(typeof(ProxyDisplayWithAudio), typeof(IDisplay))]
 	public interface IDisplayWithAudio : IDisplay
 	{
+		/// <summary>
+		/// Raised when the volume changes.
+		/// </summary>
+		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
 
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		[ApiEvent(DisplayWithAudioApi.EVENT_IS_MUTED, DisplayWithAudioApi.HELP_EVENT_IS_MUTED)]
 		event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
 		#region Properties
