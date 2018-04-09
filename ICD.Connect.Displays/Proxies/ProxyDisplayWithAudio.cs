@@ -146,7 +146,7 @@ namespace ICD.Connect.Displays.Proxies
 					IsMuted = result.GetValue<bool>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT:
-					VolumeDefault = result.GetValue<float>();
+					VolumeDefault = result.GetValue<float?>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX:
 					VolumeDeviceMax = result.GetValue<float>();
@@ -155,10 +155,10 @@ namespace ICD.Connect.Displays.Proxies
 					VolumeDeviceMin = result.GetValue<float>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX:
-					VolumeSafetyMax = result.GetValue<float>();
+					VolumeSafetyMax = result.GetValue<float?>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN:
-					VolumeSafetyMin = result.GetValue<float>();
+					VolumeSafetyMin = result.GetValue<float?>();
 					break;
 			}
 		}
