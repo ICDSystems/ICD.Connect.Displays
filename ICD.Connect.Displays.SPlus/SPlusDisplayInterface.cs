@@ -210,7 +210,7 @@ namespace ICD.Connect.Displays.SPlus
 			display.OnScalingModeChanged -= DisplayOnScalingModeChanged;
 		}
 
-		private void DisplayOnVolumeChanged(object sender, FloatEventArgs args)
+		private void DisplayOnVolumeChanged(object sender, DisplayVolumeApiEventArgs args)
 		{
 			if (VolumeChanged == null)
 				return;
@@ -221,28 +221,28 @@ namespace ICD.Connect.Displays.SPlus
 			VolumeChanged(percentage, volume);
 		}
 
-		private void DisplayOnScalingModeChanged(object sender, ScalingModeEventArgs scalingModeEventArgs)
+		private void DisplayOnScalingModeChanged(object sender, DisplayScalingModeApiEventArgs args)
 		{
 			if (ScalingModeChanged != null)
-				ScalingModeChanged((ushort)scalingModeEventArgs.Data);
+				ScalingModeChanged((ushort)args.Data);
 		}
 
-		private void DisplayOnIsPoweredChanged(object sender, BoolEventArgs boolEventArgs)
+		private void DisplayOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
 			if (PoweredChanged != null)
-				PoweredChanged(boolEventArgs.Data ? (ushort)1 : (ushort)0);
+				PoweredChanged(args.Data ? (ushort)1 : (ushort)0);
 		}
 
-		private void DisplayOnIsMutedChanged(object sender, BoolEventArgs boolEventArgs)
+		private void DisplayOnIsMutedChanged(object sender, DisplayMuteApiEventArgs args)
 		{
 			if (MutedChanged != null)
-				MutedChanged(boolEventArgs.Data ? (ushort)1 : (ushort)0);
+				MutedChanged(args.Data ? (ushort)1 : (ushort)0);
 		}
 
-		private void DisplayOnHdmiInputChanged(IDisplay display, int hdmiInput, bool active)
+		private void DisplayOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs args)
 		{
 			if (HdmiInputChanged != null)
-				HdmiInputChanged((ushort)hdmiInput);
+				HdmiInputChanged((ushort)args.HdmiInput);
 		}
 
 		/// <summary>
