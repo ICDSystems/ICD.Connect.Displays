@@ -8,6 +8,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
@@ -296,7 +297,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void SerialQueueOnIsOnlineStateChanged(object sender, BoolEventArgs args)
+		private void SerialQueueOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
 		}
