@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Core;
 
@@ -15,8 +15,15 @@ namespace ICD.Connect.Displays.Devices
 	public abstract class AbstractDisplayWithAudio<T> : AbstractDisplay<T>, IDisplayWithAudio
 		where T : IDisplayWithAudioSettings, new()
 	{
-		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
-		public event EventHandler<FloatEventArgs> OnVolumeChanged;
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
+
+		/// <summary>
+		/// Raised when the volume changes.
+		/// </summary>
+		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		private bool m_IsMuted;
 		private float m_Volume;
@@ -62,7 +69,7 @@ namespace ICD.Connect.Displays.Devices
 				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
 					SetVolume(safeVolume);
 
-				OnVolumeChanged.Raise(this, new FloatEventArgs(m_Volume));
+				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
 
@@ -81,7 +88,7 @@ namespace ICD.Connect.Displays.Devices
 
 				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
 
-				OnMuteStateChanged.Raise(this, new BoolEventArgs(m_IsMuted));
+				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
 		}
 

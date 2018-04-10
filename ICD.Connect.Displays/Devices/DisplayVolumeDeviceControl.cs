@@ -2,13 +2,10 @@
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices
 {
-	/// <summary>
-	/// TODO - Right now this is a simple shim of IDisplayWithAudio. Eventually we should have a specific
-	/// volume control for each display type, which contains the actual command building and parsing logic.
-	/// </summary>
 	public sealed class DisplayVolumeDeviceControl : AbstractVolumeRawLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
 	{
 		#region Properties
@@ -138,7 +135,7 @@ namespace ICD.Connect.Displays.Devices
 			parent.OnMuteStateChanged -= ParentOnMuteStateChanged;
 		}
 
-		private void ParentOnVolumeChanged(object sender, FloatEventArgs args)
+		private void ParentOnVolumeChanged(object sender, DisplayVolumeApiEventArgs args)
 		{
 			IPowerDeviceControl senderAsPowerControl = sender as IPowerDeviceControl;
 			if (senderAsPowerControl != null && !senderAsPowerControl.IsPowered)
@@ -147,9 +144,9 @@ namespace ICD.Connect.Displays.Devices
 			VolumeFeedback(args.Data);
 		}
 
-		private void ParentOnMuteStateChanged(object sender, BoolEventArgs args)
+		private void ParentOnMuteStateChanged(object sender, DisplayMuteApiEventArgs args)
 		{
-			OnMuteStateChanged.Raise(this, args);
+			OnMuteStateChanged.Raise(this, new BoolEventArgs(args.Data));
 		}
 
 		#endregion

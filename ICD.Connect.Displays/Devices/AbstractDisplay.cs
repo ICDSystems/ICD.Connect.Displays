@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -23,9 +22,9 @@ namespace ICD.Connect.Displays.Devices
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
 		where T : IDisplaySettings, new()
 	{
-		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
-		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
-		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
@@ -61,7 +60,7 @@ namespace ICD.Connect.Displays.Devices
 				if (m_IsPowered)
 					QueryState();
 
-				OnIsPoweredChanged.Raise(this, new BoolEventArgs(m_IsPowered));
+				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
 		}
 
@@ -81,15 +80,11 @@ namespace ICD.Connect.Displays.Devices
 
 				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
-				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
-				if (handler == null)
-					return;
-
 				if (oldInput.HasValue)
-					handler(this, oldInput.Value, false);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
 
 				if (m_HdmiInput.HasValue)
-					handler(this, m_HdmiInput.Value, true);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
 			}
 		}
 
@@ -108,7 +103,7 @@ namespace ICD.Connect.Displays.Devices
 
 				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
-				OnScalingModeChanged.Raise(this, new ScalingModeEventArgs(m_ScalingMode));
+				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 

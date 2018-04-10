@@ -1,5 +1,4 @@
 ﻿using System;
-using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -7,8 +6,6 @@ using ICD.Connect.Displays.Proxies;
 
 namespace ICD.Connect.Displays.Devices
 {
-	public delegate void DisplayHdmiInputDelegate(IDisplay display, int hdmiInput, bool active);
-
 	/// <summary>
 	/// IDisplay provides methods for controlling a TV.
 	/// </summary>
@@ -21,19 +18,19 @@ namespace ICD.Connect.Displays.Devices
 		/// Raised when the power state changes.
 		/// </summary>
 		[ApiEvent(DisplayApi.EVENT_IS_POWERED, DisplayApi.HELP_EVENT_IS_POWERED)]
-		event EventHandler<BoolEventArgs> OnIsPoweredChanged;
+		event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
 		[ApiEvent(DisplayApi.EVENT_HDMI_INPUT, DisplayApi.HELP_EVENT_HDMI_INPUT)]
-		event DisplayHdmiInputDelegate OnHdmiInputChanged;
+		event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
 		/// </summary>
 		[ApiEvent(DisplayApi.EVENT_SCALING_MODE, DisplayApi.HELP_EVENT_SCALING_MODE)]
-		event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
+		event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		#endregion
 

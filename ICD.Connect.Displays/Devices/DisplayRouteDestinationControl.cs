@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
@@ -137,8 +137,8 @@ namespace ICD.Connect.Displays.Devices
 		/// Called when the parent is powered on/off.
 		/// </summary>
 		/// <param name="sender"></param>
-		/// <param name="boolEventArgs"></param>
-		private void ParentOnIsPoweredChanged(object sender, BoolEventArgs boolEventArgs)
+		/// <param name="args"></param>
+		private void ParentOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
 			UpdateInputState();
 		}
@@ -146,10 +146,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Called when the parent switches HDMI inputs.
 		/// </summary>
-		/// <param name="display"></param>
-		/// <param name="input"></param>
-		/// <param name="active"></param>
-		private void ParentOnHdmiInputChanged(IDisplay display, int input, bool active)
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		private void ParentOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs args)
 		{
 			UpdateInputState();
 		}

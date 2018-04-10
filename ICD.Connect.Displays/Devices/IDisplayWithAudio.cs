@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Connect.API.Attributes;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
 
 namespace ICD.Connect.Displays.Devices
@@ -13,13 +13,13 @@ namespace ICD.Connect.Displays.Devices
 		/// Raised when the volume changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
-		event EventHandler<FloatEventArgs> OnVolumeChanged;
+		event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		/// <summary>
 		/// Raised when the mute state changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_IS_MUTED, DisplayWithAudioApi.HELP_EVENT_IS_MUTED)]
-		event EventHandler<BoolEventArgs> OnMuteStateChanged;
+		event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
 		#region Properties
 
