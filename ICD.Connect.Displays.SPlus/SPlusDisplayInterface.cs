@@ -241,7 +241,7 @@ namespace ICD.Connect.Displays.SPlus
 
 		private void DisplayOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs args)
 		{
-			if (HdmiInputChanged != null)
+			if (HdmiInputChanged != null && args.Active)
 				HdmiInputChanged((ushort)args.HdmiInput);
 		}
 
