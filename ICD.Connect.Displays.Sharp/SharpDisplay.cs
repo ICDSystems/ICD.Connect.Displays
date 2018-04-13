@@ -86,6 +86,7 @@ namespace ICD.Connect.Displays.Sharp
 				else
 				{
 					m_WarmupRepeatPowerQueryTimer.Stop();
+					QueryState();
 				}
 			}
 		}
@@ -420,7 +421,8 @@ namespace ICD.Connect.Displays.Sharp
 			switch (args.Data.Serialize())
 			{
 				case POWER_QUERY:
-					IsPowered = responseValue == 1;
+					if (!WarmingUp)
+						IsPowered = responseValue == 1;
 					break;
 
 				case VOLUME_QUERY:
@@ -433,8 +435,7 @@ namespace ICD.Connect.Displays.Sharp
 
 				case INPUT_HDMI_QUERY:
 					HdmiInput = responseValue;
-					if (IsPowered)
-						WarmingUp = false;
+					WarmingUp = false;
 					break;
 
 				case SCALING_MODE_QUERY:
