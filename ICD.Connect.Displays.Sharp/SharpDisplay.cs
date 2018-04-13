@@ -135,11 +135,17 @@ namespace ICD.Connect.Displays.Sharp
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
 
+			if (port != null)
+			{
+				port.DebugRx = eDebugMode.Ascii;
+				port.DebugTx = eDebugMode.Ascii;
+			}
+
 			ISerialBuffer buffer = new DelimiterSerialBuffer((char)Encoding.ASCII.GetBytes(RETURN)[0]);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 3 * 1000;
+			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
 		}
