@@ -67,12 +67,6 @@ namespace ICD.Connect.Displays.Sharp
 		private bool m_WarmingUp;
 
 		private SafeTimer m_WarmupRepeatPowerQueryTimer;
-			
-
-		private static void Callback()
-		{
-			throw new NotImplementedException();
-		}
 
 		private const long TIMER_MS = 3 * 1000;
 
