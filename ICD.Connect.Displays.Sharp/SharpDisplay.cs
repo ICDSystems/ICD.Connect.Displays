@@ -65,7 +65,15 @@ namespace ICD.Connect.Displays.Sharp
 		private const int MAX_RETRY_ATTEMPTS = 20;
 
 		private bool m_WarmingUp;
-		private readonly IcdTimer m_WarmupRepeatPowerQueryTimer = new IcdTimer();
+
+		private SafeTimer m_WarmupRepeatPowerQueryTimer;
+			
+
+		private static void Callback()
+		{
+			throw new NotImplementedException();
+		}
+
 		private const long TIMER_MS = 3 * 1000;
 
 		private bool WarmingUp
@@ -79,7 +87,11 @@ namespace ICD.Connect.Displays.Sharp
 				m_WarmingUp = value;
 				if (value)
 				{
-					m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
+					m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
+				}
+				else
+				{
+					m_WarmupRepeatPowerQueryTimer.Stop();
 				}
 			}
 		}
@@ -317,18 +329,19 @@ namespace ICD.Connect.Displays.Sharp
 
 			SetPort(port);
 
-			m_WarmupRepeatPowerQueryTimer.OnElapsed += WarmupRepeatPowerQueryTimerOnElapsed;
+			m_WarmupRepeatPowerQueryTimer = SafeTimer.Stopped(WarmupRepeatPowerQueryTimerOnElapsed);
 		}
 
 		#endregion
 
 		#region Private Methods
 
-		private void WarmupRepeatPowerQueryTimerOnElapsed(object sender, EventArgs eventArgs)
+		private void WarmupRepeatPowerQueryTimerOnElapsed()
 		{
 			SendCommand(POWER_QUERY);
+			SendCommand(INPUT_HDMI_QUERY);
 			if(m_WarmingUp)
-				m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
+				m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
 		}
 
 
@@ -408,8 +421,6 @@ namespace ICD.Connect.Displays.Sharp
 			{
 				case POWER_QUERY:
 					IsPowered = responseValue == 1;
-					if (IsPowered)
-						WarmingUp = false;
 					break;
 
 				case VOLUME_QUERY:
@@ -422,6 +433,8 @@ namespace ICD.Connect.Displays.Sharp
 
 				case INPUT_HDMI_QUERY:
 					HdmiInput = responseValue;
+					if (IsPowered)
+						WarmingUp = false;
 					break;
 
 				case SCALING_MODE_QUERY:
