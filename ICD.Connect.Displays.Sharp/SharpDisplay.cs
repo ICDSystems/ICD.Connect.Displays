@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -133,7 +132,7 @@ namespace ICD.Connect.Displays.Sharp
 				port.DebugTx = eDebugMode.Ascii;
 			}
 
-			ISerialBuffer buffer = new DelimiterSerialBuffer((char)Encoding.ASCII.GetBytes(RETURN)[0]);
+			ISerialBuffer buffer = new DelimiterSerialBuffer(SharpDisplayCommands.RETURN[0]);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
