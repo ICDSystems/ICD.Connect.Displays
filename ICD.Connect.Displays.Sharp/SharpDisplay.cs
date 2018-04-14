@@ -333,7 +333,9 @@ namespace ICD.Connect.Displays.Sharp
 			if (args.Data == null)
 				return;
 
-			switch (args.Response)
+			string responseWithDelimiter = args.Response + SharpDisplayCommands.RETURN;
+
+			switch (responseWithDelimiter)
 			{
 				case SharpDisplayCommands.ERROR:
 					ParseError(args);
