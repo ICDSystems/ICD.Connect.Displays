@@ -78,7 +78,13 @@ namespace ICD.Connect.Displays.Sharp
 			}
 			set
 			{
+				if (value == m_WarmingUp)
+					return;
+
 				m_WarmingUp = value;
+
+				Log(eSeverity.Informational, "WarmingUp set to {0}", m_WarmingUp);
+
 				if (m_WarmingUp)
 				{
 					m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
@@ -161,7 +167,6 @@ namespace ICD.Connect.Displays.Sharp
 		public override void PowerOn()
 		{
 			SendCommand(SharpDisplayCommands.POWER_ON);
-			WarmingUp = true;
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 
@@ -171,7 +176,6 @@ namespace ICD.Connect.Displays.Sharp
 			PowerOnCommand();
 
 			SendCommand(SharpDisplayCommands.POWER_OFF);
-			WarmingUp = false;
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 
@@ -329,14 +333,28 @@ namespace ICD.Connect.Displays.Sharp
 			if (args.Data == null)
 				return;
 
-			if (args.Response == SharpDisplayCommands.ERROR)
-				ParseError(args);
-			else
+			switch (args.Response)
 			{
-				if (args.Data.Serialize().Substring(4, 4) == SharpDisplayCommands.QUERY)
-					ParseQuery(args);
+				case SharpDisplayCommands.ERROR:
+					ParseError(args);
+					break;
 
-				ResetRetryCount(args.Data.Serialize());
+				case SharpDisplayCommands.OK:
+					string command = args.Data.Serialize();
+
+					// If we sent a power command we need to update the warmup state
+					if (command == SharpDisplayCommands.POWER_ON)
+						WarmingUp = true;
+					else if (command == SharpDisplayCommands.POWER_OFF)
+						WarmingUp = false;
+
+					break;
+
+				default:
+					if (args.Data.Serialize().Substring(4, 4) == SharpDisplayCommands.QUERY)
+						ParseQuery(args);
+					ResetRetryCount(args.Data.Serialize());
+					break;
 			}
 		}
 
@@ -365,16 +383,24 @@ namespace ICD.Connect.Displays.Sharp
 			switch (args.Data.Serialize())
 			{
 				case SharpDisplayCommands.POWER_QUERY:
-					if (!WarmingUp)
-						IsPowered = responseValue == 1;
+					bool powered = responseValue == 1;
+
+					// Set the powered state if we are not warming up, OR the new power state is false
+					if (!WarmingUp || !powered)
+					{
+						IsPowered = powered;
+						WarmingUp = false;
+					}
 					break;
 
 				case SharpDisplayCommands.VOLUME_QUERY:
 					Volume = (ushort)responseValue;
+					WarmingUp = false;
 					break;
 
 				case SharpDisplayCommands.MUTE_QUERY:
 					IsMuted = responseValue == 1;
+					WarmingUp = false;
 					break;
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
@@ -390,6 +416,7 @@ namespace ICD.Connect.Displays.Sharp
 					}
 					else
 						ScalingMode = eScalingMode.Unknown;
+					WarmingUp = false;
 					break;
 			}
 		}

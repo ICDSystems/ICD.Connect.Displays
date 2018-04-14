@@ -4,7 +4,7 @@
 	{
 		public const string RETURN = "\x0D";
 
-		//private const string OK = "OK" + RETURN;
+		public const string OK = "OK" + RETURN;
 		public const string ERROR = "ERR" + RETURN;
 
 		public const string POWER = "POWR";
