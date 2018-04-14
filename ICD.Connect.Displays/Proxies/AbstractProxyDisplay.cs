@@ -166,6 +166,35 @@ namespace ICD.Connect.Displays.Proxies
 		}
 
 		/// <summary>
+		/// Updates the proxy with event feedback info.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="result"></param>
+		protected override void ParseEvent(string name, ApiResult result)
+		{
+			base.ParseEvent(name, result);
+
+			switch (name)
+			{
+				case DisplayApi.EVENT_IS_POWERED:
+					IsPowered = result.GetValue<bool>();
+					break;
+
+				case DisplayApi.HELP_EVENT_HDMI_INPUT:
+					DisplayHdmiInputState state = result.GetValue<DisplayHdmiInputState>();
+					if (state.Active)
+						HdmiInput = state.HdmiInput;
+					else if (state.HdmiInput == HdmiInput)
+						HdmiInput = null;
+					break;
+
+				case DisplayApi.EVENT_SCALING_MODE:
+					ScalingMode = result.GetValue<eScalingMode>();
+					break;
+			}
+		}
+
+		/// <summary>
 		/// Updates the proxy with a property result.
 		/// </summary>
 		/// <param name="name"></param>

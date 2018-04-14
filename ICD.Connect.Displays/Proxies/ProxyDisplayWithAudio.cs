@@ -129,6 +129,26 @@ namespace ICD.Connect.Displays.Proxies
 		}
 
 		/// <summary>
+		/// Updates the proxy with event feedback info.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="result"></param>
+		protected override void ParseEvent(string name, ApiResult result)
+		{
+			base.ParseEvent(name, result);
+
+			switch (name)
+			{
+				case DisplayWithAudioApi.EVENT_VOLUME:
+					Volume = result.GetValue<float>();
+					break;
+				case DisplayWithAudioApi.EVENT_IS_MUTED:
+					IsMuted = result.GetValue<bool>();
+					break;
+			}
+		}
+
+		/// <summary>
 		/// Updates the proxy with a property result.
 		/// </summary>
 		/// <param name="name"></param>
