@@ -66,7 +66,7 @@ namespace ICD.Connect.Displays.Sharp
 
 		private bool m_WarmingUp;
 
-		private SafeTimer m_WarmupRepeatPowerQueryTimer;
+		private readonly SafeTimer m_WarmupRepeatPowerQueryTimer;
 
 		private const long TIMER_MS = 3 * 1000;
 
@@ -79,7 +79,7 @@ namespace ICD.Connect.Displays.Sharp
 			set
 			{
 				m_WarmingUp = value;
-				if (value)
+				if (m_WarmingUp)
 				{
 					m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
 				}
@@ -125,6 +125,24 @@ namespace ICD.Connect.Displays.Sharp
 			{3, INPUT_HDMI_3},
 			{4, INPUT_HDMI_4}
 		};
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public SharpDisplay()
+		{
+			m_WarmupRepeatPowerQueryTimer = SafeTimer.Stopped(WarmupRepeatPowerQueryTimerOnElapsed);
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			m_WarmupRepeatPowerQueryTimer.Dispose();
+
+			base.DisposeFinal(disposing);
+		}
 
 		#region Methods
 
@@ -329,8 +347,6 @@ namespace ICD.Connect.Displays.Sharp
 			}
 
 			SetPort(port);
-
-			m_WarmupRepeatPowerQueryTimer = SafeTimer.Stopped(WarmupRepeatPowerQueryTimerOnElapsed);
 		}
 
 		#endregion
