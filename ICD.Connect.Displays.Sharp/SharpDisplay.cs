@@ -4,7 +4,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Common.Utils.Timers;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -24,7 +23,6 @@ namespace ICD.Connect.Displays.Sharp
 	public sealed class SharpDisplay : AbstractDisplayWithAudio<SharpDisplaySettings>
 	{
 		private const int MAX_RETRY_ATTEMPTS = 500;
-		private const long TIMER_MS = 3 * 1000;
 
 		/// <summary>
 		/// Maps the Sharp view mode to the command.
@@ -61,41 +59,10 @@ namespace ICD.Connect.Displays.Sharp
 			{4, SharpDisplayCommands.INPUT_HDMI_4}
 		};
 
-		private bool m_WarmingUp;
-
-		private readonly SafeTimer m_WarmupRepeatPowerQueryTimer;
-
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 
 		#region Properties
-
-		private bool WarmingUp
-		{
-			get
-			{
-				return m_WarmingUp;
-			}
-			set
-			{
-				if (value == m_WarmingUp)
-					return;
-
-				m_WarmingUp = value;
-
-				Log(eSeverity.Informational, "WarmingUp set to {0}", m_WarmingUp);
-
-				if (m_WarmingUp)
-				{
-					m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
-				}
-				else
-				{
-					m_WarmupRepeatPowerQueryTimer.Stop();
-					QueryState();
-				}
-			}
-		}
 
 		/// <summary>
 		/// Gets the number of HDMI inputs.
@@ -104,23 +71,6 @@ namespace ICD.Connect.Displays.Sharp
 
 		#endregion
 
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public SharpDisplay()
-		{
-			m_WarmupRepeatPowerQueryTimer = SafeTimer.Stopped(WarmupRepeatPowerQueryTimerOnElapsed);
-		}
-
-		/// <summary>
-		/// Clears resources.
-		/// </summary>
-		protected override void DisposeFinal(bool disposing)
-		{
-			m_WarmupRepeatPowerQueryTimer.Dispose();
-
-			base.DisposeFinal(disposing);
-		}
 
 		#region Methods
 
@@ -131,12 +81,6 @@ namespace ICD.Connect.Displays.Sharp
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
-
-			if (port != null)
-			{
-				port.DebugRx = eDebugMode.Ascii;
-				port.DebugTx = eDebugMode.Ascii;
-			}
 
 			ISerialBuffer buffer = new DelimiterSerialBuffer(SharpDisplayCommands.RETURN[0]);
 			SerialQueue queue = new SerialQueue();
@@ -295,15 +239,6 @@ namespace ICD.Connect.Displays.Sharp
 			}
 		}
 
-		private void WarmupRepeatPowerQueryTimerOnElapsed()
-		{
-			SendCommand(SharpDisplayCommands.POWER_QUERY);
-			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
-
-			if (m_WarmingUp)
-				m_WarmupRepeatPowerQueryTimer.Reset(TIMER_MS);
-		}
-
 		/// <summary>
 		/// Called when the display has powered on.
 		/// </summary>
@@ -341,17 +276,6 @@ namespace ICD.Connect.Displays.Sharp
 					ParseError(args);
 					break;
 
-				case SharpDisplayCommands.OK:
-					string command = args.Data.Serialize();
-
-					// If we sent a power command we need to update the warmup state
-					if (command == SharpDisplayCommands.POWER_ON)
-						WarmingUp = true;
-					else if (command == SharpDisplayCommands.POWER_OFF)
-						WarmingUp = false;
-
-					break;
-
 				default:
 					if (args.Data.Serialize().Substring(4, 4) == SharpDisplayCommands.QUERY)
 						ParseQuery(args);
@@ -385,29 +309,19 @@ namespace ICD.Connect.Displays.Sharp
 			switch (args.Data.Serialize())
 			{
 				case SharpDisplayCommands.POWER_QUERY:
-					bool powered = responseValue == 1;
-
-					// Set the powered state if we are not warming up, OR the new power state is false
-					if (!WarmingUp || !powered)
-					{
-						IsPowered = powered;
-						WarmingUp = false;
-					}
+					IsPowered = responseValue == 1;
 					break;
 
 				case SharpDisplayCommands.VOLUME_QUERY:
 					Volume = (ushort)responseValue;
-					WarmingUp = false;
 					break;
 
 				case SharpDisplayCommands.MUTE_QUERY:
 					IsMuted = responseValue == 1;
-					WarmingUp = false;
 					break;
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
 					HdmiInput = responseValue;
-					WarmingUp = false;
 					break;
 
 				case SharpDisplayCommands.SCALING_MODE_QUERY:
@@ -418,7 +332,6 @@ namespace ICD.Connect.Displays.Sharp
 					}
 					else
 						ScalingMode = eScalingMode.Unknown;
-					WarmingUp = false;
 					break;
 			}
 		}
