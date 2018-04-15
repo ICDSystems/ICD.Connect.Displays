@@ -23,7 +23,7 @@ namespace ICD.Connect.Displays.Sharp
 	/// </summary>
 	public sealed class SharpDisplay : AbstractDisplayWithAudio<SharpDisplaySettings>
 	{
-		private const int MAX_RETRY_ATTEMPTS = 20;
+		private const int MAX_RETRY_ATTEMPTS = 50;
 		private const long TIMER_MS = 3 * 1000;
 
 		/// <summary>
