@@ -342,6 +342,26 @@ namespace ICD.Connect.Displays.Sharp
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
+			string command = args.Data.Serialize();
+			string commandType = command.Substring(0, 4);
+			bool query = command.Substring(4, 4) == SharpDisplayCommands.QUERY;
+			
+			// Check to see if we are getting an error because we are setting a value to the same thing
+			if (!query)
+			{
+				switch (commandType)
+				{
+					case SharpDisplayCommands.INPUT:
+						int input;
+						if (StringUtils.TryParse(command.Substring(4, 4).Trim(), out input))
+						{
+							if (input == HdmiInput)
+								return;
+						}
+						break;
+				}
+			}
+
 			RetryCommand(args.Data.Serialize());
 		}
 
