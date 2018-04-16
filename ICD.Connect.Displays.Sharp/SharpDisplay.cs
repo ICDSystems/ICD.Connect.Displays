@@ -71,6 +71,17 @@ namespace ICD.Connect.Displays.Sharp
 		/// </summary>
 		public override int InputCount { get { return s_InputMap.Count; } }
 
+		public override bool IsPowered
+		{
+			get { return base.IsPowered; }
+			set
+			{
+				if (value == false)
+					m_RequestedInput = null;
+				base.IsPowered = value;
+			}
+		}
+
 		#endregion
 
 
@@ -373,6 +384,9 @@ namespace ICD.Connect.Displays.Sharp
 								RetryCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 								return;
 							}
+							// If the input isn't being requested any more, or the display is powered off, ignore the error
+							if (m_RequestedInput == null || !IsPowered)
+								return;
 						}
 						break;
 				}
