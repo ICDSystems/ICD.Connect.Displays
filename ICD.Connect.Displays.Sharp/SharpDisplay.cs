@@ -62,6 +62,8 @@ namespace ICD.Connect.Displays.Sharp
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 
+		private int? m_RequestedInput;
+
 		#region Properties
 
 		/// <summary>
@@ -181,7 +183,8 @@ namespace ICD.Connect.Displays.Sharp
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(s_InputMap[address]);
+			m_RequestedInput = address;
+			//SendCommand(s_InputMap[address]);
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 		}
 
@@ -322,6 +325,14 @@ namespace ICD.Connect.Displays.Sharp
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
 					HdmiInput = responseValue;
+					if (m_RequestedInput != null)
+						if (responseValue != (int)m_RequestedInput)
+						{
+							SendCommand(s_InputMap[(int)m_RequestedInput]);
+							SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
+						}
+						else
+							m_RequestedInput = null;
 					break;
 
 				case SharpDisplayCommands.SCALING_MODE_QUERY:
@@ -355,8 +366,13 @@ namespace ICD.Connect.Displays.Sharp
 						int input;
 						if (StringUtils.TryParse(command.Substring(4, 4).Trim(), out input))
 						{
-							if (input == HdmiInput)
+							// If input set errored and we are still requesting an input,
+							// Retry input query (so it will eventually hit retry limit
+							if (m_RequestedInput != null && IsPowered)
+							{
+								RetryCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 								return;
+							}
 						}
 						break;
 				}
