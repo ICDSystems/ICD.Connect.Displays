@@ -74,7 +74,7 @@ namespace ICD.Connect.Displays.Sharp
 		public override bool IsPowered
 		{
 			get { return base.IsPowered; }
-			set
+			protected set
 			{
 				if (value == false)
 					m_RequestedInput = null;
