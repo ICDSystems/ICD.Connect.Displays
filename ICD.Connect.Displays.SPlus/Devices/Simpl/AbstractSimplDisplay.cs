@@ -7,9 +7,10 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Simpl;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 
-namespace ICD.Connect.Displays.Devices.Simpl
+namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	public delegate void SimplDisplayPowerOnCallback(IDisplay sender);
 

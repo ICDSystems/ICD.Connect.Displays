@@ -10,5 +10,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Adding Simpl display with audio device
 
 ### Removed
- - Removed old, unused SPlus display interface project
+ - Removed old, unused SPlus display interface
  - Removing unused VolumeControl property from IDisplayWithAudio

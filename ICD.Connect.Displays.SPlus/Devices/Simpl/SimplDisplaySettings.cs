@@ -1,7 +1,7 @@
 using System;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Displays.Devices.Simpl
+namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	[KrangSettings(FACTORY_NAME)]
 	public sealed class SimplDisplaySettings : AbstractSimplDisplaySettings

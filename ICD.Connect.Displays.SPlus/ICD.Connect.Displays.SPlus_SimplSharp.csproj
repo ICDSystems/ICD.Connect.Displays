@@ -66,6 +66,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Devices\Simpl\AbstractSimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\AbstractSimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudio.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudioSettings.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

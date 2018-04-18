@@ -6,8 +6,9 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Displays.Devices;
 
-namespace ICD.Connect.Displays.Devices.Simpl
+namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	public delegate void SimplDisplayWithAudioSetVolumeCallback(IDisplayWithAudio sender, float volume);
 
