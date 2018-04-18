@@ -61,13 +61,35 @@ namespace ICD.Connect.Displays.Devices
 
 		#region Methods
 
+		/// <summary>
+		/// Sets the current volume.
+		/// </summary>
+		/// <param name="raw"></param>
 		void SetVolume(float raw);
 
+		/// <summary>
+		/// Increments the current volume.
+		/// </summary>
 		void VolumeUpIncrement();
+
+		/// <summary>
+		/// Decrements the current volume.
+		/// </summary>
 		void VolumeDownIncrement();
 
+		/// <summary>
+		/// Mutes the display.
+		/// </summary>
 		void MuteOn();
+
+		/// <summary>
+		/// Unmutes the display.
+		/// </summary>
 		void MuteOff();
+
+		/// <summary>
+		/// Toggles the current mute state on the display.
+		/// </summary>
 		void MuteToggle();
 
 		#endregion
