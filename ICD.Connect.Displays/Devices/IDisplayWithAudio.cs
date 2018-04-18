@@ -2,7 +2,6 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
-using ICD.Connect.Devices.Controls;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -11,8 +10,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the volume control for this display.
 		/// </summary>
-		IVolumeDeviceControl VolumeControl { get; }
-
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
 		event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
