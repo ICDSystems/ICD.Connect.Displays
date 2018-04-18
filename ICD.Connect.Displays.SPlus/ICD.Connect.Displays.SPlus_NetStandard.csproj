@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ICD.Connect.Displays.projectinfo" />
     <None Remove="ICD.Connect.Displays.SPlus_SimplSharp.suo" />
     <None Remove="ICD.SimplSharp.projectinfo" />
   </ItemGroup>
