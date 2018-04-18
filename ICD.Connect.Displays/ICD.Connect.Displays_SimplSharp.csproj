@@ -82,6 +82,8 @@
     <Compile Include="Devices\IrDisplay\IrDisplaySettings.cs" />
     <Compile Include="Devices\Simpl\AbstractSimplDisplaySettings.cs" />
     <Compile Include="Devices\Simpl\SimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudio.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudioSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EventArguments\ScalingModeEventArgs.cs" />
