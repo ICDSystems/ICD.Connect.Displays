@@ -154,6 +154,17 @@ namespace ICD.Connect.Displays.Devices
 			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
 		}
 
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnMuteStateChanged = null;
+			OnVolumeChanged = null;
+
+			base.DisposeFinal(disposing);
+		}
+
 		#region Methods
 
 		/// <summary>
