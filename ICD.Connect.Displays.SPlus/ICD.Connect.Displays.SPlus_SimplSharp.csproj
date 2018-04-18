@@ -89,14 +89,6 @@
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Displays.Samsung\ICD.Connect.Displays.Samsung_SimplSharp.csproj">
-      <Project>{E091CD3C-6D0E-4BEB-AB7D-BF0C7887B805}</Project>
-      <Name>ICD.Connect.Displays.Samsung</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Displays.Sharp\ICD.Connect.Displays.Sharp_SimplSharp.csproj">
-      <Project>{1EA3B892-C4F7-42B7-8341-A62B81C97F06}</Project>
-      <Name>ICD.Connect.Displays.Sharp</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
       <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
       <Name>ICD.Connect.Displays</Name>
