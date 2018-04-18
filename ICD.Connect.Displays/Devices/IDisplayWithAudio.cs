@@ -8,9 +8,13 @@ namespace ICD.Connect.Displays.Devices
 	public interface IDisplayWithAudio : IDisplay
 	{
 		/// <summary>
-		/// Gets the volume control for this display.
+		/// Raised when the volume changes.
 		/// </summary>
 		event EventHandler<FloatEventArgs> OnVolumeChanged;
+
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
 		event EventHandler<BoolEventArgs> OnMuteStateChanged;
 
 		#region Properties
