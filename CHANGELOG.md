@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+ - Adding simpl display interfaces
  - Adding Simpl display device
  - Adding Simpl display with audio device
 

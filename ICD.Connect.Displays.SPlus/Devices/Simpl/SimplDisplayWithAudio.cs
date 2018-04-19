@@ -10,19 +10,7 @@ using ICD.Connect.Displays.Devices;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public delegate void SimplDisplayWithAudioSetVolumeCallback(IDisplayWithAudio sender, float volume);
-
-	public delegate void SimplDisplayWithAudioVolumeUpIncrementCallback(IDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioVolumeDownIncrementCallback(IDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteOnCallback(IDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteOffCallback(IDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteToggleCallback(IDisplayWithAudio sender);
-
-	public sealed class SimplDisplayWithAudio : AbstractSimplDisplay<SimplDisplayWithAudioSettings>, IDisplayWithAudio
+	public sealed class SimplDisplayWithAudio : AbstractSimplDisplay<SimplDisplayWithAudioSettings>, ISimplDisplayWithAudio
 	{
 		/// <summary>
 		/// Raised when the volume changes.

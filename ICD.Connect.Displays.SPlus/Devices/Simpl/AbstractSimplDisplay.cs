@@ -12,15 +12,7 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public delegate void SimplDisplayPowerOnCallback(IDisplay sender);
-
-	public delegate void SimplDisplayPowerOffCallback(IDisplay sender);
-
-	public delegate void SimplDisplaySetHdmiInputCallback(IDisplay sender, int address);
-
-	public delegate void SimplDisplaySetScalingModeCallback(IDisplay sender, eScalingMode scalingMode);
-
-	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, IDisplay
+	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay
 		where TSettings : AbstractSimplDisplaySettings, new()
 	{
 		private bool m_IsPowered;

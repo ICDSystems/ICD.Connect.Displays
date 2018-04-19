@@ -68,6 +68,8 @@
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Devices\Simpl\AbstractSimplDisplay.cs" />
     <Compile Include="Devices\Simpl\AbstractSimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\ISimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\ISimplDisplayWithAudio.cs" />
     <Compile Include="Devices\Simpl\SimplDisplay.cs" />
     <Compile Include="Devices\Simpl\SimplDisplaySettings.cs" />
     <Compile Include="Devices\Simpl\SimplDisplayWithAudio.cs" />
