@@ -7,7 +7,6 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Core;
 
@@ -27,11 +26,6 @@ namespace ICD.Connect.Displays.Devices
 		private float? m_VolumeDefault;
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the volume control for this display.
-		/// </summary>
-		public IVolumeDeviceControl VolumeControl { get { return Controls.GetControl<IVolumeDeviceControl>(); } }
 
 		/// <summary>
 		/// Override if the display volume minimum is not 0.
@@ -158,6 +152,17 @@ namespace ICD.Connect.Displays.Devices
 		protected AbstractDisplayWithAudio()
 		{
 			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnMuteStateChanged = null;
+			OnVolumeChanged = null;
+
+			base.DisposeFinal(disposing);
 		}
 
 		#region Methods
