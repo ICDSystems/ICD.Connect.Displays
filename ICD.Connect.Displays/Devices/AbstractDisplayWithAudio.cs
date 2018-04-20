@@ -135,7 +135,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public override sealed bool IsPowered
+		public override bool IsPowered
 		{
 			get { return base.IsPowered; }
 			protected set

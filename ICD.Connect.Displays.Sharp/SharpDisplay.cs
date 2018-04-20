@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Common.Utils.Timers;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -20,126 +18,94 @@ using ICD.Connect.Settings.Core;
 namespace ICD.Connect.Displays.Sharp
 {
 	/// <summary>
-	///     SharpDisplay provides methods for interacting with a Sharp TV.
+	/// SharpDisplay provides methods for interacting with a Sharp TV.
 	/// </summary>
 	public sealed class SharpDisplay : AbstractDisplayWithAudio<SharpDisplaySettings>
 	{
-		public const string RETURN = "\x0D";
-
-		//private const string OK = "OK" + RETURN;
-		public const string ERROR = "ERR" + RETURN;
-
-		public const string POWER = "POWR";
-		public const string MUTE = "MUTE";
-		public const string VOLUME = "VOLM";
-		public const string INPUT = "IAVD";
-		public const string WIDE = "WIDE";
-		public const string REMOTE_CONTROL_BUTTONS = "RCKY";
-		public const string QUERY = "????";
-
-		public const string POWER_ON = POWER + "1   " + RETURN;
-		public const string POWER_OFF = POWER + "0   " + RETURN;
-		public const string POWER_ON_COMMAND = "RSPW1   " + RETURN;
-		public const string POWER_QUERY = POWER + QUERY + RETURN;
-
-		public const string MUTE_TOGGLE = MUTE + "0   " + RETURN;
-		public const string MUTE_ON = MUTE + "1   " + RETURN;
-		public const string MUTE_OFF = MUTE + "2   " + RETURN;
-		public const string MUTE_QUERY = MUTE + QUERY + RETURN;
-
-		public const string INPUT_HDMI_1 = INPUT + "1   " + RETURN;
-		public const string INPUT_HDMI_2 = INPUT + "2   " + RETURN;
-		public const string INPUT_HDMI_3 = INPUT + "3   " + RETURN;
-		public const string INPUT_HDMI_4 = INPUT + "4   " + RETURN;
-		public const string INPUT_HDMI_QUERY = INPUT + QUERY + RETURN;
-
-		public const string VOLUME_DOWN = REMOTE_CONTROL_BUTTONS + "32  " + RETURN;
-		public const string VOLUME_UP = REMOTE_CONTROL_BUTTONS + "33  " + RETURN;
-		public const string VOLUME_QUERY = VOLUME + QUERY + RETURN;
-
-		public const string SCALING_MODE_16_X9 = WIDE + "40  " + RETURN; // Stretch
-		public const string SCALING_MODE_4_X3 = WIDE + "20  " + RETURN; // S. Stretch
-		public const string SCALING_MODE_NO_SCALE = WIDE + "80  " + RETURN; // Dot by dot
-		public const string SCALING_MODE_ZOOM = WIDE + "30  " + RETURN; // Zoom AV
-		public const string SCALING_MODE_QUERY = WIDE + QUERY + RETURN;
-		private const int MAX_RETRY_ATTEMPTS = 20;
-
-		private bool m_WarmingUp;
-		private readonly IcdTimer m_WarmupRepeatPowerQueryTimer = new IcdTimer();
-		private const long TIMER_MS = 3 * 1000;
-
-		private bool WarmingUp
-		{
-			get
-			{
-				return m_WarmingUp;
-			}
-			set
-			{
-				m_WarmingUp = value;
-				if (value)
-				{
-					m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
-				}
-			}
-		}
+		private const int MAX_RETRY_ATTEMPTS = 500;
 
 		/// <summary>
-		///     Maps the Sharp view mode to the command.
+		/// Maps the Sharp view mode to the command.
 		/// </summary>
 		private static readonly Dictionary<int, string> s_ViewModeMap =
 			new Dictionary<int, string>
 			{
-				{2, SCALING_MODE_4_X3},
-				{3, SCALING_MODE_ZOOM},
-				{4, SCALING_MODE_16_X9},
-				{8, SCALING_MODE_NO_SCALE}
+				{2, SharpDisplayCommands.SCALING_MODE_4_X3},
+				{3, SharpDisplayCommands.SCALING_MODE_ZOOM},
+				{4, SharpDisplayCommands.SCALING_MODE_16_X9},
+				{8, SharpDisplayCommands.SCALING_MODE_NO_SCALE}
 			};
 
 		/// <summary>
-		///     Maps scaling mode to command.
+		/// Maps scaling mode to command.
 		/// </summary>
 		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
 			new Dictionary<eScalingMode, string>
 			{
-				{eScalingMode.Wide16X9, SCALING_MODE_16_X9},
-				{eScalingMode.Square4X3, SCALING_MODE_4_X3},
-				{eScalingMode.NoScale, SCALING_MODE_NO_SCALE},
-				{eScalingMode.Zoom, SCALING_MODE_ZOOM}
+				{eScalingMode.Wide16X9, SharpDisplayCommands.SCALING_MODE_16_X9},
+				{eScalingMode.Square4X3, SharpDisplayCommands.SCALING_MODE_4_X3},
+				{eScalingMode.NoScale, SharpDisplayCommands.SCALING_MODE_NO_SCALE},
+				{eScalingMode.Zoom, SharpDisplayCommands.SCALING_MODE_ZOOM}
 			};
 
 		/// <summary>
-		///     Maps index to an input command.
+		/// Maps index to an input command.
 		/// </summary>
 		private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
 		{
-			{1, INPUT_HDMI_1},
-			{2, INPUT_HDMI_2},
-			{3, INPUT_HDMI_3},
-			{4, INPUT_HDMI_4}
+			{1, SharpDisplayCommands.INPUT_HDMI_1},
+			{2, SharpDisplayCommands.INPUT_HDMI_2},
+			{3, SharpDisplayCommands.INPUT_HDMI_3},
+			{4, SharpDisplayCommands.INPUT_HDMI_4}
 		};
+
+		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
+		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
+
+		private int? m_RequestedInput;
+
+		#region Properties
+
+		/// <summary>
+		/// Gets the number of HDMI inputs.
+		/// </summary>
+		public override int InputCount { get { return s_InputMap.Count; } }
+
+		public override bool IsPowered
+		{
+			get { return base.IsPowered; }
+			protected set
+			{
+				if (value == false)
+					m_RequestedInput = null;
+				base.IsPowered = value;
+			}
+		}
+
+		#endregion
+
 
 		#region Methods
 
 		/// <summary>
-		///     Sets and configures the port for communication with the physical display.
+		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
 		public void SetPort(ISerialPort port)
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
 
-			ISerialBuffer buffer = new DelimiterSerialBuffer((char)Encoding.ASCII.GetBytes(RETURN)[0]);
+			ISerialBuffer buffer = new DelimiterSerialBuffer(SharpDisplayCommands.RETURN[0]);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 3 * 1000;
+			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
 		}
 
 		/// <summary>
-		///     Configures a com port for communication with the physical display.
+		/// Configures a com port for communication with the physical display.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
@@ -157,9 +123,8 @@ namespace ICD.Connect.Displays.Sharp
 
 		public override void PowerOn()
 		{
-			SendCommand(POWER_ON);
-			WarmingUp = true;
-			SendCommand(POWER_QUERY);
+			SendCommand(SharpDisplayCommands.POWER_ON);
+			SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 
 		public override void PowerOff()
@@ -167,170 +132,82 @@ namespace ICD.Connect.Displays.Sharp
 			// So we can PowerOn the TV later.
 			PowerOnCommand();
 
-			SendCommand(POWER_OFF);
-			WarmingUp = false;
-			SendCommand(POWER_QUERY);
+			SendCommand(SharpDisplayCommands.POWER_OFF);
+			SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 
 		public override void MuteOn()
 		{
-			SendCommand(MUTE_ON);
-			SendCommand(MUTE_QUERY);
+			SendCommand(SharpDisplayCommands.MUTE_ON);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
 		public override void MuteOff()
 		{
-			SendCommand(MUTE_OFF);
-			SendCommand(MUTE_QUERY);
+			SendCommand(SharpDisplayCommands.MUTE_OFF);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
 		public override void MuteToggle()
 		{
-			SendCommand(MUTE_TOGGLE);
-			SendCommand(MUTE_QUERY);
+			SendCommand(SharpDisplayCommands.MUTE_TOGGLE);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
 		[PublicAPI]
 		public void PowerOnCommand()
 		{
-			SendCommand(POWER_ON_COMMAND);
+			SendCommand(SharpDisplayCommands.POWER_ON_COMMAND);
 		}
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
             if (!IsPowered)
                 return;
-			string command = GetCommand(VOLUME, raw.ToString());
+
+			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, raw.ToString());
 
 			SendCommand(command, CommandComparer);
-			SendCommand(VOLUME_QUERY, CommandComparer);
-			SendCommand(MUTE_QUERY, CommandComparer);
-		}
-
-		/// <summary>
-		///     Prevents multiple volume commands being queued.
-		/// </summary>
-		/// <param name="commandA"></param>
-		/// <param name="commandB"></param>
-		/// <returns></returns>
-		private static bool CommandComparer(string commandA, string commandB)
-		{
-			// If one is a query and the other is not, the commands are different.
-			if (commandA.Contains(QUERY) != commandB.Contains(QUERY))
-				return false;
-
-			// Compare the first 4 characters (e.g. VOLM) to see if it's the same command type.
-			return commandA.Substring(0, 4) == commandB.Substring(0, 4);
+			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
 		}
 
 		public override void VolumeUpIncrement()
 		{
             if (!IsPowered)
                 return;
-			SendCommand(VOLUME_UP, CommandComparer);
-			SendCommand(VOLUME_QUERY, CommandComparer);
-			SendCommand(MUTE_QUERY, CommandComparer);
+
+			SendCommand(SharpDisplayCommands.VOLUME_UP, CommandComparer);
+			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
 		}
 
 		public override void VolumeDownIncrement()
 		{
             if (!IsPowered)
                 return;
-			SendCommand(VOLUME_DOWN, CommandComparer);
-			SendCommand(VOLUME_QUERY, CommandComparer);
-			SendCommand(MUTE_QUERY, CommandComparer);
+
+			SendCommand(SharpDisplayCommands.VOLUME_DOWN, CommandComparer);
+			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
 		}
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(s_InputMap[address]);
-			SendCommand(INPUT_HDMI_QUERY);
+			m_RequestedInput = address;
+			//SendCommand(s_InputMap[address]);
+			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 		}
 
 		/// <summary>
-		///     Builds the string for the command.
-		/// </summary>
-		/// <param name="prefix"></param>
-		/// <param name="parameters"></param>
-		/// <returns></returns>
-		[PublicAPI]
-		public static string GetCommand(string prefix, string parameters)
-		{
-			return prefix + parameters.PadRight(4, ' ') + RETURN;
-		}
-
-		/// <summary>
-		///     Sets the scaling mode.
+		/// Sets the scaling mode.
 		/// </summary>
 		/// <param name="mode" />
 		public override void SetScalingMode(eScalingMode mode)
 		{
 			SendCommand(s_ScalingModeMap[mode]);
-			SendCommand(SCALING_MODE_QUERY);
+			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
 		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		///     Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(SharpDisplaySettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-		}
-
-		/// <summary>
-		///     Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			SetPort(null);
-		}
-
-		/// <summary>
-		///     Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(SharpDisplaySettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				if (port == null)
-					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
-			}
-
-			SetPort(port);
-
-			m_WarmupRepeatPowerQueryTimer.OnElapsed += WarmupRepeatPowerQueryTimerOnElapsed;
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		private void WarmupRepeatPowerQueryTimerOnElapsed(object sender, EventArgs eventArgs)
-		{
-			SendCommand(POWER_QUERY);
-			if(m_WarmingUp)
-				m_WarmupRepeatPowerQueryTimer.Restart(TIMER_MS);
-		}
-
 
 		public void SendCommand(string data)
 		{
@@ -342,27 +219,61 @@ namespace ICD.Connect.Displays.Sharp
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		/// <summary>
-		///     Called when the display has powered on.
+		/// Prevents multiple volume commands being queued.
+		/// </summary>
+		/// <param name="commandA"></param>
+		/// <param name="commandB"></param>
+		/// <returns></returns>
+		private static bool CommandComparer(string commandA, string commandB)
+		{
+			// If one is a query and the other is not, the commands are different.
+			if (commandA.Contains(SharpDisplayCommands.QUERY) != commandB.Contains(SharpDisplayCommands.QUERY))
+				return false;
+
+			// Compare the first 4 characters (e.g. VOLM) to see if it's the same command type.
+			return commandA.Substring(0, 4) == commandB.Substring(0, 4);
+		}
+
+		private int GetRetryCount(string command)
+		{
+			m_RetryLock.Enter();
+
+			try
+			{
+				return m_RetryCounts.ContainsKey(command) ? m_RetryCounts[command] : 0;
+			}
+			finally
+			{
+				m_RetryLock.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Called when the display has powered on.
 		/// </summary>
 		protected override void QueryState()
 		{
 			base.QueryState();
 
 			// Update ourselves.
-			SendCommand(POWER_QUERY);
+			SendCommand(SharpDisplayCommands.POWER_QUERY);
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(INPUT_HDMI_QUERY);
-			SendCommand(MUTE_QUERY);
-			SendCommand(SCALING_MODE_QUERY);
-			SendCommand(VOLUME_QUERY);
+			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
+			SendCommand(SharpDisplayCommands.MUTE_QUERY);
+			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
+			SendCommand(SharpDisplayCommands.VOLUME_QUERY);
 		}
 
 		/// <summary>
-		///     Called when a command gets a response from the physical display.
+		/// Called when a command gets a response from the physical display.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
@@ -371,14 +282,19 @@ namespace ICD.Connect.Displays.Sharp
 			if (args.Data == null)
 				return;
 
-			if (args.Response == ERROR)
-				ParseError(args);
-			else
-			{
-				if (args.Data.Serialize().Substring(4, 4) == QUERY)
-					ParseQuery(args);
+			string responseWithDelimiter = args.Response + SharpDisplayCommands.RETURN;
 
-				ResetRetryCount(args.Data.Serialize());
+			switch (responseWithDelimiter)
+			{
+				case SharpDisplayCommands.ERROR:
+					ParseError(args);
+					break;
+
+				default:
+					if (args.Data.Serialize().Substring(4, 4) == SharpDisplayCommands.QUERY)
+						ParseQuery(args);
+					ResetRetryCount(args.Data.Serialize());
+					break;
 			}
 		}
 
@@ -393,12 +309,12 @@ namespace ICD.Connect.Displays.Sharp
 		}
 
 		/// <summary>
-		///     Called when a query command is successful.
+		/// Called when a query command is successful.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParseQuery(SerialResponseEventArgs args)
 		{
-			string response = args.Response.Replace(RETURN, "");
+			string response = args.Response.Replace(SharpDisplayCommands.RETURN, "");
 
 			int responseValue;
 			if (!StringUtils.TryParse(response, out responseValue))
@@ -406,25 +322,31 @@ namespace ICD.Connect.Displays.Sharp
 
 			switch (args.Data.Serialize())
 			{
-				case POWER_QUERY:
+				case SharpDisplayCommands.POWER_QUERY:
 					IsPowered = responseValue == 1;
-					if (IsPowered)
-						WarmingUp = false;
 					break;
 
-				case VOLUME_QUERY:
+				case SharpDisplayCommands.VOLUME_QUERY:
 					Volume = (ushort)responseValue;
 					break;
 
-				case MUTE_QUERY:
+				case SharpDisplayCommands.MUTE_QUERY:
 					IsMuted = responseValue == 1;
 					break;
 
-				case INPUT_HDMI_QUERY:
+				case SharpDisplayCommands.INPUT_HDMI_QUERY:
 					HdmiInput = responseValue;
+					if (m_RequestedInput != null)
+						if (responseValue != (int)m_RequestedInput)
+						{
+							SendCommand(s_InputMap[(int)m_RequestedInput]);
+							SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
+						}
+						else
+							m_RequestedInput = null;
 					break;
 
-				case SCALING_MODE_QUERY:
+				case SharpDisplayCommands.SCALING_MODE_QUERY:
 					if (s_ViewModeMap.ContainsKey(responseValue))
 					{
 						string command = s_ViewModeMap[responseValue];
@@ -437,11 +359,39 @@ namespace ICD.Connect.Displays.Sharp
 		}
 
 		/// <summary>
-		///     Called when a command fails.
+		/// Called when a command fails.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
+			string command = args.Data.Serialize();
+			string commandType = command.Substring(0, 4);
+			bool query = command.Substring(4, 4) == SharpDisplayCommands.QUERY;
+			
+			// Check to see if we are getting an error because we are setting a value to the same thing
+			if (!query)
+			{
+				switch (commandType)
+				{
+					case SharpDisplayCommands.INPUT:
+						int input;
+						if (StringUtils.TryParse(command.Substring(4, 4).Trim(), out input))
+						{
+							// If input set errored and we are still requesting an input,
+							// Retry input query (so it will eventually hit retry limit
+							if (m_RequestedInput != null && IsPowered)
+							{
+								RetryCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
+								return;
+							}
+							// If the input isn't being requested any more, or the display is powered off, ignore the error
+							if (m_RequestedInput == null || !IsPowered)
+								return;
+						}
+						break;
+				}
+			}
+
 			RetryCommand(args.Data.Serialize());
 		}
 
@@ -490,28 +440,55 @@ namespace ICD.Connect.Displays.Sharp
 			}
 		}
 
-		private int GetRetryCount(string command)
-		{
-			m_RetryLock.Enter();
+		#endregion
 
-			try
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(SharpDisplaySettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			if (SerialQueue != null && SerialQueue.Port != null)
+				settings.Port = SerialQueue.Port.Id;
+			else
+				settings.Port = null;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			SetPort(null);
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(SharpDisplaySettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			ISerialPort port = null;
+
+			if (settings.Port != null)
 			{
-				return m_RetryCounts.ContainsKey(command) ? m_RetryCounts[command] : 0;
+				port = factory.GetPortById((int)settings.Port) as ISerialPort;
+				if (port == null)
+					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
 			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+
+			SetPort(port);
 		}
 
 		#endregion
-
-		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
-		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
-
-		/// <summary>
-		///     Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
 	}
 }
