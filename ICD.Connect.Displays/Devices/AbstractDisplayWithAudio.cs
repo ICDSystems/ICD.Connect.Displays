@@ -35,11 +35,6 @@ namespace ICD.Connect.Displays.Devices
 		#region Properties
 
 		/// <summary>
-		/// Gets the volume control for this display.
-		/// </summary>
-		public IVolumeDeviceControl VolumeControl { get { return Controls.GetControl<IVolumeDeviceControl>(); } }
-
-		/// <summary>
 		/// Override if the display volume minimum is not 0.
 		/// </summary>
 		public virtual float VolumeDeviceMin { get { return 0; } }
@@ -140,7 +135,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public sealed override bool IsPowered
+		public override bool IsPowered
 		{
 			get { return base.IsPowered; }
 			protected set
@@ -163,6 +158,17 @@ namespace ICD.Connect.Displays.Devices
 		protected AbstractDisplayWithAudio()
 		{
 			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnMuteStateChanged = null;
+			OnVolumeChanged = null;
+
+			base.DisposeFinal(disposing);
 		}
 
 		#region Methods
