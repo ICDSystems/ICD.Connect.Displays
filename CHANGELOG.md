@@ -14,3 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed old, unused SPlus display interface
  - Removing unused VolumeControl property from IDisplayWithAudio
+
+### Changed
+ - Fixed the command retry in Sharp displays
+ - Changed the input set command to set input after successful poll where input is different from requested - fixes warmup and input select on some sharp consumer series
