@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.EventArguments;
 using ICD.Connect.Displays.Proxies;
@@ -6,7 +7,7 @@ using ICD.Connect.Displays.Proxies;
 namespace ICD.Connect.Displays.EventArguments
 {
 	[Serializable]
-	public class DisplayHdmiInputState
+	public sealed class DisplayHdmiInputState
 	{
 		public int HdmiInput { get; set; }
 		public bool Active { get; set; }
@@ -17,11 +18,13 @@ namespace ICD.Connect.Displays.EventArguments
 		/// <summary>
 		/// Gets the HDMI input address for this event.
 		/// </summary>
+		[PublicAPI]
 		public int HdmiInput { get { return Data.HdmiInput; } }
 
 		/// <summary>
 		/// Gets the active state of the HDMI input.
 		/// </summary>
+		[PublicAPI]
 		public bool Active { get { return Data.Active; } }
 
 		/// <summary>
