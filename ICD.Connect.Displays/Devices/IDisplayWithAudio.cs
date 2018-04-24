@@ -3,7 +3,6 @@ using ICD.Common.Utils;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
-using ICD.Common.Utils.EventArguments;
 
 namespace ICD.Connect.Displays.Devices
 {
