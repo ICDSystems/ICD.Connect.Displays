@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Settings.Attributes;
@@ -7,11 +6,9 @@ using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Devices.IrDisplay
 {
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("IrDisplay", typeof(IrDisplayDevice))]
 	public sealed class IrDisplaySettings : AbstractDeviceSettings
 	{
-		private const string FACTORY_NAME = "IrDisplay";
-
 		private const string PORT_ELEMENT = "Port";
 
 		#region IR Command Elements
@@ -37,16 +34,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		#endregion
 
 		private readonly IrDisplayCommands m_Commands;
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(IrDisplayDevice); } }
 
 		[OriginatorIdSettingsProperty(typeof(IIrPort))]
 		public int? Port { get; set; }

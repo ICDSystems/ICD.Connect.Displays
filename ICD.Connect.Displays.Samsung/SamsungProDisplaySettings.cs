@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
@@ -9,22 +8,10 @@ namespace ICD.Connect.Displays.Samsung
 	/// <summary>
 	/// Settings for the SamsungProDisplay device.
 	/// </summary>
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("SamsungProDisplay", typeof(SamsungProDisplay))]
 	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings
 	{
-		private const string FACTORY_NAME = "SamsungProDisplay";
-
 		private const string WALLID_ELEMENT = "WallId";
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(SamsungProDisplay); } }
 
 		/// <summary>
 		/// The video wall id for this display.
