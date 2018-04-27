@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.0.0] - 2018-04-27
+### Changed
+ - SPlus displays use new API events
+
 ## [5.0.0] - 2018-04-23
 ### Added
  - Adding API proxies for displays
