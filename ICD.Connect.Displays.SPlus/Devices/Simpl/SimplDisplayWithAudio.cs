@@ -202,6 +202,19 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		#region Console
 
 		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in DisplayWithAudioConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
@@ -209,14 +222,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.BuildConsoleStatus(addRow);
 
-			float volume = this.GetVolumeAsPercentage() * 100;
-			string percentage = string.Format("{0}%", (int)volume);
-
-			addRow("Muted", IsMuted);
-			addRow("Volume", Volume);
-			addRow("Volume Percentage", percentage);
-			addRow("Device volume range", string.Format("{0} - {1}", VolumeDeviceMin, VolumeDeviceMax));
-			addRow("Safety volume range", string.Format("{0} - {1}", VolumeSafetyMin, VolumeSafetyMax));
+			DisplayWithAudioConsole.BuildConsoleStatus(this, addRow);
 		}
 
 		/// <summary>
@@ -228,24 +234,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("MuteOn", "Mutes the audio", () => MuteOn());
-			yield return new ConsoleCommand("MuteOff", "Unmutes the audio", () => MuteOff());
-			yield return new ConsoleCommand("MuteToggle", "Toggles the audio mute state", () => MuteToggle());
 
-			string setVolumeHelp = string.Format("SetVolume <{0}>",
-												 StringUtils.RangeFormat(this.GetVolumeSafetyOrDeviceMin(),
-																		 this.GetVolumeSafetyOrDeviceMax()));
-			yield return new GenericConsoleCommand<float>("SetVolume", setVolumeHelp, f => SetVolume(f));
-
-			string setSafetyMinVolumeHelp = string.Format("SetSafetyMinVolume <{0}>",
-														  StringUtils.RangeFormat(VolumeDeviceMin, VolumeDeviceMax));
-			yield return new GenericConsoleCommand<float>("SetSafetyMinVolume", setSafetyMinVolumeHelp, v => VolumeSafetyMin = v);
-			yield return new ConsoleCommand("ClearSafetyMinVolume", "", () => VolumeSafetyMin = null);
-
-			string setSafetyMaxVolumeHelp = string.Format("SetSafetyMaxVolume <{0}>",
-														  StringUtils.RangeFormat(VolumeDeviceMin, VolumeDeviceMax));
-			yield return new GenericConsoleCommand<float>("SetSafetyMaxVolume", setSafetyMaxVolumeHelp, v => VolumeSafetyMax = v);
-			yield return new ConsoleCommand("ClearSafetyMaxVolume", "", () => VolumeSafetyMax = null);
+			foreach (IConsoleCommand command in DisplayWithAudioConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>
@@ -255,6 +246,15 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		#endregion
