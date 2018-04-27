@@ -3,7 +3,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.SPlusInterfaces;
-using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
 
@@ -214,17 +213,17 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 			originator.SetScalingModeCallback = null;
 		}
 
-		private void OriginatorOnScalingModeChanged(object sender, ScalingModeEventArgs scalingModeEventArgs)
+		private void OriginatorOnScalingModeChanged(object sender, DisplayScalingModeApiEventArgs displayScalingModeApiEventArgs)
 		{
 			OnScalingModeChanged.Raise(this, new UShortEventArgs(ScalingMode));
 		}
 
-		private void OriginatorOnIsPoweredChanged(object sender, BoolEventArgs boolEventArgs)
+		private void OriginatorOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs displayPowerStateApiEventArgs)
 		{
 			OnIsPoweredChanged.Raise(this, new UShortEventArgs(IsPowered));
 		}
 
-		private void OriginatorOnHdmiInputChanged(IDisplay display, int hdmiInput, bool active)
+		private void OriginatorOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs displayHmdiInputApiEventArgs)
 		{
 			OnHdmiInputChanged.Raise(this, new UShortEventArgs(HdmiInput));
 		}

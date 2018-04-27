@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
@@ -15,12 +15,12 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
-		public event EventHandler<FloatEventArgs> OnVolumeChanged;
+		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		/// <summary>
 		/// Raised when the mute state changes.
 		/// </summary>
-		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
+		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
 		private float m_Volume;
 		private bool m_IsMuted;
@@ -58,7 +58,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				Logger.AddEntry(eSeverity.Informational, "{0} - Raw volume set to {1}", StringUtils.NiceName(m_Volume));
 
-				OnVolumeChanged.Raise(this, new FloatEventArgs(m_Volume));
+				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				Logger.AddEntry(eSeverity.Informational, "{0} - Mute set to {1}", m_IsMuted);
 
-				OnMuteStateChanged.Raise(this, new BoolEventArgs(m_IsMuted));
+				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
 		}
 

@@ -2,6 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
 
 namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
@@ -234,12 +235,12 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 			originator.MuteToggleCallback = null;
 		}
 
-		private void OriginatorOnMuteStateChanged(object sender, BoolEventArgs boolEventArgs)
+		private void OriginatorOnMuteStateChanged(object sender, DisplayMuteApiEventArgs displayMuteApiEventArgs)
 		{
 			OnMuteStateChanged.Raise(this, new UShortEventArgs(IsMuted));
 		}
 
-		private void OriginatorOnVolumeChanged(object sender, FloatEventArgs floatEventArgs)
+		private void OriginatorOnVolumeChanged(object sender, DisplayVolumeApiEventArgs displayVolumeApiEventArgs)
 		{
 			OnMuteStateChanged.Raise(this, new UShortEventArgs(Volume));
 		}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -22,17 +21,17 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
+		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
 		/// </summary>
-		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
+		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		#region Callbacks
 
@@ -63,7 +62,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
 
-				OnIsPoweredChanged.Raise(this, new BoolEventArgs(m_IsPowered));
+				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
 		}
 
@@ -88,15 +87,11 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
 
-				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
-				if (handler == null)
-					return;
-
 				if (oldInput.HasValue)
-					handler(this, oldInput.Value, false);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
 
 				if (m_HdmiInput.HasValue)
-					handler(this, m_HdmiInput.Value, true);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
 			}
 		}
 
@@ -115,7 +110,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
 
-				OnScalingModeChanged.Raise(this, new ScalingModeEventArgs(m_ScalingMode));
+				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 
