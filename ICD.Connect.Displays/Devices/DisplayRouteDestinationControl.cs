@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
@@ -13,43 +12,9 @@ namespace ICD.Connect.Displays.Devices
 	/// <summary>
 	/// Simple IRouteDestinationControl for IDisplays.
 	/// </summary>
-	public sealed class DisplayRouteDestinationControl : AbstractRouteDestinationControl<IDisplay>
+	public sealed class DisplayRouteDestinationControl : AbstractRouteInputSelectControl<IDisplay>
 	{
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
-		public override event EventHandler<ActiveInputStateChangeEventArgs> OnActiveInputsChanged;
-
-		private int? m_ActiveInput;
-
-		public int? ActiveInput
-		{
-			get { return m_ActiveInput; }
-			set
-			{
-				if (value == m_ActiveInput)
-					return;
-
-				int? old = m_ActiveInput;
-				m_ActiveInput = value;
-
-				// Stopped using the old input
-				if (old != null)
-				{
-					ActiveInputStateChangeEventArgs args =
-						new ActiveInputStateChangeEventArgs((int)old, eConnectionType.Audio | eConnectionType.Video,
-						                                    false);
-					OnActiveInputsChanged.Raise(this, args);
-				}
-
-				// Started using the new input
-				if (m_ActiveInput != null)
-				{
-					ActiveInputStateChangeEventArgs args =
-						new ActiveInputStateChangeEventArgs((int)m_ActiveInput, eConnectionType.Audio | eConnectionType.Video,
-						                                    true);
-					OnActiveInputsChanged.Raise(this, args);
-				}
-			}
-		}
 
 		/// <summary>
 		/// Constructor.
@@ -69,7 +34,6 @@ namespace ICD.Connect.Displays.Devices
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnSourceDetectionStateChange = null;
-			OnActiveInputsChanged = null;
 
 			base.DisposeFinal(disposing);
 
@@ -77,6 +41,16 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Sets the current active input.
+		/// </summary>
+		/// <param name="input"></param>
+		public override void SetActiveInput(int? input)
+		{
+			if (input.HasValue)
+				Parent.SetHdmiInput(input.Value);
+		}
 
 		/// <summary>
 		/// Returns true if a signal is detected at the given input.
