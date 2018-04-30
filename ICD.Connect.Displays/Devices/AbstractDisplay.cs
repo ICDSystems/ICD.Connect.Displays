@@ -115,6 +115,7 @@ namespace ICD.Connect.Displays.Devices
 		protected AbstractDisplay()
 		{
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
+			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		#region Methods

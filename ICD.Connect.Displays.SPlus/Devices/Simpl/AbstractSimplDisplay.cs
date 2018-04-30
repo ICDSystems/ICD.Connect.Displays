@@ -122,6 +122,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		protected AbstractSimplDisplay()
 		{
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
+			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		/// <summary>
