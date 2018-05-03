@@ -156,7 +156,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected AbstractDisplayWithAudio()
 		{
-			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		/// <summary>
