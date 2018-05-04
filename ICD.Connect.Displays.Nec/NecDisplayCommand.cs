@@ -242,6 +242,7 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command to set the given parameter.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="page"></param>
 		/// <param name="code"></param>
 		/// <param name="value"></param>
