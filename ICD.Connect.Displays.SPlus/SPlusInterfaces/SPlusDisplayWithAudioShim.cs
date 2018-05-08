@@ -8,7 +8,7 @@ using ICD.Connect.Displays.SPlus.Devices.Simpl;
 namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 {
 	[PublicAPI("S+")]
-	public sealed class SPlusDisplayWithAudioInterface : AbstractSPlusDisplayInterface<ISimplDisplayWithAudio>
+	public sealed class SPlusDisplayWithAudioShim : AbstractSPlusDisplayShim<ISimplDisplayWithAudio>
 	{
 		public delegate void SPlusDisplayWithAudioInterfaceSetVolumeCallback(object sender, ushort raw);
 
