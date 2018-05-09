@@ -98,7 +98,7 @@ namespace ICD.Connect.Displays.Samsung
 				ConfigureComPort(port as IComPort);
 
 			ISerialBuffer buffer = new SamsungDisplaySerialBuffer();
-			SerialQueue queue = new SerialQueue();
+			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
