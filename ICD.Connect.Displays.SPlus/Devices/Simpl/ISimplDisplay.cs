@@ -21,5 +21,25 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		SimplDisplaySetHdmiInputCallback SetHdmiInputCallback { get; set; }
 
 		SimplDisplaySetScalingModeCallback SetScalingModeCallback { get; set; }
+
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		new bool IsPowered { get; set; }
+
+		/// <summary>
+		/// Gets the number of HDMI inputs.
+		/// </summary>
+		new int InputCount { get; set; }
+
+		/// <summary>
+		/// Gets the Hdmi input.
+		/// </summary>
+		new int? HdmiInput { get; set; }
+
+		/// <summary>
+		/// Gets the scaling mode.
+		/// </summary>
+		new eScalingMode ScalingMode { get; set; }
 	}
 }

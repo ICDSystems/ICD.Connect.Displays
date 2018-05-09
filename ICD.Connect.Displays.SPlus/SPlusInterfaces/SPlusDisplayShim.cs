@@ -4,7 +4,7 @@ using ICD.Connect.Displays.SPlus.Devices.Simpl;
 namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 {
 	[PublicAPI("S+")]
-	public sealed class SPlusDisplayInterface : AbstractSPlusDisplayInterface<ISimplDisplay>
+	public sealed class SPlusDisplayShim : AbstractSPlusDisplayShim<ISimplDisplay>
 	{
 	}
 }

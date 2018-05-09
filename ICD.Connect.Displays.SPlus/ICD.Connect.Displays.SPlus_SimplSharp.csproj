@@ -76,9 +76,9 @@
     <Compile Include="Devices\Simpl\SimplDisplayWithAudioSettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SPlusInterfaces\AbstractSPlusDisplayInterface.cs" />
-    <Compile Include="SPlusInterfaces\SPlusDisplayInterface.cs" />
-    <Compile Include="SPlusInterfaces\SPlusDisplayWithAudioInterface.cs" />
+    <Compile Include="SPlusInterfaces\AbstractSPlusDisplayShim.cs" />
+    <Compile Include="SPlusInterfaces\SPlusDisplayShim.cs" />
+    <Compile Include="SPlusInterfaces\SPlusDisplayWithAudioShim.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
