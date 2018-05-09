@@ -271,7 +271,7 @@ namespace ICD.Connect.Displays.Samsung
 			{
 				port = factory.GetPortById((int)settings.Port) as ISerialPort;
 				if (port == null)
-					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
 			}
 
 			SetPort(port);
