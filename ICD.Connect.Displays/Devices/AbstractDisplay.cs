@@ -220,20 +220,6 @@ namespace ICD.Connect.Displays.Devices
 			return SerialQueue != null && SerialQueue.Port != null && SerialQueue.Port.IsOnline;
 		}
 
-		/// <summary>
-		/// Logs to logging core.
-		/// </summary>
-		/// <param name="severity"></param>
-		/// <param name="message"></param>
-		/// <param name="args"></param>
-		protected void Log(eSeverity severity, string message, params object[] args)
-		{
-			message = string.Format(message, args);
-			message = string.Format("{0} - {1}", this, message);
-
-			Logger.AddEntry(severity, message);
-		}
-
 		#endregion
 
 		#region SerialQueue Callbacks
