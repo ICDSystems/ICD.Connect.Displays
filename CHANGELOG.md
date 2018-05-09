@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.0.0] - 2018-05-09
+### Added
+ - Added display property setters for S+
+
+### Changed
+ - Fixed control id overlap
+ - Changed S+ shim naming convention
+
 ## [6.1.0] - 2018-05-03
 ### Added
  - Adding power control to displays
