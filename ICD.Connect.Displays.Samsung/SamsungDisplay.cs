@@ -212,7 +212,7 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			byte[] array = Encoding.ASCII.GetBytes(data);
 			int sum = array.Sum(b => (int)b);
-			int result = Convert.ToInt32("100", 16) - sum;
+			int result = 0x100 - sum;
 
 			return ((char)result).ToString();
 		}
