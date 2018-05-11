@@ -12,7 +12,8 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
+using ICD.Connect.Settings.Cores;
 
 namespace ICD.Connect.Displays.Christie
 {
