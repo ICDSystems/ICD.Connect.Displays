@@ -1,34 +1,22 @@
-﻿using System;
-using ICD.Common.Properties;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Samsung
 {
 	/// <summary>
 	/// Settings for the SamsungProDisplay device.
 	/// </summary>
+	[KrangSettings("SamsungProDisplay", typeof(SamsungProDisplay))]
 	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings
 	{
-		private const string FACTORY_NAME = "SamsungProDisplay";
-
 		private const string WALLID_ELEMENT = "WallId";
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(SamsungProDisplay); } }
 
 		/// <summary>
 		/// The video wall id for this display.
 		/// </summary>
-		[SettingsProperty(SettingsProperty.ePropertyType.Ipid)]
+		[CrestronByteSettingsProperty]
 		public byte WallId { get; set; }
 
 		/// <summary>
@@ -39,27 +27,18 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			base.WriteElements(writer);
 
-			if (WallId != 0)
-				writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
+			writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static SamsungProDisplaySettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			byte? wallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT);
+			base.ParseXml(xml);
 
-			SamsungProDisplaySettings output = new SamsungProDisplaySettings
-			{
-				WallId = wallId == null ? (byte)0 : (byte)wallId
-			};
-
-			ParseXml(output, xml);
-			return output;
+			WallId = XmlUtils.TryReadChildElementContentAsByte(xml, WALLID_ELEMENT) ?? 0;
 		}
 	}
 }

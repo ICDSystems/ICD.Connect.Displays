@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Displays.EventArguments;
+﻿using ICD.Connect.Displays.Devices;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 
 namespace ICD.Connect.Displays.Mock
@@ -71,6 +72,8 @@ namespace ICD.Connect.Displays.Mock
 		/// </summary>
 		public override void VolumeUpIncrement()
 		{
+            if (!IsPowered)
+                return;
 			if (Volume < 100)
 				Volume++;
 		}
@@ -79,7 +82,9 @@ namespace ICD.Connect.Displays.Mock
 		/// Decrements volume.
 		/// </summary>
 		public override void VolumeDownIncrement()
-		{
+        {
+            if (!IsPowered)
+                return;
 			if (Volume > 0)
 				Volume--;
 		}
@@ -90,6 +95,8 @@ namespace ICD.Connect.Displays.Mock
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
+            if (!IsPowered)
+                return;
 			Volume = raw;
 		}
 

@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.Extensions;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
 using ICD.Connect.Routing.EventArguments;
-using ICD.Connect.Routing.Utils;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// Simple IRouteDestinationControl for IDisplays.
 	/// </summary>
-	public sealed class DisplayRouteDestinationControl : AbstractRouteDestinationControl<IDisplay>
+	public sealed class DisplayRouteDestinationControl : AbstractRouteInputSelectControl<IDisplay>
 	{
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
-		public override event EventHandler<ActiveInputStateChangeEventArgs> OnActiveInputsChanged;
-
-		private readonly SwitcherCache m_Cache;
 
 		/// <summary>
 		/// Constructor.
@@ -28,10 +24,6 @@ namespace ICD.Connect.Displays
 		public DisplayRouteDestinationControl(IDisplay parent, int id)
 			: base(parent, id)
 		{
-			m_Cache = new SwitcherCache();
-			m_Cache.OnSourceDetectionStateChange += CacheOnSourceDetectionStateChange;
-			m_Cache.OnActiveInputsChanged += CacheOnActiveInputsChanged;
-
 			Subscribe(parent);
 		}
 
@@ -42,7 +34,6 @@ namespace ICD.Connect.Displays
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnSourceDetectionStateChange = null;
-			OnActiveInputsChanged = null;
 
 			base.DisposeFinal(disposing);
 
@@ -50,6 +41,16 @@ namespace ICD.Connect.Displays
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Sets the current active input.
+		/// </summary>
+		/// <param name="input"></param>
+		public override void SetActiveInput(int? input)
+		{
+			if (input.HasValue)
+				Parent.SetHdmiInput(input.Value);
+		}
 
 		/// <summary>
 		/// Returns true if a signal is detected at the given input.
@@ -69,7 +70,7 @@ namespace ICD.Connect.Displays
 		/// </summary>
 		public override bool GetInputActiveState(int input, eConnectionType type)
 		{
-			return input == Parent.HdmiInput;
+			return ActiveInput == input;
 		}
 
 		/// <summary>
@@ -93,6 +94,7 @@ namespace ICD.Connect.Displays
 		private void Subscribe(IDisplay parent)
 		{
 			parent.OnHdmiInputChanged += ParentOnHdmiInputChanged;
+			parent.OnIsPoweredChanged += ParentOnIsPoweredChanged;
 		}
 
 		/// <summary>
@@ -102,31 +104,32 @@ namespace ICD.Connect.Displays
 		private void Unsubscribe(IDisplay parent)
 		{
 			parent.OnHdmiInputChanged -= ParentOnHdmiInputChanged;
+			parent.OnIsPoweredChanged -= ParentOnIsPoweredChanged;
+		}
+
+		/// <summary>
+		/// Called when the parent is powered on/off.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		private void ParentOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
+		{
+			UpdateInputState();
 		}
 
 		/// <summary>
 		/// Called when the parent switches HDMI inputs.
 		/// </summary>
-		/// <param name="display"></param>
-		/// <param name="input"></param>
-		/// <param name="active"></param>
-		private void ParentOnHdmiInputChanged(IDisplay display, int input, bool active)
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		private void ParentOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs args)
 		{
-			m_Cache.SetSourceDetectedState(input, eConnectionType.Video | eConnectionType.Audio, active);
+			UpdateInputState();
 		}
 
-		#endregion
-
-		#region Cache Callbacks
-
-		private void CacheOnActiveInputsChanged(object sender, ActiveInputStateChangeEventArgs args)
+		private void UpdateInputState()
 		{
-			OnActiveInputsChanged.Raise(this, new ActiveInputStateChangeEventArgs(args.Input, args.Type, args.Active));
-		}
-
-		private void CacheOnSourceDetectionStateChange(object sender, SourceDetectionStateChangeEventArgs args)
-		{
-			OnSourceDetectionStateChange.Raise(this, new SourceDetectionStateChangeEventArgs(args.Input, args.Type, args.State));
+			ActiveInput = Parent.IsPowered ? Parent.HdmiInput : null;
 		}
 
 		#endregion

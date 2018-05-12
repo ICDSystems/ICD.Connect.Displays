@@ -1,72 +1,109 @@
 ﻿using System;
-using ICD.Common.Utils.EventArguments;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Connect.Devices.Controls;
+using ICD.Connect.API.Attributes;
+using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.Proxies;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
+	[ApiClass(typeof(ProxyDisplayWithAudio), typeof(IDisplay))]
 	public interface IDisplayWithAudio : IDisplay
 	{
 		/// <summary>
-		/// Gets the volume control for this display.
+		/// Raised when the volume changes.
 		/// </summary>
-		IVolumeDeviceControl VolumeControl { get; }
+		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
+		event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
-		event EventHandler<FloatEventArgs> OnVolumeChanged;
-		event EventHandler<BoolEventArgs> OnMuteStateChanged;
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		[ApiEvent(DisplayWithAudioApi.EVENT_IS_MUTED, DisplayWithAudioApi.HELP_EVENT_IS_MUTED)]
+		event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
 		#region Properties
 
 		/// <summary>
 		/// Gets the current volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
 		float Volume { get; }
 
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED, DisplayWithAudioApi.HELP_PROPERTY_IS_MUTED)]
 		bool IsMuted { get; }
 
 		/// <summary>
 		/// The min volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEVICE_MIN)]
 		float VolumeDeviceMin { get; }
 
 		/// <summary>
 		/// The max volume.
 		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEVICE_MAX)]
 		float VolumeDeviceMax { get; }
 
 		/// <summary>
 		/// Prevents the device from going below this volume.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MIN)]
 		float? VolumeSafetyMin { get; set; }
 
 		/// <summary>
 		/// Prevents the device from going above this volume.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MAX)]
 		float? VolumeSafetyMax { get; set; }
 
 		/// <summary>
 		/// The volume the device is set to when powered.
 		/// </summary>
-		[PublicAPI]
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEFAULT)]
 		float? VolumeDefault { get; set; }
 
 		#endregion
 
 		#region Methods
 
+		/// <summary>
+		/// Sets the raw volume.
+		/// </summary>
+		/// <param name="raw"></param>
+		[ApiMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, DisplayWithAudioApi.HELP_METHOD_SET_VOLUME)]
 		void SetVolume(float raw);
 
+		/// <summary>
+		/// Increments the volume once.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_UP_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_UP_INCREMENT)]
 		void VolumeUpIncrement();
+
+		/// <summary>
+		/// Decrements the volume once.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_DOWN_INCREMENT, DisplayWithAudioApi.HELP_METHOD_VOLUME_DOWN_INCREMENT)]
 		void VolumeDownIncrement();
 
+		/// <summary>
+		/// Mutes the display.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_ON, DisplayWithAudioApi.HELP_METHOD_MUTE_ON)]
 		void MuteOn();
+
+		/// <summary>
+		/// Unmutes the display.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_OFF, DisplayWithAudioApi.HELP_METHOD_MUTE_OFF)]
 		void MuteOff();
+
+		/// <summary>
+		/// Toggles the mute state of the display.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE, DisplayWithAudioApi.HELP_METHOD_MUTE_TOGGLE)]
 		void MuteToggle();
 
 		#endregion
@@ -132,6 +169,10 @@ namespace ICD.Connect.Displays
 		/// </summary>
 		public static float GetVolumeAsPercentage(float volume, float min, float max)
 		{
+			// Avoid divide by zero
+			if (min.Equals(max))
+				return 0.0f;
+
 			return MathUtils.MapRange(min, max, 0.0f, 1.0f, volume);
 		}
 	}

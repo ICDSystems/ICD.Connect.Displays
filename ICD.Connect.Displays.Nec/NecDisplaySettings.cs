@@ -1,35 +1,39 @@
-﻿using System;
-using ICD.Common.Properties;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Nec
 {
+	[KrangSettings("NecDisplay", typeof(NecDisplay))]
 	public sealed class NecDisplaySettings : AbstractDisplayWithAudioSettings
 	{
-		private const string FACTORY_NAME = "NecDisplay";
+		private const string ELEMENT_MONITOR_ID = "MonitorId";
 
 		/// <summary>
-		/// Gets the originator factory name.
+		/// The id for the monitor in a video wall.
 		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
+		public byte? MonitorId { get; set; }
 
 		/// <summary>
-		/// Gets the type of the originator for this settings instance.
+		/// Write settings elements to xml.
 		/// </summary>
-		public override Type OriginatorType { get { return typeof(NecDisplay); } }
+		/// <param name="writer"></param>
+		protected override void WriteElements(IcdXmlTextWriter writer)
+		{
+			base.WriteElements(writer);
+
+			writer.WriteElementString(ELEMENT_MONITOR_ID, IcdXmlConvert.ToString(MonitorId));
+		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static NecDisplaySettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
-			NecDisplaySettings output = new NecDisplaySettings();
-			ParseXml(output, xml);
-			return output;
+			base.ParseXml(xml);
+
+			MonitorId = XmlUtils.TryReadChildElementContentAsByte(xml, ELEMENT_MONITOR_ID);
 		}
 	}
 }

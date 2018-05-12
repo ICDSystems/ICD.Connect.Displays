@@ -1,23 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils.EventArguments;
-using ICD.Common.Properties;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Devices.Controls;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	public abstract class AbstractDisplayWithAudio<T> : AbstractDisplay<T>, IDisplayWithAudio
-		where T : AbstractDisplayWithAudioSettings, new()
+		where T : IDisplayWithAudioSettings, new()
 	{
-		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
-		public event EventHandler<FloatEventArgs> OnVolumeChanged;
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
+
+		/// <summary>
+		/// Raised when the volume changes.
+		/// </summary>
+		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		private bool m_IsMuted;
 		private float m_Volume;
@@ -27,11 +32,6 @@ namespace ICD.Connect.Displays
 		private float? m_VolumeDefault;
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the volume control for this display.
-		/// </summary>
-		public IVolumeDeviceControl VolumeControl { get { return Controls.GetControl<IVolumeDeviceControl>(); } }
 
 		/// <summary>
 		/// Override if the display volume minimum is not 0.
@@ -63,7 +63,7 @@ namespace ICD.Connect.Displays
 				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
 					SetVolume(safeVolume);
 
-				OnVolumeChanged.Raise(this, new FloatEventArgs(m_Volume));
+				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace ICD.Connect.Displays
 
 				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
 
-				OnMuteStateChanged.Raise(this, new BoolEventArgs(m_IsMuted));
+				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
 		}
 
@@ -117,7 +117,6 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// The default volume to use when the display powers on.
 		/// </summary>
-		[PublicAPI]
 		public float? VolumeDefault
 		{
 			get { return m_VolumeDefault; }
@@ -135,7 +134,7 @@ namespace ICD.Connect.Displays
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public override sealed bool IsPowered
+		public override bool IsPowered
 		{
 			get { return base.IsPowered; }
 			protected set
@@ -157,7 +156,18 @@ namespace ICD.Connect.Displays
 		/// </summary>
 		protected AbstractDisplayWithAudio()
 		{
-			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnMuteStateChanged = null;
+			OnVolumeChanged = null;
+
+			base.DisposeFinal(disposing);
 		}
 
 		#region Methods
@@ -189,6 +199,8 @@ namespace ICD.Connect.Displays
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
+			if (!IsPowered)
+				return;
 			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
 			VolumeSetRawFinal(raw);
 		}
@@ -261,6 +273,19 @@ namespace ICD.Connect.Displays
 		#region Console
 
 		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in DisplayWithAudioConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
@@ -268,14 +293,7 @@ namespace ICD.Connect.Displays
 		{
 			base.BuildConsoleStatus(addRow);
 
-			float volume = this.GetVolumeAsPercentage() * 100;
-			string percentage = string.Format("{0}%", (int)volume);
-
-			addRow("Muted", IsMuted);
-			addRow("Volume", Volume);
-			addRow("Volume Percentage", percentage);
-			addRow("Device volume range", string.Format("{0} - {1}", VolumeDeviceMin, VolumeDeviceMax));
-			addRow("Safety volume range", string.Format("{0} - {1}", VolumeSafetyMin, VolumeSafetyMax));
+			DisplayWithAudioConsole.BuildConsoleStatus(this, addRow);
 		}
 
 		/// <summary>
@@ -287,24 +305,9 @@ namespace ICD.Connect.Displays
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("MuteOn", "Mutes the audio", () => MuteOn());
-			yield return new ConsoleCommand("MuteOff", "Unmutes the audio", () => MuteOff());
-			yield return new ConsoleCommand("MuteToggle", "Toggles the audio mute state", () => MuteToggle());
 
-			string setVolumeHelp = string.Format("SetVolume <{0}>",
-			                                     StringUtils.RangeFormat(this.GetVolumeSafetyOrDeviceMin(),
-			                                                             this.GetVolumeSafetyOrDeviceMax()));
-			yield return new GenericConsoleCommand<float>("SetVolume", setVolumeHelp, f => SetVolume(f));
-
-			string setSafetyMinVolumeHelp = string.Format("SetSafetyMinVolume <{0}>",
-			                                              StringUtils.RangeFormat(VolumeDeviceMin, VolumeDeviceMax));
-			yield return new GenericConsoleCommand<float>("SetSafetyMinVolume", setSafetyMinVolumeHelp, v => VolumeSafetyMin = v);
-			yield return new ConsoleCommand("ClearSafetyMinVolume", "", () => VolumeSafetyMin = null);
-
-			string setSafetyMaxVolumeHelp = string.Format("SetSafetyMaxVolume <{0}>",
-			                                              StringUtils.RangeFormat(VolumeDeviceMin, VolumeDeviceMax));
-			yield return new GenericConsoleCommand<float>("SetSafetyMaxVolume", setSafetyMaxVolumeHelp, v => VolumeSafetyMax = v);
-			yield return new ConsoleCommand("ClearSafetyMaxVolume", "", () => VolumeSafetyMax = null);
+			foreach (IConsoleCommand command in DisplayWithAudioConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>
@@ -314,6 +317,15 @@ namespace ICD.Connect.Displays
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		#endregion

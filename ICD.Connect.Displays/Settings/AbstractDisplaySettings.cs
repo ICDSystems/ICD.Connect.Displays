@@ -1,14 +1,15 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
-using ICD.Connect.Settings.Attributes;
+using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Settings
 {
-	public abstract class AbstractDisplaySettings : AbstractDeviceSettings
+	public abstract class AbstractDisplaySettings : AbstractDeviceSettings, IDisplaySettings
 	{
 		private const string PORT_ELEMENT = "Port";
 
-		[SettingsProperty(SettingsProperty.ePropertyType.PortId)]
+		[OriginatorIdSettingsProperty(typeof(ISerialPort))]
 		public int? Port { get; set; }
 
 		/// <summary>
@@ -19,20 +20,18 @@ namespace ICD.Connect.Displays.Settings
 		{
 			base.WriteElements(writer);
 
-			if (Port != null)
-				writer.WriteElementString(PORT_ELEMENT, IcdXmlConvert.ToString((int)Port));
+			writer.WriteElementString(PORT_ELEMENT, Port == null ? null : IcdXmlConvert.ToString((int)Port));
 		}
 
 		/// <summary>
-		/// Parses the xml and applies the properties to the instance.
+		/// Updates the settings from xml.
 		/// </summary>
-		/// <param name="instance"></param>
 		/// <param name="xml"></param>
-		protected static void ParseXml(AbstractDisplaySettings instance, string xml)
+		public override void ParseXml(string xml)
 		{
-			instance.Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
+			base.ParseXml(xml);
 
-			AbstractDeviceSettings.ParseXml(instance, xml);
+			Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
 		}
 	}
 }

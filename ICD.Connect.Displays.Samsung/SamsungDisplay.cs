@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
@@ -97,7 +98,7 @@ namespace ICD.Connect.Displays.Samsung
 				ConfigureComPort(port as IComPort);
 
 			ISerialBuffer buffer = new SamsungDisplaySerialBuffer();
-			SerialQueue queue = new SerialQueue();
+			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
@@ -157,6 +158,8 @@ namespace ICD.Connect.Displays.Samsung
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME + (char)(ushort)raw, VolumeComparer);
 		}
 
@@ -173,11 +176,15 @@ namespace ICD.Connect.Displays.Samsung
 
 		public override void VolumeUpIncrement()
 		{
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME_UP);
 		}
 
 		public override void VolumeDownIncrement()
 		{
+			if (!IsPowered)
+				return;
 			SendNonFormattedCommand(VOLUME_DOWN);
 		}
 
@@ -205,7 +212,7 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			byte[] array = Encoding.ASCII.GetBytes(data);
 			int sum = array.Sum(b => (int)b);
-			int result = Convert.ToInt32("100", 16) - sum;
+			int result = 0x100 - sum;
 
 			return ((char)result).ToString();
 		}
@@ -261,10 +268,11 @@ namespace ICD.Connect.Displays.Samsung
 			ISerialPort port = null;
 
 			if (settings.Port != null)
+			{
 				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-			if (port == null)
-				Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+				if (port == null)
+					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+			}
 
 			SetPort(port);
 		}

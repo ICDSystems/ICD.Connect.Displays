@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
@@ -163,11 +164,15 @@ namespace ICD.Connect.Displays.Samsung
 
 		public override void VolumeUpIncrement()
 		{
+			if (!IsPowered)
+				return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
+			if (!IsPowered)
+				return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
@@ -211,10 +216,11 @@ namespace ICD.Connect.Displays.Samsung
 			ISerialPort port = null;
 
 			if (settings.Port != null)
+			{
 				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-			if (port == null)
-				Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+				if (port == null)
+					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+			}
 
 			SetPort(port);
 		}

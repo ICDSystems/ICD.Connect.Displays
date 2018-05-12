@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Properties;
-using ICD.Common.Services;
-using ICD.Common.Services.Logging;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays
+namespace ICD.Connect.Displays.Devices
 {
 	/// <summary>
 	/// AbstractDisplay represents the base class for all TV displays.
 	/// </summary>
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
-		where T : AbstractDisplaySettings, new()
+		where T : IDisplaySettings, new()
 	{
-		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
-		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
-		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
@@ -61,7 +60,7 @@ namespace ICD.Connect.Displays
 				if (m_IsPowered)
 					QueryState();
 
-				OnIsPoweredChanged.Raise(this, new BoolEventArgs(m_IsPowered));
+				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
 		}
 
@@ -81,15 +80,11 @@ namespace ICD.Connect.Displays
 
 				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
-				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
-				if (handler == null)
-					return;
-
 				if (oldInput.HasValue)
-					handler(this, oldInput.Value, false);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
 
 				if (m_HdmiInput.HasValue)
-					handler(this, m_HdmiInput.Value, true);
+					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
 			}
 		}
 
@@ -108,7 +103,7 @@ namespace ICD.Connect.Displays
 
 				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
-				OnScalingModeChanged.Raise(this, new ScalingModeEventArgs(m_ScalingMode));
+				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 
@@ -120,6 +115,7 @@ namespace ICD.Connect.Displays
 		protected AbstractDisplay()
 		{
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
+			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		#region Methods
@@ -147,9 +143,26 @@ namespace ICD.Connect.Displays
 			SerialQueue.Enqueue(command, comparer);
 		}
 
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public abstract void PowerOn();
+
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public abstract void PowerOff();
+
+		/// <summary>
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// </summary>
+		/// <param name="address"></param>
 		public abstract void SetHdmiInput(int address);
+
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public abstract void SetScalingMode(eScalingMode mode);
 
 		/// <summary>
@@ -205,20 +218,6 @@ namespace ICD.Connect.Displays
 		protected override bool GetIsOnlineStatus()
 		{
 			return SerialQueue != null && SerialQueue.Port != null && SerialQueue.Port.IsOnline;
-		}
-
-		/// <summary>
-		/// Logs to logging core.
-		/// </summary>
-		/// <param name="severity"></param>
-		/// <param name="message"></param>
-		/// <param name="args"></param>
-		protected void Log(eSeverity severity, string message, params object[] args)
-		{
-			message = string.Format(message, args);
-			message = string.Format("{0} - {1}", this, message);
-
-			ServiceProvider.GetService<ILoggerService>().AddEntry(severity, message);
 		}
 
 		#endregion
@@ -280,7 +279,7 @@ namespace ICD.Connect.Displays
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void SerialQueueOnIsOnlineStateChanged(object sender, BoolEventArgs args)
+		private void SerialQueueOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
 		}
@@ -290,6 +289,19 @@ namespace ICD.Connect.Displays
 		#region Console
 
 		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in DisplayConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
 		/// Calls the delegate for each console status item.
 		/// </summary>
 		/// <param name="addRow"></param>
@@ -297,9 +309,7 @@ namespace ICD.Connect.Displays
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Powered", IsPowered);
-			addRow("Hdmi Input", HdmiInput);
-			addRow("Scaling Mode", ScalingMode);
+			DisplayConsole.BuildConsoleStatus(this, addRow);
 		}
 
 		/// <summary>
@@ -311,13 +321,8 @@ namespace ICD.Connect.Displays
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new ConsoleCommand("PowerOn", "Turns on the display", () => PowerOn());
-			yield return new ConsoleCommand("PowerOff", "Turns off the display", () => PowerOff());
-
-			string hdmiRange = StringUtils.RangeFormat(1, InputCount);
-			yield return new GenericConsoleCommand<int>("SetHdmiInput", "SetHdmiInput x " + hdmiRange, i => SetHdmiInput(i));
-
-			yield return new EnumConsoleCommand<eScalingMode>("SetScalingMode", a => SetScalingMode(a));
+			foreach (IConsoleCommand command in DisplayConsole.GetConsoleCommands(this))
+				yield return command;
 		}
 
 		/// <summary>
@@ -327,6 +332,15 @@ namespace ICD.Connect.Displays
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		#endregion

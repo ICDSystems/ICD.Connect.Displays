@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Nec
 {
 	public sealed class NecDisplayCommand : ISerialData
 	{
-		private const byte START_HEADER = 0x01;
+		public const byte START_HEADER = 0x01;
 		private const byte RESERVED = 0x30;
-		private const byte MONITOR_ID_ALL = 0x2A;
+		public const byte MONITOR_ID_ALL = 0x2A;
 		private const byte CONTROLLER_ID = 0x30;
 
 		public const byte COMMAND = 0x41;
@@ -23,7 +26,7 @@ namespace ICD.Connect.Displays.Nec
 		public const byte SET_PARAMETER_REPLY = 0x46;
 
 		private const byte START_MESSAGE = 0x02;
-		private const byte END_MESSAGE = 0x03;
+		public const byte END_MESSAGE = 0x03;
 
 		private const byte NULL_RESPONSE = 0x87;
 		private const byte ERROR_RESPONSE = 0x01;
@@ -32,6 +35,8 @@ namespace ICD.Connect.Displays.Nec
 
 		private readonly byte[] m_Header;
 		private readonly byte[] m_Message;
+
+		public ILoggerService Logger { get { return ServiceProvider.TryGetService<ILoggerService>(); } }
 
 		#region Properties
 
@@ -48,8 +53,8 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				return MessageType == GET_PARAMETER_REPLY ||
-				       MessageType == SET_PARAMETER_REPLY ||
-				       MessageType == COMMAND_REPLY;
+					   MessageType == SET_PARAMETER_REPLY ||
+					   MessageType == COMMAND_REPLY;
 			}
 		}
 
@@ -63,7 +68,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					return false;
-				return FromAsciiCharacters8(new[] {m_Message[1], m_Message[2]}) == NULL_RESPONSE;
+				return FromAsciiCharacters8(new[] { m_Message[1], m_Message[2] }) == NULL_RESPONSE;
 			}
 		}
 
@@ -75,8 +80,8 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				if (!IsResponse)
-					throw new InvalidOperationException();
-				return FromAsciiCharacters8(new[] {m_Message[1], m_Message[2]}) == ERROR_RESPONSE;
+					return false;
+				return FromAsciiCharacters8(new[] { m_Message[1], m_Message[2] }) == ERROR_RESPONSE;
 			}
 		}
 
@@ -88,7 +93,7 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				int offset = IsResponse ? 2 : 0;
-				return FromAsciiCharacters8(new[] {m_Message[1 + offset], m_Message[2 + offset]});
+				return FromAsciiCharacters8(new[] { m_Message[1 + offset], m_Message[2 + offset] });
 			}
 		}
 
@@ -100,7 +105,7 @@ namespace ICD.Connect.Displays.Nec
 			get
 			{
 				int offset = IsResponse ? 2 : 0;
-				return FromAsciiCharacters8(new[] {m_Message[3 + offset], m_Message[4 + offset]});
+				return FromAsciiCharacters8(new[] { m_Message[3 + offset], m_Message[4 + offset] });
 			}
 		}
 
@@ -113,7 +118,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					throw new InvalidOperationException();
-				return FromAsciiCharacters8(new[] {m_Message[7], m_Message[8]});
+				return FromAsciiCharacters8(new[] { m_Message[7], m_Message[8] });
 			}
 		}
 
@@ -126,7 +131,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				if (!IsResponse)
 					throw new InvalidOperationException();
-				return FromAsciiCharacters16(new[] {m_Message[9], m_Message[10], m_Message[11], m_Message[12]});
+				return FromAsciiCharacters16(new[] { m_Message[9], m_Message[10], m_Message[11], m_Message[12] });
 			}
 		}
 
@@ -140,11 +145,11 @@ namespace ICD.Connect.Displays.Nec
 				switch (MessageType)
 				{
 					case SET_PARAMETER:
-						return FromAsciiCharacters16(new[] {m_Message[5], m_Message[6], m_Message[7], m_Message[8]});
+						return FromAsciiCharacters16(new[] { m_Message[5], m_Message[6], m_Message[7], m_Message[8] });
 
 					case GET_PARAMETER_REPLY:
 					case SET_PARAMETER_REPLY:
-						return FromAsciiCharacters16(new[] {m_Message[13], m_Message[14], m_Message[15], m_Message[16]});
+						return FromAsciiCharacters16(new[] { m_Message[13], m_Message[14], m_Message[15], m_Message[16] });
 
 					default:
 						throw new InvalidOperationException();
@@ -198,7 +203,7 @@ namespace ICD.Connect.Displays.Nec
 				data = data.Take(data.Length - 1).ToArray();
 
 			byte[] header = data.Take(7).ToArray();
-			byte[] message = data.Skip(7).Take(data.Length - 8).ToArray();
+			byte[] message = data.Skip(7).ToArray();
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -206,14 +211,15 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="bytes"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand Command(IEnumerable<byte> bytes)
+		public static NecDisplayCommand Command(byte monitorId, IEnumerable<byte> bytes)
 		{
-			byte[] message = new[] {START_MESSAGE}.Concat(bytes)
-			                                      .Concat(new[] {END_MESSAGE})
-			                                      .ToArray();
-			byte[] header = GetHeader(COMMAND, (byte)message.Length);
+			byte[] message = new[] { START_MESSAGE }.Concat(bytes)
+												  .Concat(new[] { END_MESSAGE })
+												  .ToArray();
+			byte[] header = GetHeader(monitorId, COMMAND, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -221,13 +227,14 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command to get the given parameter.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="page"></param>
 		/// <param name="code"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand GetParameterCommand(byte page, byte code)
+		public static NecDisplayCommand GetParameterCommand(byte monitorId, byte page, byte code)
 		{
 			byte[] message = GetParameterMessage(page, code);
-			byte[] header = GetHeader(GET_PARAMETER, (byte)message.Length);
+			byte[] header = GetHeader(monitorId, GET_PARAMETER, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -235,14 +242,15 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Instantiates a command to set the given parameter.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="page"></param>
 		/// <param name="code"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public static NecDisplayCommand SetParameterCommand(byte page, byte code, ushort value)
+		public static NecDisplayCommand SetParameterCommand(byte monitorId, byte page, byte code, ushort value)
 		{
 			byte[] message = SetParameterMessage(page, code, value);
-			byte[] header = GetHeader(SET_PARAMETER, (byte)message.Length);
+			byte[] header = GetHeader(monitorId, SET_PARAMETER, (byte)message.Length);
 
 			return new NecDisplayCommand(header, message);
 		}
@@ -270,8 +278,8 @@ namespace ICD.Connect.Displays.Nec
 			byte checksum = GetChecksum(m_Header.Concat(m_Message));
 
 			return m_Header.Concat(m_Message)
-			               .Append(checksum)
-			               .Append(DELIMITER);
+						   .Append(checksum)
+						   .Append(DELIMITER);
 		}
 
 		/// <summary>
@@ -279,7 +287,16 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public IEnumerable<byte> GetMessageWithoutStartEndCodes()
 		{
-			return m_Message.Skip(1).Take(m_Message.Length - 2).ToArray();
+			int startIndex = m_Message.FindIndex(b => b == START_MESSAGE);
+			int endIndex = m_Message.FindIndex(b => b == END_MESSAGE);
+
+			if (startIndex != -1 && endIndex != -1)
+				return m_Message.Skip(startIndex + 1).Take(endIndex - startIndex - 1).ToArray();
+
+			Logger.AddEntry(eSeverity.Error,
+			                "Command message {0} is missing start and/or end character.",
+			                StringUtils.ArrayFormat(m_Message));
+			return null;
 		}
 
 		#endregion
@@ -339,10 +356,11 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Creates the header string.
 		/// </summary>
+		/// <param name="monitorId"></param>
 		/// <param name="messageType"></param>
 		/// <param name="messageLength"></param>
 		/// <returns></returns>
-		private static byte[] GetHeader(byte messageType, byte messageLength)
+		private static byte[] GetHeader(byte monitorId, byte messageType, byte messageLength)
 		{
 			byte[] lengthBytes = ToAsciiCharacters(messageLength);
 
@@ -350,7 +368,7 @@ namespace ICD.Connect.Displays.Nec
 			{
 				START_HEADER,
 				RESERVED,
-				MONITOR_ID_ALL,
+				monitorId,
 				CONTROLLER_ID,
 				messageType,
 				lengthBytes[0],

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ICD.Connect.Displays.SPlus</RootNamespace>
-    <AssemblyName>ICD.Connect.Displays.SPlus_SimplSharp</AssemblyName>
+    <AssemblyName>ICD.Connect.Displays.SPlus</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
@@ -25,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;SIMPLSHARP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <FileAlignment>512</FileAlignment>
@@ -44,6 +44,7 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+    <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -64,8 +65,20 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Devices\Simpl\AbstractSimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\AbstractSimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\ISimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\ISimplDisplayWithAudio.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplay.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplaySettings.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudio.cs" />
+    <Compile Include="Devices\Simpl\SimplDisplayWithAudioSettings.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SPlusDisplayInterface.cs" />
+    <Compile Include="SPlusInterfaces\AbstractSPlusDisplayShim.cs" />
+    <Compile Include="SPlusInterfaces\SPlusDisplayShim.cs" />
+    <Compile Include="SPlusInterfaces\SPlusDisplayWithAudioShim.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -77,17 +90,17 @@
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio\ICD.Connect.Audio_SimplSharp.csproj">
+      <Project>{8ED25D96-E9A5-4E9A-A890-B4EF3AB62041}</Project>
+      <Name>ICD.Connect.Audio_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Displays.Samsung\ICD.Connect.Displays.Samsung_SimplSharp.csproj">
-      <Project>{E091CD3C-6D0E-4BEB-AB7D-BF0C7887B805}</Project>
-      <Name>ICD.Connect.Displays.Samsung</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Displays.Sharp\ICD.Connect.Displays.Sharp_SimplSharp.csproj">
-      <Project>{1EA3B892-C4F7-42B7-8341-A62B81C97F06}</Project>
-      <Name>ICD.Connect.Displays.Sharp</Name>
+    <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing\ICD.Connect.Routing_SimplSharp.csproj">
+      <Project>{B0C0CA1C-FA55-4BEA-8A8B-EDB2141C523E}</Project>
+      <Name>ICD.Connect.Routing_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
       <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
