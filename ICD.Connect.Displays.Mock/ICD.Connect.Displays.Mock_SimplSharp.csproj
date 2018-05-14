@@ -83,6 +83,10 @@
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
+      <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
+      <Name>ICD.Connect.Protocol.Network_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
       <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
       <Name>ICD.Connect.Displays</Name>
