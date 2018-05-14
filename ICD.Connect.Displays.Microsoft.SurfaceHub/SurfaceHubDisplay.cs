@@ -13,7 +13,6 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Cores;
 
 namespace ICD.Connect.Displays.Microsoft.SurfaceHub
 {
@@ -209,7 +208,7 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
             }
             else
             {
-                Logger.AddEntry(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
+                Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
             }
         }
 
@@ -239,7 +238,7 @@ namespace ICD.Connect.Displays.Microsoft.SurfaceHub
             {
                 port = factory.GetPortById((int)settings.Port) as ISerialPort;
                 if (port == null)
-                    Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+                    Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
             }
 
             SetPort(port);

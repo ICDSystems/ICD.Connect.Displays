@@ -14,7 +14,6 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Cores;
 
 namespace ICD.Connect.Displays.Panasonic
 {
@@ -370,7 +369,7 @@ namespace ICD.Connect.Displays.Panasonic
         }
 
         /// <summary>
-        ///     Override to apply settings to the instance.
+        /// Override to apply settings to the instance.
         /// </summary>
         /// <param name="settings"></param>
         /// <param name="factory"></param>
@@ -384,7 +383,7 @@ namespace ICD.Connect.Displays.Panasonic
             {
                 port = factory.GetPortById((int)settings.Port) as ISerialPort;
                 if (port == null)
-                    Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+                    Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
             }
 
             SetPort(port);

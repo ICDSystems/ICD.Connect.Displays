@@ -483,6 +483,5 @@ namespace ICD.Connect.Displays.SmartTech
         }
 
         #endregion
-
     }
 }
