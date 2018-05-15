@@ -12,7 +12,12 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Network.Settings;
+using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -22,9 +27,23 @@ namespace ICD.Connect.Displays.Devices
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
 		where T : IDisplaySettings, new()
 	{
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
 		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
 		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
+
+		private readonly ComSpecProperties m_ComSpecProperties;
+		private readonly NetworkProperties m_NetworkProperties;
 
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
@@ -114,11 +133,20 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected AbstractDisplay()
 		{
+			m_NetworkProperties = new NetworkProperties();
+			m_ComSpecProperties = new ComSpecProperties();
+
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Sets and configures the port for communication with the physical display.
+		/// </summary>
+		[PublicAPI]
+		public abstract void SetPort(ISerialPort port);
 
 		/// <summary>
 		/// Queues the command to be sent to the device.
@@ -282,6 +310,64 @@ namespace ICD.Connect.Displays.Devices
 		private void SerialQueueOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			if (SerialQueue != null && SerialQueue.Port != null)
+				settings.Port = SerialQueue.Port.Id;
+			else
+				settings.Port = null;
+
+			settings.ComSpecProperties.Copy(m_ComSpecProperties);
+			settings.NetworkProperties.Copy(m_NetworkProperties);
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			SetPort(null);
+
+			m_ComSpecProperties.Clear();
+			m_NetworkProperties.Clear();
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			m_NetworkProperties.Copy(settings.NetworkProperties);
+			m_ComSpecProperties.Copy(settings.ComSpecProperties);
+
+			ISerialPort port = null;
+
+			if (settings.Port != null)
+			{
+				port = factory.GetPortById((int)settings.Port) as ISerialPort;
+				if (port == null)
+					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+			}
+
+			SetPort(port);
 		}
 
 		#endregion

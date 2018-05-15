@@ -7,7 +7,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -92,7 +91,7 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public void SetPort(ISerialPort port)
+		public override void SetPort(ISerialPort port)
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
@@ -351,11 +350,6 @@ namespace ICD.Connect.Displays.Nec
 		{
 			base.CopySettingsFinal(settings);
 
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-
 			settings.MonitorId = MonitorId;
 		}
 
@@ -367,8 +361,6 @@ namespace ICD.Connect.Displays.Nec
 			base.ClearSettingsFinal();
 
 			MonitorId = NecDisplayCommand.MONITOR_ID_ALL;
-
-			SetPort(null);
 		}
 
 		/// <summary>
@@ -381,16 +373,6 @@ namespace ICD.Connect.Displays.Nec
 			base.ApplySettingsFinal(settings, factory);
 
 			MonitorId = settings.MonitorId ?? NecDisplayCommand.MONITOR_ID_ALL;
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-			if (port == null)
-				Log(eSeverity.Error, "No Com Port with id {0}", settings.Port);
-
-			SetPort(port);
 		}
 
 		#endregion

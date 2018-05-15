@@ -1,6 +1,7 @@
 ﻿using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Ports;
 
 namespace ICD.Connect.Displays.Mock
 {
@@ -16,6 +17,13 @@ namespace ICD.Connect.Displays.Mock
 		public override int InputCount { get { return 1; } }
 
 		#region Methods
+
+		/// <summary>
+		/// Sets and configures the port for communication with the physical display.
+		/// </summary>
+		public override void SetPort(ISerialPort port)
+		{
+		}
 
 		/// <summary>
 		/// Sets IsPowered to true.

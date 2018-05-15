@@ -79,9 +79,9 @@ namespace ICD.Connect.Displays.Christie
 		#region Methods
 
 		/// <summary>
-		///     Sets and configures the port for communication with the physical display.
+		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public void SetPort(ISerialPort port)
+		public override void SetPort(ISerialPort port)
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
@@ -96,7 +96,7 @@ namespace ICD.Connect.Displays.Christie
 		}
 
 		/// <summary>
-		///     Configures a com port for communication with the physical display.
+		/// Configures a com port for communication with the physical display.
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
@@ -142,7 +142,7 @@ namespace ICD.Connect.Displays.Christie
 		#region Settings
 
 		/// <summary>
-		///     Override to apply properties to the settings instance.
+		/// Override to apply properties to the settings instance.
 		/// </summary>
 		/// <param name="settings"></param>
 		protected override void CopySettingsFinal(ChristieDisplaySettings settings)
@@ -156,7 +156,7 @@ namespace ICD.Connect.Displays.Christie
 		}
 
 		/// <summary>
-		///     Override to clear the instance settings.
+		/// Override to clear the instance settings.
 		/// </summary>
 		protected override void ClearSettingsFinal()
 		{
@@ -166,7 +166,7 @@ namespace ICD.Connect.Displays.Christie
 		}
 
 		/// <summary>
-		///     Override to apply settings to the instance.
+		/// Override to apply settings to the instance.
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
@@ -225,7 +225,7 @@ namespace ICD.Connect.Displays.Christie
 		}
 
 		/// <summary>
-		///     Called when a command is successful.
+		/// Called when a command is successful.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParseSuccess(SerialResponseEventArgs args)
