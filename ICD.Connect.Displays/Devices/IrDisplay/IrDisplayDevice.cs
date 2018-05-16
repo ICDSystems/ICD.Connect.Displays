@@ -43,7 +43,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				m_IsPowered = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
 
 				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
@@ -79,7 +79,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 				int? oldInput = m_HdmiInput;
 				m_HdmiInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
 				if (oldInput.HasValue)
 					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
@@ -102,7 +102,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				m_ScalingMode = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
+				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
 				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
@@ -225,7 +225,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		{
 			if (m_Port == null)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} unable to send command - port is null.", this);
+				Log(eSeverity.Error, "Unable to send command - port is null.");
 				return false;
 			}
 
@@ -277,7 +277,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			{
 				port = factory.GetPortById((int)settings.Port) as IIrPort;
 				if (port == null)
-					Logger.AddEntry(eSeverity.Error, "Port {0} is not an IR Port", settings.Port);
+					Log(eSeverity.Error, "Port {0} is not an IR Port", settings.Port);
 			}
 
 			SetIrPort(port);
