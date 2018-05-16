@@ -10,6 +10,7 @@ using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.IrPort;
+using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Routing.RoutingGraphs;
 using ICD.Connect.Settings;
 
@@ -21,6 +22,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		private readonly IrDriverProperties m_IrDriverProperties;
 		private readonly IrDisplayCommands m_Commands;
 
 		private IIrPort m_Port;
@@ -115,6 +117,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// </summary>
 		public IrDisplayDevice()
 		{
+			m_IrDriverProperties = new IrDriverProperties();
 			m_Commands = new IrDisplayCommands();
 
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
@@ -247,6 +250,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			settings.Port = m_Port == null ? (int?)null : m_Port.Id;
 			settings.Commands.Update(m_Commands);
+
+			settings.Copy(m_IrDriverProperties);
 		}
 
 		/// <summary>
@@ -258,6 +263,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			SetIrPort(null);
 			m_Commands.Clear();
+
+			m_IrDriverProperties.Clear();
 		}
 
 		/// <summary>
@@ -270,6 +277,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			base.ApplySettingsFinal(settings, factory);
 
 			m_Commands.Update(settings.Commands);
+			m_IrDriverProperties.Copy(settings);
 
 			IIrPort port = null;
 

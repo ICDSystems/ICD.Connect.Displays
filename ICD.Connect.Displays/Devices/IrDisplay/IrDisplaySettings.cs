@@ -1,13 +1,14 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Ports.IrPort;
+using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Devices.IrDisplay
 {
 	[KrangSettings("IrDisplay", typeof(IrDisplayDevice))]
-	public sealed class IrDisplaySettings : AbstractDeviceSettings
+	public sealed class IrDisplaySettings : AbstractDeviceSettings, IIrDriverSettings
 	{
 		private const string PORT_ELEMENT = "Port";
 
@@ -34,6 +35,9 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		#endregion
 
 		private readonly IrDisplayCommands m_Commands;
+		private readonly IrDriverProperties m_IrDriverProperties;
+
+		#region Properties
 
 		[OriginatorIdSettingsProperty(typeof(IIrPort))]
 		public int? Port { get; set; }
@@ -53,12 +57,46 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		public string CommandNoScale { get { return m_Commands.CommandNoScale; } set { m_Commands.CommandNoScale = value; } }
 		public string CommandZoom { get { return m_Commands.CommandZoom; } set { m_Commands.CommandZoom = value; } }
 
+		#endregion
+
+		#region IR Driver
+
+		/// <summary>
+		/// Gets/sets the configurable path to the IR driver.
+		/// </summary>
+		public string IrDriverPath
+		{
+			get { return m_IrDriverProperties.IrDriverPath; }
+			set { m_IrDriverProperties.IrDriverPath = value; }
+		}
+
+		/// <summary>
+		/// Gets/sets the configurable pulse time for the IR driver.
+		/// </summary>
+		public ushort IrPulseTime
+		{
+			get { return m_IrDriverProperties.IrPulseTime; }
+			set { m_IrDriverProperties.IrPulseTime = value; }
+		}
+
+		/// <summary>
+		/// Gets/sets the configurable between time for the IR driver.
+		/// </summary>
+		public ushort IrBetweenTime
+		{
+			get { return m_IrDriverProperties.IrBetweenTime; }
+			set { m_IrDriverProperties.IrBetweenTime = value; }
+		}
+
+		#endregion
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public IrDisplaySettings()
 		{
 			m_Commands = new IrDisplayCommands();
+			m_IrDriverProperties = new IrDriverProperties();
 		}
 
 		/// <summary>
@@ -98,6 +136,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 				writer.WriteEndElement();
 			}
 			writer.WriteEndElement();
+
+			m_IrDriverProperties.WriteElements(writer);
 		}
 
 		/// <summary>
@@ -135,6 +175,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			CommandSquare = scale == null ? null : XmlUtils.TryReadChildElementContentAsString(scale, ELEMENT_SQUARE);
 			CommandNoScale = scale == null ? null : XmlUtils.TryReadChildElementContentAsString(scale, ELEMENT_NO_SCALE);
 			CommandZoom = scale == null ? null : XmlUtils.TryReadChildElementContentAsString(scale, ELEMENT_ZOOM);
+
+			m_IrDriverProperties.ParseXml(xml);
 		}
 	}
 }
