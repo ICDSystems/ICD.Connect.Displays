@@ -12,23 +12,13 @@ namespace ICD.Connect.Displays.Settings
 	{
 		private const string PORT_ELEMENT = "Port";
 
-		private readonly NetworkProperties m_NetworkProperties;
+		private readonly SecureNetworkProperties m_NetworkProperties;
 		private readonly ComSpecProperties m_ComSpecProperties;
 
 		#region Properties
 
 		[OriginatorIdSettingsProperty(typeof(ISerialPort))]
 		public int? Port { get; set; }
-
-		/// <summary>
-		/// Gets the configurable network properties.
-		/// </summary>
-		public INetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
-
-		/// <summary>
-		/// Gets the configurable Com Spec properties.
-		/// </summary>
-		public IComSpecProperties ComSpecProperties { get { return m_ComSpecProperties; } }
 
 		#endregion
 
@@ -153,7 +143,7 @@ namespace ICD.Connect.Displays.Settings
 		/// </summary>
 		protected AbstractDisplaySettings()
 		{
-			m_NetworkProperties = new NetworkProperties();
+			m_NetworkProperties = new SecureNetworkProperties();
 			m_ComSpecProperties = new ComSpecProperties();
 		}
 

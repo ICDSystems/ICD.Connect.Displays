@@ -329,8 +329,8 @@ namespace ICD.Connect.Displays.Devices
 			else
 				settings.Port = null;
 
-			settings.ComSpecProperties.Copy(m_ComSpecProperties);
-			settings.NetworkProperties.Copy(m_NetworkProperties);
+			settings.Copy(m_ComSpecProperties);
+			settings.Copy(m_NetworkProperties);
 		}
 
 		/// <summary>
@@ -355,8 +355,8 @@ namespace ICD.Connect.Displays.Devices
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			m_NetworkProperties.Copy(settings.NetworkProperties);
-			m_ComSpecProperties.Copy(settings.ComSpecProperties);
+			m_NetworkProperties.Copy(settings);
+			m_ComSpecProperties.Copy(settings);
 
 			ISerialPort port = null;
 
