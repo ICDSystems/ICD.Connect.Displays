@@ -145,6 +145,9 @@ namespace ICD.Connect.Displays.Settings
 		{
 			m_NetworkProperties = new SecureNetworkProperties();
 			m_ComSpecProperties = new ComSpecProperties();
+
+			UpdateNetworkDefaults(m_NetworkProperties);
+			UpdateComSpecDefaults(m_ComSpecProperties);
 		}
 
 		/// <summary>
@@ -167,6 +170,21 @@ namespace ICD.Connect.Displays.Settings
 			base.ParseXml(xml);
 
 			Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
+
+			UpdateNetworkDefaults(m_NetworkProperties);
+			UpdateComSpecDefaults(m_ComSpecProperties);
 		}
+
+		/// <summary>
+		/// Sets default values for unconfigured network properties.
+		/// </summary>
+		/// <param name="networkProperties"></param>
+		protected abstract void UpdateNetworkDefaults(SecureNetworkProperties networkProperties);
+
+		/// <summary>
+		/// Sets default values for unconfigured comspec properties.
+		/// </summary>
+		/// <param name="comSpecProperties"></param>
+		protected abstract void UpdateComSpecDefaults(ComSpecProperties comSpecProperties);
 	}
 }

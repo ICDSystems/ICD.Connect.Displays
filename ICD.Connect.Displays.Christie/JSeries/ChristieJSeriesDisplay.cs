@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
@@ -10,7 +9,6 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -95,9 +93,6 @@ namespace ICD.Connect.Displays.Christie.JSeries
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
-
 			ISerialBuffer buffer = new ChristieJSeriesDisplayBuffer();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -108,23 +103,6 @@ namespace ICD.Connect.Displays.Christie.JSeries
 
 			if (port != null)
 				SendCommand(string.Format(POWER, QUERY));
-		}
-
-		/// <summary>
-		/// Configures a com port for communication with the physical display.
-		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate115200,
-								eComDataBits.ComspecDataBits8,
-								eComParityType.ComspecParityNone,
-								eComStopBits.ComspecStopBits1,
-								eComProtocolType.ComspecProtocolRS232,
-								eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-								eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-								false);
 		}
 
 		public override void PowerOn()

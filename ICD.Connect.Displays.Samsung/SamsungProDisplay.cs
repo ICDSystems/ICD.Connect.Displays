@@ -76,9 +76,6 @@ namespace ICD.Connect.Displays.Samsung
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
-
 			ISerialBuffer buffer = new SamsungProDisplayBuffer();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -89,23 +86,6 @@ namespace ICD.Connect.Displays.Samsung
 
 			if (port != null)
 				SendCommand(new SamsungProCommand(POWER, WallId, 0).ToQuery());
-		}
-
-		/// <summary>
-		/// Configures a com port for communication with the physical display.
-		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
 		}
 
 		public override void PowerOn()

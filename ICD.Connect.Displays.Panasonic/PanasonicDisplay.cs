@@ -79,9 +79,6 @@ namespace ICD.Connect.Displays.Panasonic
         /// </summary>
         public override void SetPort(ISerialPort port)
         {
-            if (port is IComPort)
-                ConfigureComPort(port as IComPort);
-
             ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
             SerialQueue queue = new SerialQueue();
             queue.SetPort(port);
@@ -89,23 +86,6 @@ namespace ICD.Connect.Displays.Panasonic
             queue.Timeout = 10 * 1000;
 
             SetSerialQueue(queue);
-        }
-
-        /// <summary>
-        /// Configures a com port for communication with the physical display.
-        /// </summary>
-        /// <param name="port"></param>
-        [PublicAPI]
-        public static void ConfigureComPort(IComPort port)
-        {
-            port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-                                eComDataBits.ComspecDataBits8,
-                                eComParityType.ComspecParityNone,
-                                eComStopBits.ComspecStopBits1,
-                                eComProtocolType.ComspecProtocolRS232,
-                                eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-                                eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-                                false);
         }
 
 	    protected override void QueryState()
