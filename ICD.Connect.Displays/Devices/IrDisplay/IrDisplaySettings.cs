@@ -73,7 +73,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Gets/sets the configurable pulse time for the IR driver.
 		/// </summary>
-		public ushort IrPulseTime
+		public ushort? IrPulseTime
 		{
 			get { return m_IrDriverProperties.IrPulseTime; }
 			set { m_IrDriverProperties.IrPulseTime = value; }
@@ -82,7 +82,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Gets/sets the configurable between time for the IR driver.
 		/// </summary>
-		public ushort IrBetweenTime
+		public ushort? IrBetweenTime
 		{
 			get { return m_IrDriverProperties.IrBetweenTime; }
 			set { m_IrDriverProperties.IrBetweenTime = value; }

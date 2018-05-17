@@ -54,7 +54,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable network port.
 		/// </summary>
-		public ushort NetworkPort
+		public ushort? NetworkPort
 		{
 			get { return m_NetworkProperties.NetworkPort; }
 			set { m_NetworkProperties.NetworkPort = value; }
@@ -67,7 +67,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable baud rate.
 		/// </summary>
-		public eComBaudRates ComSpecBaudRate
+		public eComBaudRates? ComSpecBaudRate
 		{
 			get { return m_ComSpecProperties.ComSpecBaudRate; }
 			set { m_ComSpecProperties.ComSpecBaudRate = value; }
@@ -76,7 +76,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable number of data bits.
 		/// </summary>
-		public eComDataBits ComSpecNumberOfDataBits
+		public eComDataBits? ComSpecNumberOfDataBits
 		{
 			get { return m_ComSpecProperties.ComSpecNumberOfDataBits; }
 			set { m_ComSpecProperties.ComSpecNumberOfDataBits = value; }
@@ -85,7 +85,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable parity type.
 		/// </summary>
-		public eComParityType ComSpecParityType
+		public eComParityType? ComSpecParityType
 		{
 			get { return m_ComSpecProperties.ComSpecParityType; }
 			set { m_ComSpecProperties.ComSpecParityType = value; }
@@ -94,7 +94,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable number of stop bits.
 		/// </summary>
-		public eComStopBits ComSpecNumberOfStopBits
+		public eComStopBits? ComSpecNumberOfStopBits
 		{
 			get { return m_ComSpecProperties.ComSpecNumberOfStopBits; }
 			set { m_ComSpecProperties.ComSpecNumberOfStopBits = value; }
@@ -103,7 +103,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable protocol type.
 		/// </summary>
-		public eComProtocolType ComSpecProtocolType
+		public eComProtocolType? ComSpecProtocolType
 		{
 			get { return m_ComSpecProperties.ComSpecProtocolType; }
 			set { m_ComSpecProperties.ComSpecProtocolType = value; }
@@ -112,7 +112,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable hardware handshake type.
 		/// </summary>
-		public eComHardwareHandshakeType ComSpecHardwareHandShake
+		public eComHardwareHandshakeType? ComSpecHardwareHandShake
 		{
 			get { return m_ComSpecProperties.ComSpecHardwareHandShake; }
 			set { m_ComSpecProperties.ComSpecHardwareHandShake = value; }
@@ -121,7 +121,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable software handshake type.
 		/// </summary>
-		public eComSoftwareHandshakeType ComSpecSoftwareHandshake
+		public eComSoftwareHandshakeType? ComSpecSoftwareHandshake
 		{
 			get { return m_ComSpecProperties.ComSpecSoftwareHandshake; }
 			set { m_ComSpecProperties.ComSpecSoftwareHandshake = value; }
@@ -130,7 +130,7 @@ namespace ICD.Connect.Displays.Settings
 		/// <summary>
 		/// Gets/sets the configurable report CTS changes state.
 		/// </summary>
-		public bool ComSpecReportCtsChanges
+		public bool? ComSpecReportCtsChanges
 		{
 			get { return m_ComSpecProperties.ComSpecReportCtsChanges; }
 			set { m_ComSpecProperties.ComSpecReportCtsChanges = value; }
