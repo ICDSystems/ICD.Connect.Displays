@@ -135,11 +135,24 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			if (port == m_Port)
 				return;
 
+			ConfigurePort(port);
+
 			Unsubscribe(m_Port);
 			m_Port = port;
 			Subscribe(m_Port);
 
 			UpdateCachedOnlineStatus();
+		}
+
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(IIrPort port)
+		{
+			// IR
+			if (port != null)
+				port.ApplyDeviceConfiguration(m_IrDriverProperties);
 		}
 
 		/// <summary>
