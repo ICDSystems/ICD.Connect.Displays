@@ -8,7 +8,9 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -78,6 +80,8 @@ namespace ICD.Connect.Displays.Panasonic
         /// </summary>
         public override void SetPort(ISerialPort port)
         {
+			ConfigurePort(port);
+
             ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
             SerialQueue queue = new SerialQueue();
             queue.SetPort(port);
@@ -87,6 +91,26 @@ namespace ICD.Connect.Displays.Panasonic
             SetSerialQueue(queue);
         }
 
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+		}
+
+	    /// <summary>
+	    /// Polls the physical device for the current state.
+	    /// </summary>
 	    protected override void QueryState()
 	    {
 		    base.QueryState();
@@ -99,13 +123,19 @@ namespace ICD.Connect.Displays.Panasonic
 		    SendNonFormattedCommand(QUERY_ASPECT);
 		}
 
-        [PublicAPI]
+	    /// <summary>
+	    /// Powers the TV.
+	    /// </summary>
+	    [PublicAPI]
         public override void PowerOn()
         {
             SendNonFormattedCommand(POWER_ON);
         }
 
-        [PublicAPI]
+	    /// <summary>
+	    /// Shuts down the TV.
+	    /// </summary>
+	    [PublicAPI]
         public override void PowerOff()
         {
             SendNonFormattedCommand(POWER_OFF);
@@ -145,12 +175,20 @@ namespace ICD.Connect.Displays.Panasonic
             SendNonFormattedCommand(setVolCommand);
         }
 
-        public override void SetHdmiInput(int address)
+	    /// <summary>
+	    /// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+	    /// </summary>
+	    /// <param name="address"></param>
+	    public override void SetHdmiInput(int address)
         {
             SendNonFormattedCommand(s_InputMap[address]);
         }
 
-        public override void SetScalingMode(eScalingMode mode)
+	    /// <summary>
+	    /// Sets the scaling mode.
+	    /// </summary>
+	    /// <param name="mode"></param>
+	    public override void SetScalingMode(eScalingMode mode)
         {
             SendNonFormattedCommand(s_ScalingModeMap[mode]);
         }

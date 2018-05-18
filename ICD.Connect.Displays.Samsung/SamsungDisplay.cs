@@ -10,7 +10,9 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -91,6 +93,8 @@ namespace ICD.Connect.Displays.Samsung
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
+			ConfigurePort(port);
+
 			ISerialBuffer buffer = new SamsungDisplaySerialBuffer();
 			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
@@ -100,12 +104,35 @@ namespace ICD.Connect.Displays.Samsung
 			SetSerialQueue(queue);
 		}
 
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+		}
+
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		[PublicAPI]
 		public override void PowerOn()
 		{
 			SendNonFormattedCommand(POWER_ON);
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		[PublicAPI]
 		public override void PowerOff()
 		{

@@ -7,7 +7,9 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings;
@@ -81,6 +83,8 @@ namespace ICD.Connect.Displays.Christie
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
+			ConfigurePort(port);
+
 			ISerialBuffer buffer = new ChristieDisplayBuffer();
 			RateLimitedQueue queue = new RateLimitedQueue(100);
 			queue.SetPort(port);
@@ -88,6 +92,23 @@ namespace ICD.Connect.Displays.Christie
 			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
+		}
+
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
 		}
 
 		public override void PowerOn()

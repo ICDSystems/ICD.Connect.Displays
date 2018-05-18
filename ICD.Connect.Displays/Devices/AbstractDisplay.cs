@@ -43,13 +43,23 @@ namespace ICD.Connect.Displays.Devices
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private readonly ComSpecProperties m_ComSpecProperties;
-		private readonly NetworkProperties m_NetworkProperties;
+		private readonly SecureNetworkProperties m_NetworkProperties;
 
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
+
+		/// <summary>
+		/// Gets the com spec properties.
+		/// </summary>
+		protected IComSpecProperties ComSpecProperties { get { return m_ComSpecProperties; } }
+
+		/// <summary>
+		/// Gets the network properties.
+		/// </summary>
+		protected ISecureNetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
 		/// Gets the number of HDMI inputs.
@@ -133,7 +143,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected AbstractDisplay()
 		{
-			m_NetworkProperties = new NetworkProperties();
+			m_NetworkProperties = new SecureNetworkProperties();
 			m_ComSpecProperties = new ComSpecProperties();
 
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));

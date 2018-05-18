@@ -8,7 +8,9 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -88,6 +90,8 @@ namespace ICD.Connect.Displays.Sharp
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
+			ConfigurePort(port);
+
 			ISerialBuffer buffer = new DelimiterSerialBuffer(SharpDisplayCommands.RETURN[0]);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -97,12 +101,35 @@ namespace ICD.Connect.Displays.Sharp
 			SetSerialQueue(queue);
 		}
 
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+		}
+
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public override void PowerOn()
 		{
 			SendCommand(SharpDisplayCommands.POWER_ON);
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public override void PowerOff()
 		{
 			// So we can PowerOn the TV later.

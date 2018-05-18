@@ -6,7 +6,9 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings;
@@ -91,6 +93,8 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		public override void SetPort(ISerialPort port)
 		{
+			ConfigurePort(port);
+
 			ISerialBuffer buffer = new BoundedSerialBuffer(NecDisplayCommand.START_HEADER, NecDisplayCommand.END_MESSAGE);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -103,21 +107,52 @@ namespace ICD.Connect.Displays.Nec
 				QueryState();
 		}
 
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+		}
+
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public override void PowerOn()
 		{
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOn)));
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public override void PowerOff()
 		{
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOff)));
 		}
 
+		/// <summary>
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// </summary>
+		/// <param name="address"></param>
 		public override void SetHdmiInput(int address)
 		{
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
 		}
 
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public override void SetScalingMode(eScalingMode mode)
 		{
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE, s_ScalingModeMap[mode]));
