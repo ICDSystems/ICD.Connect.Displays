@@ -17,7 +17,7 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 	public delegate void SPlusDisplayShimSetScalingModeCallback(object sender, ushort scalingMode);
 
 	public abstract class AbstractSPlusDisplayShim<TOriginator> : AbstractSPlusDeviceShim<TOriginator>
-		where TOriginator : ISimplDisplay
+		where TOriginator : class, ISimplDisplay
 	{
 		#region Events
 
