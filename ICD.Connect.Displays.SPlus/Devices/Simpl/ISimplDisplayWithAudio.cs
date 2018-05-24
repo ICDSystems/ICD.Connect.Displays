@@ -27,5 +27,25 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		SimplDisplayWithAudioMuteOffCallback MuteOffCallback { get; set; }
 
 		SimplDisplayWithAudioMuteToggleCallback MuteToggleCallback { get; set; }
+
+		/// <summary>
+		/// Gets/sets the current volume.
+		/// </summary>
+		new float Volume { get; set; }
+
+		/// <summary>
+		/// Gets/sets the muted state.
+		/// </summary>
+		new bool IsMuted { get; set; }
+
+		/// <summary>
+		/// Gets/sets the min volume.
+		/// </summary>
+		new float VolumeDeviceMin { get; set; }
+
+		/// <summary>
+		/// Gets/sets the max volume.
+		/// </summary>
+		new float VolumeDeviceMax { get; set; }
 	}
 }
