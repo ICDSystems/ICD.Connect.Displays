@@ -36,16 +36,22 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 		#region Callbacks
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceSetVolumeCallback SetVolumeCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceVolumeUpIncrementCallback VolumeUpIncrementCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceVolumeDownIncrementCallback VolumeDownIncrementCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteOnCallback MuteOnCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteOffCallback MuteOffCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteToggleCallback MuteToggleCallback { get; set; }
 
 		#endregion
