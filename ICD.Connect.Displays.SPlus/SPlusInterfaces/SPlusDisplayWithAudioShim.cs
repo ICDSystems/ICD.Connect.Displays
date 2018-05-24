@@ -72,6 +72,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 				return (ushort)originator.Volume;
 			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.Volume = value;
+			}
 		}
 
 		/// <summary>
@@ -87,6 +95,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 					return 0;
 
 				return (ushort)(originator.IsMuted ? 1 : 0);
+			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.IsMuted = value.ToBool();
 			}
 		}
 
@@ -104,6 +120,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 				return (ushort)originator.VolumeDeviceMin;
 			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.VolumeDeviceMin = value;
+			}
 		}
 
 		/// <summary>
@@ -119,6 +143,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 					return 0;
 
 				return (ushort)originator.VolumeDeviceMax;
+			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.VolumeDeviceMax = value;
 			}
 		}
 
