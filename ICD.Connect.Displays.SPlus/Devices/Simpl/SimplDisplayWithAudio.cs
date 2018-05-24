@@ -56,7 +56,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_Volume = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Raw volume set to {1}", StringUtils.NiceName(m_Volume));
+				Log(eSeverity.Informational, "Raw volume set to {0}", StringUtils.NiceName(m_Volume));
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
@@ -75,7 +75,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_IsMuted = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Mute set to {1}", m_IsMuted);
+				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
