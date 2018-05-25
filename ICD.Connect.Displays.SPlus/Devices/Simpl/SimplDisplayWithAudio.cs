@@ -113,7 +113,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public SimplDisplayWithAudio()
 		{
-			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		/// <summary>
