@@ -60,7 +60,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_IsPowered = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
 
 				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
@@ -85,7 +85,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 				int? oldInput = m_HdmiInput;
 				m_HdmiInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
 				if (oldInput.HasValue)
 					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
@@ -108,7 +108,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_ScalingMode = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
+				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
 				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
