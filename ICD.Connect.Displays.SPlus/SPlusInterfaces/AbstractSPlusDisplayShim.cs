@@ -239,6 +239,9 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		{
 			base.Unsubscribe(originator);
 
+			if (originator == null)
+				return;
+
 			originator.OnHdmiInputChanged += OriginatorOnHdmiInputChanged;
 			originator.OnIsPoweredChanged += OriginatorOnIsPoweredChanged;
 			originator.OnScalingModeChanged += OriginatorOnScalingModeChanged;
