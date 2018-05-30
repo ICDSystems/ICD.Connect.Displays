@@ -10,12 +10,10 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Samsung
 {
@@ -92,7 +90,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public void SetPort(ISerialPort port)
+		protected override void ConfigurePort(ISerialPort port)
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
@@ -111,7 +109,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
+		public override void ConfigureComPort(IComPort port)
 		{
 			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
 			                    eComDataBits.ComspecDataBits8,
@@ -226,55 +224,6 @@ namespace ICD.Connect.Displays.Samsung
 		public static string RemoveCheckSum(string data)
 		{
 			return data.Substring(0, 6);
-		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(SamsungDisplaySettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-		}
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			SetPort(null);
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(SamsungDisplaySettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				if (port == null)
-					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
-			}
-
-			SetPort(port);
 		}
 
 		#endregion

@@ -92,10 +92,9 @@ namespace ICD.Connect.Displays.Nec
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public void SetPort(ISerialPort port)
+		protected override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new BoundedSerialBuffer(NecDisplayCommand.START_HEADER, NecDisplayCommand.END_MESSAGE);
 			SerialQueue queue = new SerialQueue();
@@ -103,6 +102,7 @@ namespace ICD.Connect.Displays.Nec
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 
+			
 			SetSerialQueue(queue);
 
 			if (port != null)
@@ -114,7 +114,7 @@ namespace ICD.Connect.Displays.Nec
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
+		public override void ConfigureComPort(IComPort port)
 		{
 			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
 			                    eComDataBits.ComspecDataBits8,
@@ -351,11 +351,6 @@ namespace ICD.Connect.Displays.Nec
 		{
 			base.CopySettingsFinal(settings);
 
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-
 			settings.MonitorId = MonitorId;
 		}
 
@@ -367,8 +362,6 @@ namespace ICD.Connect.Displays.Nec
 			base.ClearSettingsFinal();
 
 			MonitorId = NecDisplayCommand.MONITOR_ID_ALL;
-
-			SetPort(null);
 		}
 
 		/// <summary>
@@ -381,16 +374,6 @@ namespace ICD.Connect.Displays.Nec
 			base.ApplySettingsFinal(settings, factory);
 
 			MonitorId = settings.MonitorId ?? NecDisplayCommand.MONITOR_ID_ALL;
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-
-			if (port == null)
-				Logger.AddEntry(eSeverity.Error, "No Com Port with id {0}", settings.Port);
-
-			SetPort(port);
 		}
 
 		#endregion
