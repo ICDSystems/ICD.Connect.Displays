@@ -30,7 +30,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.ParseXml(xml);
 
-			InputCount = XmlUtils.ReadChildElementContentAsInt(xml, INPUT_COUNT_ELEMENT);
+			InputCount = XmlUtils.TryReadChildElementContentAsInt(xml, INPUT_COUNT_ELEMENT) ?? 0;
 		}
 	}
 }
