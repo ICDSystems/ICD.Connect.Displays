@@ -7,6 +7,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
@@ -113,6 +114,8 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public SimplDisplayWithAudio()
 		{
+			VolumeDeviceMin = ushort.MinValue;
+			VolumeDeviceMax = ushort.MaxValue;
 			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
@@ -195,6 +198,49 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteToggleCallback handler = MuteToggleCallback;
 			if (handler != null)
 				handler(this);
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(SimplDisplayWithAudioSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.VolumeDefault = VolumeDefault;
+			settings.VolumeSafetyMin = VolumeSafetyMin;
+			settings.VolumeSafetyMax = VolumeSafetyMax;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			VolumeSafetyMin = null;
+			VolumeSafetyMax = null;
+			VolumeDefault = null;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(SimplDisplayWithAudioSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			VolumeSafetyMin = settings.VolumeSafetyMin;
+			VolumeSafetyMax = settings.VolumeSafetyMax;
+			VolumeDefault = settings.VolumeDefault;
 		}
 
 		#endregion
