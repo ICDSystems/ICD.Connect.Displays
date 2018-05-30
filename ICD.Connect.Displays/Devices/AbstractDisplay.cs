@@ -10,9 +10,14 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
+using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -25,6 +30,8 @@ namespace ICD.Connect.Displays.Devices
 		public event EventHandler<BoolEventArgs> OnIsPoweredChanged;
 		public event DisplayHdmiInputDelegate OnHdmiInputChanged;
 		public event EventHandler<ScalingModeEventArgs> OnScalingModeChanged;
+
+		private readonly ConnectionStateManager m_ConnectionStateManager;
 
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
@@ -40,7 +47,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets and sets the serial port.
 		/// </summary>
-		protected virtual ISerialQueue SerialQueue { get; private set; }
+		protected ISerialQueue SerialQueue { get; private set; }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -118,7 +125,23 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected AbstractDisplay()
 		{
+			m_ConnectionStateManager = new ConnectionStateManager(this)
+			{
+				ConfigurePort = ConfigurePort
+			};
+			m_ConnectionStateManager.OnIsOnlineStateChanged += PortOnIsOnlineStateChanged;
+
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
+		}
+
+		protected virtual void ConfigurePort(ISerialPort port)
+		{
+			if (port is IComPort)
+				ConfigureComPort(port as IComPort);
+		}
+
+		public virtual void ConfigureComPort(IComPort comPort)
+		{
 		}
 
 		#region Methods
@@ -163,8 +186,7 @@ namespace ICD.Connect.Displays.Devices
 			base.DisposeFinal(disposing);
 
 			Unsubscribe(SerialQueue);
-		}
-
+		} 
 		#endregion
 
 		#region Private Methods
@@ -203,7 +225,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			return SerialQueue != null && SerialQueue.Port != null && SerialQueue.Port.IsOnline;
+			return SerialQueue != null 
+				&& SerialQueue.Port != null 
+				&& SerialQueue.Port.IsOnline 
+				&& m_ConnectionStateManager != null 
+				&& m_ConnectionStateManager.IsConnected;
 		}
 
 		/// <summary>
@@ -218,6 +244,11 @@ namespace ICD.Connect.Displays.Devices
 			message = string.Format("{0} - {1}", this, message);
 
 			Logger.AddEntry(severity, message);
+		}
+
+		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			UpdateCachedOnlineStatus();
 		}
 
 		#endregion
@@ -326,6 +357,53 @@ namespace ICD.Connect.Displays.Devices
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			ISerialPort port = null;
+
+			if (settings.Port != null)
+			{
+				port = factory.GetPortById((int)settings.Port) as ISerialPort;
+				if (port == null)
+					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+			}
+
+			m_ConnectionStateManager.SetPort(port);
+			UpdateCachedOnlineStatus();
+		}
+
+		/// <summary>
+		///     Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			m_ConnectionStateManager.SetPort(null);
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Port = m_ConnectionStateManager.PortNumber;
 		}
 
 		#endregion
