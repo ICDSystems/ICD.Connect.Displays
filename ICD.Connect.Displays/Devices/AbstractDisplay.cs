@@ -136,13 +136,12 @@ namespace ICD.Connect.Displays.Devices
 
 		protected virtual void ConfigurePort(ISerialPort port)
 		{
-			if(port is IComPort)
+			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
 		}
 
 		public virtual void ConfigureComPort(IComPort comPort)
 		{
-			
 		}
 
 		#region Methods
@@ -198,7 +197,6 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="serialQueue"></param>
 		protected void SetSerialQueue(ISerialQueue serialQueue)
 		{
-			Log(eSeverity.Debug, "Is Serial Queue set null? {0}", serialQueue == null);
 			Unsubscribe(SerialQueue);
 
 			if (SerialQueue != null)
@@ -227,17 +225,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			bool isonline = SerialQueue != null;
-			Log(eSeverity.Debug, "DISPLAY ONLINE STATE is " + isonline + " : serial queue null");
-			isonline = isonline && SerialQueue.Port != null;
-			Log(eSeverity.Debug, "DISPLAY ONLINE STATE is " + isonline + " : serial queue port null");
-			isonline = isonline && SerialQueue.Port.IsOnline;
-			Log(eSeverity.Debug, "DISPLAY ONLINE STATE is " + isonline + " : serial queue port online");
-			isonline = isonline && m_ConnectionStateManager != null;
-			Log(eSeverity.Debug, "DISPLAY ONLINE STATE is " + isonline + " : CSM null");
-			isonline = isonline && m_ConnectionStateManager.IsConnected;
-			Log(eSeverity.Debug, "DISPLAY ONLINE STATE is " + isonline + " : CSM online");
-			return isonline;
+			return SerialQueue != null 
+				&& SerialQueue.Port != null 
+				&& SerialQueue.Port.IsOnline 
+				&& m_ConnectionStateManager != null 
+				&& m_ConnectionStateManager.IsConnected;
 		}
 
 		/// <summary>
