@@ -128,7 +128,10 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 				if (originator == null)
 					return;
 
-				originator.HdmiInput = value;
+				// Input 0 turns into null
+				int? input = (value == 0) ? (int?)null : value;
+
+				originator.HdmiInput = input;
 			}
 		}
 

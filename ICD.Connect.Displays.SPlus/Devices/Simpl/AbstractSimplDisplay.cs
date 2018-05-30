@@ -8,6 +8,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
@@ -188,6 +189,44 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		#endregion
 
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.InputCount = InputCount;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			InputCount = 0;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			InputCount = settings.InputCount;
+		}
+
+		#endregion
+
+
 		#region Console
 
 		/// <summary>
@@ -210,6 +249,8 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
+
+			addRow("Input Count", InputCount);
 
 			DisplayConsole.BuildConsoleStatus(this, addRow);
 		}
