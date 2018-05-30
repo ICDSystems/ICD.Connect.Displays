@@ -81,7 +81,7 @@ namespace ICD.Connect.Displays.Christie
 		/// <summary>
 		///     Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public void SetPort(ISerialPort port)
+		protected override void ConfigurePort(ISerialPort port)
 		{
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
@@ -100,8 +100,9 @@ namespace ICD.Connect.Displays.Christie
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
+		public override void ConfigureComPort(IComPort port)
 		{
+			base.ConfigureComPort(port);
 			port.SetComPortSpec(eComBaudRates.ComspecBaudRate19200,
 			                    eComDataBits.ComspecDataBits8,
 			                    eComParityType.ComspecParityNone,
@@ -135,55 +136,6 @@ namespace ICD.Connect.Displays.Christie
 		private void SendCommand(string data)
 		{
 			SendCommand(new SerialData(data));
-		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		///     Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(ChristieDisplaySettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-		}
-
-		/// <summary>
-		///     Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			SetPort(null);
-		}
-
-		/// <summary>
-		///     Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(ChristieDisplaySettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				if (port == null)
-					Logger.AddEntry(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
-			}
-
-			SetPort(port);
 		}
 
 		#endregion

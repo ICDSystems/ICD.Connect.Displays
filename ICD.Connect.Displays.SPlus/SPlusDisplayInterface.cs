@@ -258,17 +258,16 @@ namespace ICD.Connect.Displays.SPlus
 			{
 				case SAMSUNG_DISPLAY:
 					SamsungDisplay samsung = new SamsungDisplay();
-					samsung.SetPort(port);
+					//samsung.SetPort(port);
 					return samsung;
 
 				case SAMSUNG_PRO_DISPLAY:
 					SamsungProDisplay samsungPro = new SamsungProDisplay();
-					samsungPro.SetPort(port);
+					//samsungPro.SetPort(port);
 					return samsungPro;
-
 				case SHARP_DISPLAY:
 					SharpDisplay sharp = new SharpDisplay();
-					sharp.SetPort(port);
+					//sharp.SetPort(port);
 					return sharp;
 
 				default:
