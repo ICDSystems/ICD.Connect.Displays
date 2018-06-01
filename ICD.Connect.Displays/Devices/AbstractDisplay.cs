@@ -236,11 +236,8 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			return SerialQueue != null 
-				&& SerialQueue.Port != null 
-				&& SerialQueue.Port.IsOnline 
-				&& m_ConnectionStateManager != null 
-				&& m_ConnectionStateManager.IsConnected;
+			return m_ConnectionStateManager != null
+				&& m_ConnectionStateManager.IsOnline;
 		}
 
 		/// <summary>
