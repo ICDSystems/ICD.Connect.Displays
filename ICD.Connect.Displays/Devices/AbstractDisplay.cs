@@ -155,6 +155,17 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Queues the command at the given priority level. Lower values are sent first.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="priority"></param>
+		[PublicAPI]
+		public void SendCommandPriority(ISerialData command, int priority)
+		{
+			SerialQueue.EnqueuePriority(command, priority);
+		}
+
+		/// <summary>
 		/// Queues the command to be sent to the device.
 		/// Replaces an existing command if it matches the comparer.
 		/// </summary>
@@ -162,7 +173,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="comparer"></param>
 		[PublicAPI]
 		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer)
-			where TData : ISerialData
+			where TData : class, ISerialData
 		{
 			SerialQueue.Enqueue(command, comparer);
 		}
@@ -240,11 +251,8 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			return SerialQueue != null 
-				&& SerialQueue.Port != null 
-				&& SerialQueue.Port.IsOnline 
-				&& m_ConnectionStateManager != null 
-				&& m_ConnectionStateManager.IsConnected;
+			return m_ConnectionStateManager != null
+				&& m_ConnectionStateManager.IsOnline;
 		}
 
 		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs eventArgs)

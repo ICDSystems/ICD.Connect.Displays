@@ -123,8 +123,8 @@ namespace ICD.Connect.Displays.Sharp
 
 		public override void PowerOn()
 		{
-			SendCommand(SharpDisplayCommands.POWER_ON);
-			SendCommand(SharpDisplayCommands.POWER_QUERY);
+			SendCommandPriority(SharpDisplayCommands.POWER_ON, 0);
+			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
 		}
 
 		public override void PowerOff()
@@ -132,8 +132,8 @@ namespace ICD.Connect.Displays.Sharp
 			// So we can PowerOn the TV later.
 			PowerOnCommand();
 
-			SendCommand(SharpDisplayCommands.POWER_OFF);
-			SendCommand(SharpDisplayCommands.POWER_QUERY);
+			SendCommandPriority(SharpDisplayCommands.POWER_OFF, 1);
+			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 1);
 		}
 
 		public override void MuteOn()
@@ -157,7 +157,7 @@ namespace ICD.Connect.Displays.Sharp
 		[PublicAPI]
 		public void PowerOnCommand()
 		{
-			SendCommand(SharpDisplayCommands.POWER_ON_COMMAND);
+			SendCommandPriority(SharpDisplayCommands.POWER_ON_COMMAND, 0);
 		}
 
 		protected override void VolumeSetRawFinal(float raw)
@@ -212,6 +212,11 @@ namespace ICD.Connect.Displays.Sharp
 		public void SendCommand(string data)
 		{
 			SendCommand(new SerialData(data));
+		}
+
+		public void SendCommandPriority(string data, int priority)
+		{
+			SendCommandPriority(new SerialData(data), priority);
 		}
 
 		public void SendCommand(string data, Func<string, string, bool> comparer)
