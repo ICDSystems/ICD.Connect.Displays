@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using ICD.Connect.Displays.Christie.JSeries;
+using ICD.Connect.Displays.Christie.Devices.JSeries;
 using NUnit.Framework;
 
 namespace ICD.Common.Utils.Tests.JSeries
