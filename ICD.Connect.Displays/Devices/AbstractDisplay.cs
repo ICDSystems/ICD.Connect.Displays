@@ -41,6 +41,11 @@ namespace ICD.Connect.Displays.Devices
 		#region Properties
 
 		/// <summary>
+		/// Gets the connection state manager instance.
+		/// </summary>
+		protected ConnectionStateManager ConnectionStateManager { get { return m_ConnectionStateManager; } }
+
+		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
 		public abstract int InputCount { get; }

@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -20,6 +21,11 @@ namespace ICD.Connect.Displays.Sharp
 	/// </summary>
 	public sealed class SharpProDisplay : AbstractDisplayWithAudio<SharpProDisplaySettings>
 	{
+		/// <summary>
+		/// TCP drops connection every 3 minutes without a command.
+		/// </summary>
+		private const long KEEP_ALIVE_INTERVAL = 2 * 60 * 1000;
+
 		public const string RETURN = "\x0D\x0A";
 
 		//private const string OK = "OK" + RETURN;
@@ -104,6 +110,7 @@ namespace ICD.Connect.Displays.Sharp
 
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
+		private readonly SafeTimer m_KeepAliveTimer;
 
 		#region Properties
 
@@ -129,6 +136,24 @@ namespace ICD.Connect.Displays.Sharp
 		public byte WallId { get; set; }
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public SharpProDisplay()
+		{
+			m_KeepAliveTimer = new SafeTimer(KeepAliveCallback, KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL);
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			m_KeepAliveTimer.Dispose();
+
+			base.DisposeFinal(disposing);
+		}
 
 		#region Methods
 
@@ -263,6 +288,15 @@ namespace ICD.Connect.Displays.Sharp
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Called periodically to maintain the connection with the display.
+		/// </summary>
+		private void KeepAliveCallback()
+		{
+			if (ConnectionStateManager.IsConnected && SerialQueue.CommandCount == 0)
+				SendCommand(POWER_QUERY);
+		}
 
 		private void SendCommand(string data)
 		{
