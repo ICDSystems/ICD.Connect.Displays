@@ -14,7 +14,7 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays.Sharp
+namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 {
 	/// <summary>
 	/// SharpProDisplay provides methods for interacting with a Sharp TV.
