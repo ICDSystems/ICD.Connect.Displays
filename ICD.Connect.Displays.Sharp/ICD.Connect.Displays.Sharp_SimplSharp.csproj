@@ -72,12 +72,12 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SharpDisplay.cs" />
-    <Compile Include="SharpDisplayCommands.cs" />
-    <Compile Include="SharpDisplaySettings.cs" />
-    <Compile Include="SharpProDisplay.cs" />
-    <Compile Include="SharpProDisplaySettings.cs" />
-    <Compile Include="SharpProSerialBuffer.cs" />
+    <Compile Include="Devices\Consumer\SharpDisplay.cs" />
+    <Compile Include="Devices\Consumer\SharpDisplayCommands.cs" />
+    <Compile Include="Devices\Consumer\SharpDisplaySettings.cs" />
+    <Compile Include="Devices\Commercial\SharpProDisplay.cs" />
+    <Compile Include="Devices\Commercial\SharpProDisplaySettings.cs" />
+    <Compile Include="Devices\Commercial\SharpProSerialBuffer.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

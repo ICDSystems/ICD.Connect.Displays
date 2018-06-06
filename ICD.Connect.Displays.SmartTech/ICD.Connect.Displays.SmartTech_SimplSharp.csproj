@@ -64,8 +64,8 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SmartTechDisplay.cs" />
-    <Compile Include="SmartTechDisplaySettings.cs" />
+    <Compile Include="Devices\SmartTechDisplay.cs" />
+    <Compile Include="Devices\SmartTechDisplaySettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
