@@ -100,7 +100,6 @@ namespace ICD.Connect.Displays.Nec.Devices
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
-
 			
 			SetSerialQueue(queue);
 
