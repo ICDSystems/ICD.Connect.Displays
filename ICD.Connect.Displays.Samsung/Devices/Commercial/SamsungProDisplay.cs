@@ -10,6 +10,7 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
