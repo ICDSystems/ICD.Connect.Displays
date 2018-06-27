@@ -270,5 +270,42 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		}
 
 		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			WallId = 0;
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(SamsungProDisplaySettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.WallId = WallId;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(SamsungProDisplaySettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			WallId = settings.WallId;
+		}
+
+		#endregion
 	}
 }
