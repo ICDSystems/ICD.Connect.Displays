@@ -6,7 +6,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -269,6 +268,43 @@ namespace ICD.Connect.Displays.Samsung
 		private void ParseError(SerialResponseEventArgs args)
 		{
 			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			WallId = 0;
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(SamsungProDisplaySettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.WallId = WallId;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(SamsungProDisplaySettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			WallId = settings.WallId;
 		}
 
 		#endregion
