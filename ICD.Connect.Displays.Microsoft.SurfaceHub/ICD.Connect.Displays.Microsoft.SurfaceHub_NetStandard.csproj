@@ -1,22 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ICD.Connect.Displays.Microsoft.SurfaceHub</RootNamespace>
-	<AssemblyName>ICD.Connect.Displays.Microsoft.SurfaceHub</AssemblyName>
-	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	<Deterministic>true</Deterministic>
+    <AssemblyName>ICD.Connect.Displays.Microsoft.SurfaceHub</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
+    <EazfuscatorActiveConfiguration>Release</EazfuscatorActiveConfiguration>
+    <EazfuscatorCompatibilityVersion>2018.2</EazfuscatorCompatibilityVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;STANDARD</DefineConstants>
   </PropertyGroup>
-  
   <PropertyGroup>
     <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE;STANDARD</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
     <Compile Remove="SIMPLSharpLogs\**" />
@@ -25,21 +26,19 @@
     <None Remove="ICD.Connect.Displays.Microsoft.SurfaceHub\**" />
     <None Remove="SIMPLSharpLogs\**" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Remove="ObfuscationSettings.cs" />
-    
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="ICD.Connect.Displays.Microsoft.projectinfo" />
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
   </ItemGroup>
-
+  <PropertyGroup>
+    <PostBuildEvent>REM Eazfuscator.NET is integrated with this project at MSBuild level: https://www.gapotchenko.com/eazfuscator.net/kb/100036</PostBuildEvent>
+  </PropertyGroup>
 </Project>
