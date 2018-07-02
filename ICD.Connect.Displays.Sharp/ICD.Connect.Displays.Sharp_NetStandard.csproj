@@ -38,7 +38,5 @@
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>REM Eazfuscator.NET is integrated with this project at MSBuild level: https://www.gapotchenko.com/eazfuscator.net/kb/100036</PostBuildEvent>
-  </PropertyGroup>
+
 </Project>
