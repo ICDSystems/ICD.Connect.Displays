@@ -85,7 +85,7 @@ namespace ICD.Connect.Displays.Devices
 				int? oldInput = m_HdmiInput;
 				m_HdmiInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput == null ? "NULL" : m_HdmiInput.ToString());
 
 				DisplayHdmiInputDelegate handler = OnHdmiInputChanged;
 				if (handler == null)
