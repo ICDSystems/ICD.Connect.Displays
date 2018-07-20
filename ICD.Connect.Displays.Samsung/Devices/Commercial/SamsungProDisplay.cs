@@ -165,6 +165,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			if (!IsPowered)
 				return;
+
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
@@ -172,6 +173,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			if (!IsPowered)
 				return;
+
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
