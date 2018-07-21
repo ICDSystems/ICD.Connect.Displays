@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
@@ -35,7 +36,8 @@ namespace ICD.Connect.Displays.Nec
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(ELEMENT_MONITOR_ID, IcdXmlConvert.ToString(MonitorId));
+			if (MonitorId != null)
+				writer.WriteElementString(ELEMENT_MONITOR_ID, StringUtils.ToIpIdString((byte)MonitorId));
 		}
 
 		/// <summary>
