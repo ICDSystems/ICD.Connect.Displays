@@ -250,7 +250,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			switch (response.Command)
 			{
 				case POWER:
-					IsPowered = response.Values[0] == 1;
+					byte powerValue = response.Values[0];
+					if (powerValue == 1)
+						IsPowered = true;
+					else if (powerValue == 0)
+						IsPowered = false;
 					return;
 
 				case VOLUME:
@@ -258,7 +262,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 					return;
 
 				case MUTE:
-					IsMuted = response.Values[0] == 1;
+					byte muteValue = response.Values[0];
+					if (muteValue == 1)
+						IsMuted = true;
+					else if (muteValue == 0)
+						IsMuted = false;
 					return;
 
 				case INPUT:
