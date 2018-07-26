@@ -23,8 +23,11 @@ namespace ICD.Connect.Displays.Samsung
 		private const byte SCREEN_MODE = 0x15;
 
 		private const byte INPUT_HDMI_1 = 0x21;
+		private const byte INPUT_HDMI_1_PC = 0x22;
 		private const byte INPUT_HDMI_2 = 0x23;
+		private const byte INPUT_HDMI_2_PC = 0x24;
 		private const byte INPUT_HDMI_3 = 0x31;
+		private const byte INPUT_HDMI_3_PC = 0x31;
 
 		private const byte ASPECT_16_X9 = 0x01;
 		private const byte ASPECT_WIDE = 0x04;
@@ -53,6 +56,13 @@ namespace ICD.Connect.Displays.Samsung
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
 			{3, INPUT_HDMI_3}
+		};
+
+		private static readonly Dictionary<int, byte> s_InputPcMap = new Dictionary<int, byte>
+		{
+			{1, INPUT_HDMI_1_PC},
+			{2, INPUT_HDMI_2_PC},
+			{3, INPUT_HDMI_3_PC}
 		};
 
 		#region Properties
@@ -250,7 +260,9 @@ namespace ICD.Connect.Displays.Samsung
 					byte inputCode = response.Values[0];
 					HdmiInput = s_InputMap.ContainsValue(inputCode)
 						            ? s_InputMap.GetKey(inputCode)
-						            : (int?)null;
+						            : s_InputPcMap.ContainsValue(inputCode)
+							              ? s_InputPcMap.GetKey(inputCode)
+							              : (int?)null;
 					break;
 
 				case SCREEN_MODE:
