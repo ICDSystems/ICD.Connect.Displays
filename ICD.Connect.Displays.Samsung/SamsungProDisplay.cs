@@ -217,6 +217,9 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			SamsungProResponse response = new SamsungProResponse(args.Response);
 
+			if (!response.IsValid)
+				return;
+
 			if (response.Id != WallId)
 				return;
 
