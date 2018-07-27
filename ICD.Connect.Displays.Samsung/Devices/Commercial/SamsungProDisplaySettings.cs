@@ -1,4 +1,5 @@
-﻿using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils;
+using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
@@ -27,7 +28,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(WALLID_ELEMENT, IcdXmlConvert.ToString(WallId));
+			writer.WriteElementString(WALLID_ELEMENT, StringUtils.ToIpIdString(WallId));
 		}
 
 		/// <summary>
