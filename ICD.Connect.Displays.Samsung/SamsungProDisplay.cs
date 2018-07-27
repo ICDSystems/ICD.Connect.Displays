@@ -28,6 +28,8 @@ namespace ICD.Connect.Displays.Samsung
 		private const byte INPUT_HDMI_2_PC = 0x24;
 		private const byte INPUT_HDMI_3 = 0x31;
 		private const byte INPUT_HDMI_3_PC = 0x31;
+		private const byte INPUT_DISPLAYPORT = 0x25;
+		private const byte INPUT_DVI = 0x18;
 
 		private const byte ASPECT_16_X9 = 0x01;
 		private const byte ASPECT_WIDE = 0x04;
@@ -55,7 +57,9 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
-			{3, INPUT_HDMI_3}
+			{3, INPUT_HDMI_3},
+			{4, INPUT_DISPLAYPORT},
+			{5, INPUT_DVI},
 		};
 
 		private static readonly Dictionary<int, byte> s_InputPcMap = new Dictionary<int, byte>
