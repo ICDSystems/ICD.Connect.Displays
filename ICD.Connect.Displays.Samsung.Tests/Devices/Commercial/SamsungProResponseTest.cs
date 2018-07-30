@@ -26,7 +26,7 @@ namespace ICD.Connect.Displays.Samsung.Tests.Devices.Commercial
 		}
 
 		[TestCase("\xAA\xFF\x00\x03\x41\x15\x10\x68", new byte[] {0x10})]
-		public void ValuesTest(string response, params byte[] expected)
+		public void ValuesTest(string response, byte[] expected)
 		{
 			byte[] values = new SamsungProResponse(response).Values;
 			Assert.IsTrue(values.SequenceEqual(expected));
