@@ -49,8 +49,8 @@ namespace ICD.Connect.Displays.Samsung
 				if (m_Bytes.Length < 7)
 					return false;
 
-				// Getting unexpected messages with header 0xAA 0xE1
-				if (m_Bytes[1] != 0xFF)
+				// Getting unsolicited (cooldown?) messages with header 0xAA 0xE1
+				if (m_Bytes[1] == 0xE1)
 					return false;
 
 				byte expected = m_Bytes[m_Bytes.Length - 1];
