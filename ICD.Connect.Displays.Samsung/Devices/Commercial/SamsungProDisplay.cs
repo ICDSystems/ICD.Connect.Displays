@@ -100,7 +100,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 10 * 1000;
+			queue.Timeout = 3 * 1000;
 
 			SetSerialQueue(queue);
 
@@ -158,6 +158,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		protected override void VolumeSetRawFinal(float raw)
 		{
 			SendCommand(new SamsungProCommand(VOLUME, WallId, (byte)raw), CommandComparer);
+
+			// Display unmutes on volume change
 			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), CommandComparer);
 		}
 
@@ -223,18 +225,49 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
+			IcdConsole.PrintLine(eConsoleColor.Magenta, StringUtils.ToHexLiteral(args.Response));
+
 			SamsungProResponse response = new SamsungProResponse(args.Response);
 
-			if (!response.IsValid)
-				return;
+			switch (response.Header)
+			{
+				case 0xAA:
+					if (response.Id != WallId)
+						return;
 
-			if (response.Id != WallId)
-				return;
+					switch (response.Code)
+					{
+						// Normal response
+						case 0xFF:
+							if (!response.IsValid)
+								return;
 
-			if (response.Success)
-				ParseSuccess(response);
-			else
-				ParseError(args);
+							if (response.Success)
+								ParseSuccess(response);
+							else
+								ParseError(args);
+							break;
+
+						// Cooldown
+						case 0xE1:
+							// Ignore unsolicited cooldown message
+							return;
+					}
+					break;
+				
+				case 0xFF:
+				case 0x1C:
+					switch (response.Code)
+					{
+						// Warmup
+						case 0x1C:
+						case 0xC4:
+							// Keep sending power query until fully powered on
+							SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+							break;
+					}
+					break;
+			}
 		}
 
 		/// <summary>
@@ -245,6 +278,10 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+
+			// Keep sending power query until fully powered on
+			if (SerialQueue.TimeoutCount < 10)
+				SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
 		}
 
 		/// <summary>
