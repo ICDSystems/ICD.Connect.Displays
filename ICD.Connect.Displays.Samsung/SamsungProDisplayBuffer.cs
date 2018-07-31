@@ -80,10 +80,6 @@ namespace ICD.Connect.Displays.Samsung
 						if (c == AbstractSamsungProCommand.HEADER)
 							m_RxData.Clear();
 
-						// Have to start with a header
-						if (c != AbstractSamsungProCommand.HEADER && m_RxData.Length == 0)
-							continue;
-
 						m_RxData.Append(c);
 
 						if (!IsComplete(m_RxData.ToString()))
@@ -107,6 +103,10 @@ namespace ICD.Connect.Displays.Samsung
 		/// <returns></returns>
 		private static bool IsComplete(string data)
 		{
+			// Hack - warmup response doesn't fit the pattern
+			if ((data.StartsWith('\xFF') || data.StartsWith('\x1C')) && data.EndsWith('\xF9'))
+				return true;
+
 			return new SamsungProResponse(data).IsValid;
 		}
 	}
