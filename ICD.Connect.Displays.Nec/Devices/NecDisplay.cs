@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -375,5 +376,16 @@ namespace ICD.Connect.Displays.Nec.Devices
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Monitor ID", MonitorId);
+		}
 	}
 }
