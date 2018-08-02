@@ -207,16 +207,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			base.QueryState();
 
+			// Important - Some SamsungPro models get really upset if you try to send commands
+			// while it's warming up. Sending the queries first by priority seems to solve this problem.
+
 			// Query the state of the device
-			SendCommand(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+			SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), int.MinValue);
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(new SamsungProCommand(VOLUME, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(INPUT, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery());
+			SerialQueue.EnqueuePriority(new SamsungProCommand(VOLUME, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(INPUT, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), int.MinValue);
 		}
 
 		/// <summary>
