@@ -16,12 +16,15 @@
     <DefineConstants>TRACE;DEBUG;STANDARD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>s
+    <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE;STANDARD</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ReferenceDocuments\**" />
     <Compile Remove="SIMPLSharpLogs\**" />
+    <EmbeddedResource Remove="ReferenceDocuments\**" />
     <EmbeddedResource Remove="SIMPLSharpLogs\**" />
+    <None Remove="ReferenceDocuments\**" />
     <None Remove="SIMPLSharpLogs\**" />
   </ItemGroup>
   <ItemGroup>
