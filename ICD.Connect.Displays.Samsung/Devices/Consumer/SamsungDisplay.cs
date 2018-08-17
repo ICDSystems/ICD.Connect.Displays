@@ -12,7 +12,6 @@ using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
-using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Consumer
@@ -74,8 +73,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{4, INPUT_HDMI_4}
 		};
 
-		private bool m_FirstCommand = true;
-
 		#region Properties
 
 		/// <summary>
@@ -95,7 +92,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			if (port is IComPort)
 				ConfigureComPort(port as IComPort);
 
-			ISerialBuffer buffer = new SamsungDisplaySerialBuffer();
+			SamsungDisplaySerialBuffer buffer = new SamsungDisplaySerialBuffer();
+			buffer.OnJunkData += BufferOnJunkData;
+
 			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
@@ -247,14 +246,13 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
+			bool power = data == POWER_ON;
+
 			data += GetCheckSum(data);
 
 			// The Samsung requires a specific suffix after the first command.
-			if (m_FirstCommand)
-			{
+			if (power)
 				data += FIRST_COMMAND_SUFFIX;
-				m_FirstCommand = false;
-			}
 
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
 		}
@@ -293,6 +291,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// HDMI
 			if (s_InputMap.Values.Contains(command))
 			{
+				IsPowered = true;
 				HdmiInput = s_InputMap.ContainsValue(command)
 					            ? s_InputMap.GetKey(command)
 					            : (int?)null;
@@ -302,6 +301,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// Scaling Mode
 			if (s_ScalingModeMap.Values.Contains(command))
 			{
+				IsPowered = true;
 				ScalingMode = s_ScalingModeMap.GetKey(command);
 				return;
 			}
@@ -309,6 +309,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// Volume
 			if (command.StartsWith(VOLUME))
 			{
+				IsPowered = true;
 				Volume = command[5];
 				IsMuted = false;
 				return;
@@ -324,9 +325,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 					return;
 
 				case MUTE_ON:
+					IsPowered = true;
 					IsMuted = true;
 					return;
 				case MUTE_OFF:
+					IsPowered = true;
 					IsMuted = false;
 					return;
 			}
@@ -338,7 +341,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
+			// Only get error responses when powered
+			IsPowered = true;
+
 			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+		}
+
+		private void BufferOnJunkData(object sender, EventArgs eventArgs)
+		{
+			IsPowered = true;
 		}
 
 		#endregion
