@@ -17,8 +17,19 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 {
 	public sealed class IrDisplayDevice : AbstractDevice<IrDisplaySettings>, IDisplay
 	{
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
 		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
 		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private readonly IrDisplayCommands m_Commands;

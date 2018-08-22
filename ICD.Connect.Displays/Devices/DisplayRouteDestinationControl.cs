@@ -14,6 +14,9 @@ namespace ICD.Connect.Displays.Devices
 	/// </summary>
 	public sealed class DisplayRouteDestinationControl : AbstractRouteInputSelectControl<IDisplay>
 	{
+		/// <summary>
+		/// Raised when an input source status changes.
+		/// </summary>
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
 
 		/// <summary>

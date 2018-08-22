@@ -146,6 +146,8 @@ namespace ICD.Connect.Displays.Proxies
 
 		#endregion
 
+		#region API
+
 		/// <summary>
 		/// Override to build initialization commands on top of the current class info.
 		/// </summary>
@@ -222,6 +224,8 @@ namespace ICD.Connect.Displays.Proxies
 					break;
 			}
 		}
+
+		#endregion
 
 		#region Console
 
