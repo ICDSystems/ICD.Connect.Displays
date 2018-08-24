@@ -28,8 +28,19 @@ namespace ICD.Connect.Displays.Devices
 	public abstract class AbstractDisplay<T> : AbstractDevice<T>, IDisplay
 		where T : IDisplaySettings, new()
 	{
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
 		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
 		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
@@ -39,6 +50,11 @@ namespace ICD.Connect.Displays.Devices
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get; set; }
 
 		/// <summary>
 		/// Gets the connection state manager instance.
@@ -235,6 +251,9 @@ namespace ICD.Connect.Displays.Devices
 
 			SerialQueue = serialQueue;
 
+			if (SerialQueue != null)
+				SerialQueue.Trust = Trust;
+
 			Subscribe(SerialQueue);
 
 			UpdateCachedOnlineStatus();
@@ -278,6 +297,7 @@ namespace ICD.Connect.Displays.Devices
 			if (serialQueue == null)
 				return;
 
+			serialQueue.OnSerialTransmission += SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse += SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout += SerialQueueOnTimeout;
 
@@ -296,6 +316,7 @@ namespace ICD.Connect.Displays.Devices
 			if (serialQueue == null)
 				return;
 
+			serialQueue.OnSerialTransmission -= SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse -= SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout -= SerialQueueOnTimeout;
 
@@ -304,6 +325,13 @@ namespace ICD.Connect.Displays.Devices
 
 			serialQueue.Port.OnIsOnlineStateChanged -= SerialQueueOnIsOnlineStateChanged;
 		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected abstract void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args);
 
 		/// <summary>
 		/// Called when a command gets a response from the physical display.
@@ -412,6 +440,8 @@ namespace ICD.Connect.Displays.Devices
 
 			m_ConnectionStateManager.SetPort(port);
 			UpdateCachedOnlineStatus();
+
+			Trust = settings.Trust;
 		}
 
 		/// <summary>
@@ -421,7 +451,8 @@ namespace ICD.Connect.Displays.Devices
 		{
 			base.ClearSettingsFinal();
 
-			m_ConnectionStateManager.SetPort(null);
+            m_ConnectionStateManager.SetPort(null);
+			Trust = false;
 		}
 
 		/// <summary>
@@ -433,6 +464,7 @@ namespace ICD.Connect.Displays.Devices
 			base.CopySettingsFinal(settings);
 
 			settings.Port = m_ConnectionStateManager.PortNumber;
+			settings.Trust = Trust;
 		}
 
 		#endregion

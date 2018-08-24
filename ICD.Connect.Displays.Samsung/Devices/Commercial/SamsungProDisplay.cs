@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using ICD.Common.Properties;
+﻿using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
@@ -43,8 +42,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
-		private static readonly Dictionary<eScalingMode, byte> s_ScalingModeMap =
-			new Dictionary<eScalingMode, byte>
+		private static readonly BiDictionary<eScalingMode, byte> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, byte>
 			{
 				{eScalingMode.Wide16X9, ASPECT_16_X9},
 				{eScalingMode.Square4X3, ASPECT_4_X3},
@@ -55,7 +54,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
-		private static readonly Dictionary<int, byte> s_InputMap = new Dictionary<int, byte>
+		private static readonly BiDictionary<int, byte> s_InputMap = new BiDictionary<int, byte>
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
@@ -64,7 +63,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			{5, INPUT_DVI},
 		};
 
-		private static readonly Dictionary<int, byte> s_InputPcMap = new Dictionary<int, byte>
+		private static readonly BiDictionary<int, byte> s_InputPcMap = new BiDictionary<int, byte>
 		{
 			{1, INPUT_HDMI_1_PC},
 			{2, INPUT_HDMI_2_PC},
@@ -138,12 +137,12 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(new SamsungProCommand(INPUT, WallId, s_InputMap[address]));
+			SendCommand(new SamsungProCommand(INPUT, WallId, s_InputMap.GetValue(address)));
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendCommand(new SamsungProCommand(SCREEN_MODE, WallId, s_ScalingModeMap[mode]));
+			SendCommand(new SamsungProCommand(SCREEN_MODE, WallId, s_ScalingModeMap.GetValue(mode)));
 		}
 
 		public override void MuteOn()
@@ -220,6 +219,44 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SerialQueue.EnqueuePriority(new SamsungProCommand(INPUT, WallId, 0).ToQuery(), int.MinValue);
 			SerialQueue.EnqueuePriority(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery(), int.MinValue);
 			SerialQueue.EnqueuePriority(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), int.MinValue);
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			SamsungProCommand command = args.Data as SamsungProCommand;
+			if (command == null)
+				return;
+
+			switch (command.Command)
+			{
+				case POWER:
+					IsPowered = command.Data == 1;
+					return;
+
+				case VOLUME:
+					Volume = command.Data;
+					return;
+
+				case MUTE:
+					IsMuted = command.Data == 1;
+					return;
+
+				case INPUT:
+					HdmiInput = s_InputMap.GetKey(command.Data);
+					return;
+
+				case SCREEN_MODE:
+					ScalingMode = s_ScalingModeMap.GetKey(command.Data);
+					return;
+			}
 		}
 
 		/// <summary>

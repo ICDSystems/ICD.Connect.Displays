@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Displays.Devices;
@@ -68,8 +68,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// <summary>
 		/// Maps the Sharp view mode to the command.
 		/// </summary>
-		private static readonly Dictionary<int, string> s_ViewModeMap =
-			new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_ViewModeMap =
+			new BiDictionary<int, string>
 			{
 				{2, SCALING_MODE_4_X3},
 				{3, SCALING_MODE_ZOOM},
@@ -80,8 +80,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
-		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-			new Dictionary<eScalingMode, string>
+		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, SCALING_MODE_16_X9},
 				{eScalingMode.Square4X3, SCALING_MODE_4_X3},
@@ -92,7 +92,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
-		private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2}
@@ -102,7 +102,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// The display simply gives us a numeric value for the HDMI input, so we do a reverse
 		/// lookup to figure out which physical input we are on.
 		/// </summary>
-		private static readonly Dictionary<int, int> s_ResponseToInputMap = new Dictionary<int, int>
+		private static readonly BiDictionary<int, int> s_ResponseToInputMap = new BiDictionary<int, int>
 		{
 			{INPUT_HDMI_1_NUMERIC, 1},
 			{INPUT_HDMI_2_NUMERIC, 2}
@@ -259,7 +259,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(s_InputMap[address]);
+			SendCommand(s_InputMap.GetValue(address));
 			SendCommand(INPUT_HDMI_QUERY);
 		}
 
@@ -281,7 +281,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// <param name="mode"/>
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendCommand(s_ScalingModeMap[mode]);
+			SendCommand(s_ScalingModeMap.GetValue(mode));
 			SendCommand(SCALING_MODE_QUERY);
 		}
 
@@ -325,6 +325,19 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			SendCommand(MUTE_QUERY);
 			SendCommand(SCALING_MODE_QUERY);
 			SendCommand(VOLUME_QUERY);
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -381,14 +394,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 				case INPUT_HDMI_QUERY:
 					HdmiInput = s_ResponseToInputMap.ContainsKey(responseValue)
-						            ? s_ResponseToInputMap[responseValue]
+						            ? s_ResponseToInputMap.GetValue(responseValue)
 						            : (int?)null;
 					break;
 
 				case SCALING_MODE_QUERY:
 					if (s_ViewModeMap.ContainsKey(responseValue))
 					{
-						string command = s_ViewModeMap[responseValue];
+						string command = s_ViewModeMap.GetValue(responseValue);
 						ScalingMode = s_ScalingModeMap.GetKey(command);
 					}
 					else

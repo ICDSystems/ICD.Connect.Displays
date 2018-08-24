@@ -31,11 +31,21 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		private bool m_Trust;
 		private bool m_IsPowered;
 		private int? m_HdmiInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get { return m_Trust; }
+			set
+			{
+				CallMethod(DisplayApi.PROPERTY_TRUST);
+			} }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -160,6 +170,7 @@ namespace ICD.Connect.Displays.Proxies
 			                 .SubscribeEvent(DisplayApi.EVENT_IS_POWERED)
 			                 .SubscribeEvent(DisplayApi.EVENT_HDMI_INPUT)
 			                 .SubscribeEvent(DisplayApi.EVENT_SCALING_MODE)
+							 .GetProperty(DisplayApi.PROPERTY_TRUST)
 			                 .GetProperty(DisplayApi.PROPERTY_IS_POWERED)
 			                 .GetProperty(DisplayApi.PROPERTY_INPUT_COUNT)
 			                 .GetProperty(DisplayApi.PROPERTY_HDMI_INPUT)
@@ -207,6 +218,10 @@ namespace ICD.Connect.Displays.Proxies
 
 			switch (name)
 			{
+				case DisplayApi.PROPERTY_TRUST:
+					m_Trust = result.GetValue<bool>();
+					break;
+
 				case DisplayApi.PROPERTY_IS_POWERED:
 					IsPowered = result.GetValue<bool>();
 					break;

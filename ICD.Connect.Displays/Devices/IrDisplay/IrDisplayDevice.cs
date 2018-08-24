@@ -32,6 +32,11 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		bool IDisplay.Trust { get; set; }
+
 		private readonly IrDisplayCommands m_Commands;
 
 		private IIrPort m_Port;

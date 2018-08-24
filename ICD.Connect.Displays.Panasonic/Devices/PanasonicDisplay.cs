@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -46,8 +46,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
-		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-            new Dictionary<eScalingMode, string>
+		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, ASPECT_16_X9},
 				{eScalingMode.Square4X3, ASPECT_4_X3},
@@ -58,7 +58,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         /// <summary>
         /// Maps index to an input command.
         /// </summary>
-        private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI}
 		};
@@ -168,12 +168,12 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
         public override void SetHdmiInput(int address)
         {
-            SendNonFormattedCommand(s_InputMap[address]);
+            SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
 
         public override void SetScalingMode(eScalingMode mode)
         {
-            SendNonFormattedCommand(s_ScalingModeMap[mode]);
+            SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
         }
 
         /// <summary>
@@ -217,7 +217,53 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
         }
 
-        /// <summary>
+	    /// <summary>
+	    /// Called when a command is sent to the physical display.
+	    /// </summary>
+	    /// <param name="sender"></param>
+	    /// <param name="args"></param>
+	    protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+	    {
+		    if (!Trust)
+			    return;
+
+		    string command = args.Data.Serialize();
+
+		    if (s_InputMap.ContainsValue(command))
+		    {
+			    HdmiInput = s_InputMap.GetKey(command);
+			    return;
+		    }
+
+		    if (s_ScalingModeMap.ContainsValue(command))
+		    {
+			    ScalingMode = s_ScalingModeMap.GetKey(command);
+			    return;
+		    }
+
+		    switch (command)
+		    {
+			    case MUTE_ON:
+				    IsMuted = true;
+				    return;
+
+				case MUTE_OFF:
+				    IsMuted = false;
+				    return;
+		    }
+
+			// Volume set "\x02ADZZ;AVL:{0}\x03";
+		    if (command.StartsWith("\x02ADZZ;AVL:"))
+		    {
+			    command = command.Replace("\x02ADZZ;AVL:", string.Empty)
+			                     .Replace("\x03", string.Empty)
+			                     .Trim();
+
+			    Volume = int.Parse(command);
+		    }
+	    }
+
+	    /// <summary>
         /// Called when a command gets a response from the physical display.
         /// </summary>
         /// <param name="sender"></param>
@@ -291,23 +337,23 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             {
                 case "0":
                     if (s_ScalingModeMap.ContainsValue(ASPECT_AUTO))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap[k] == ASPECT_AUTO);
+                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_AUTO);
                     break;
                 case "1":
                     if (s_ScalingModeMap.ContainsValue(ASPECT_4_X3))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap[k] == ASPECT_4_X3);
+						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_4_X3);
                     break;
                 case "2":
                     if (s_ScalingModeMap.ContainsValue(ASPECT_16_X9))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap[k] == ASPECT_16_X9);
+						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_16_X9);
                     break;
                 case "5":
                     if (s_ScalingModeMap.ContainsValue(ASPECT_NATIVE))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap[k] == ASPECT_NATIVE);
+						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_NATIVE);
                     break;
                 case "6":
                     if (s_ScalingModeMap.ContainsValue(ASPECT_FULL))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap[k] == ASPECT_FULL);
+						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_FULL);
                     break;
             }
             return eScalingMode.Unknown;

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -53,8 +52,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
-		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-			new Dictionary<eScalingMode, string>
+		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, ASPECT_16_X9},
 				{eScalingMode.Square4X3, ASPECT_4_X3},
@@ -65,7 +64,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
-		private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
@@ -157,7 +156,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			if (!IsPowered)
 				return;
-			SendNonFormattedCommand(VOLUME + (char)(ushort)raw, VolumeComparer);
+
+			SendNonFormattedCommand(VOLUME + (char)(byte)raw, VolumeComparer);
 		}
 
 		/// <summary>
@@ -175,6 +175,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			if (!IsPowered)
 				return;
+
 			SendNonFormattedCommand(VOLUME_UP);
 		}
 
@@ -182,12 +183,13 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			if (!IsPowered)
 				return;
+
 			SendNonFormattedCommand(VOLUME_DOWN);
 		}
 
 		public override void SetHdmiInput(int address)
 		{
-			SendNonFormattedCommand(s_InputMap[address]);
+			SendNonFormattedCommand(s_InputMap.GetValue(address));
 		}
 
 		/// <summary>
@@ -196,7 +198,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="mode"/>
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendNonFormattedCommand(s_ScalingModeMap[mode]);
+			SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
 		}
 
 		/// <summary>
@@ -255,6 +257,69 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				data += FIRST_COMMAND_SUFFIX;
 
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			string command = args.Data.Serialize();
+
+			command = command.TrimEnd('\r');
+
+			// Remove the checksum
+			command = command.Substring(0, command.Length - 1);
+
+			switch (command)
+			{
+				case POWER_ON:
+					IsPowered = true;
+					return;
+
+				case POWER_OFF:
+					IsPowered = false;
+					return;
+
+				case POWER_TOGGLE:
+					IsPowered = !IsPowered;
+					return;
+
+				case MUTE_ON:
+					IsMuted = true;
+					return;
+
+				case MUTE_OFF:
+					IsMuted = false;
+					return;
+
+				case MUTE_TOGGLE:
+					IsMuted = !IsMuted;
+					return;
+			}
+
+			if (command.StartsWith(VOLUME))
+			{
+				Volume = (byte)command[command.Length - 1];
+				return;
+			}
+
+			if (s_InputMap.ContainsValue(command))
+			{
+				HdmiInput = s_InputMap.GetKey(command);
+				return;
+			}
+
+			if (s_ScalingModeMap.ContainsValue(command))
+			{
+				ScalingMode = s_ScalingModeMap.GetKey(command);
+				return;
+			}
 		}
 
 		/// <summary>

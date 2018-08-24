@@ -8,9 +8,12 @@ namespace ICD.Connect.Displays.Settings
 	public abstract class AbstractDisplaySettings : AbstractDeviceSettings, IDisplaySettings
 	{
 		private const string PORT_ELEMENT = "Port";
+		private const string TRUST_ELEMENT = "Trust";
 
 		[OriginatorIdSettingsProperty(typeof(ISerialPort))]
 		public int? Port { get; set; }
+
+		public bool Trust { get; set; }
 
 		/// <summary>
 		/// Write settings elements to xml.
@@ -21,6 +24,7 @@ namespace ICD.Connect.Displays.Settings
 			base.WriteElements(writer);
 
 			writer.WriteElementString(PORT_ELEMENT, Port == null ? null : IcdXmlConvert.ToString((int)Port));
+			writer.WriteElementString(TRUST_ELEMENT, IcdXmlConvert.ToString(Trust));
 		}
 
 		/// <summary>
@@ -32,6 +36,7 @@ namespace ICD.Connect.Displays.Settings
 			base.ParseXml(xml);
 
 			Port = XmlUtils.TryReadChildElementContentAsInt(xml, PORT_ELEMENT);
+			Trust = XmlUtils.TryReadChildElementContentAsBoolean(xml, TRUST_ELEMENT) ?? false;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -39,21 +40,21 @@ namespace ICD.Connect.Displays.Christie.Devices
 		private const string ASPECT_4_X3 = COMMAND_HEADER + "\x9E\xD0\x01\x00\x08\x20\x00\x00";
 		private const string ASPECT_QUERY = COMMAND_HEADER + "\xAD\xD0\x02\x00\x08\x20\x00\x00";
 
-		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-			new Dictionary<eScalingMode, string>
+		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, ASPECT_16_X9},
 				{eScalingMode.Square4X3, ASPECT_4_X3},
 				{eScalingMode.NoScale, ASPECT_NORMAL}
 			};
 
-		private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2}
 		};
 
-		private static readonly Dictionary<bool, string> s_PowerMap = new Dictionary<bool, string>
+		private static readonly BiDictionary<bool, string> s_PowerMap = new BiDictionary<bool, string>
 		{
 			{true, POWER_ON},
 			{false, POWER_OFF}
@@ -123,12 +124,12 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 		public override void SetHdmiInput(int address)
 		{
-			SendCommand(s_InputMap[address]);
+			SendCommand(s_InputMap.GetValue(address));
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendCommand(s_ScalingModeMap[mode]);
+			SendCommand(s_ScalingModeMap.GetValue(mode));
 		}
 
 		private void SendCommand(string data)
@@ -140,6 +141,42 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 		#region Private Methods
 
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			string command = args.Data.Serialize();
+
+			if (s_PowerMap.ContainsValue(command))
+			{
+				IsPowered = s_PowerMap.GetKey(command);
+				return;
+			}
+
+			if (s_InputMap.ContainsValue(command))
+			{
+				HdmiInput = s_InputMap.GetKey(command);
+				return;
+			}
+
+			if (s_ScalingModeMap.ContainsValue(command))
+			{
+				ScalingMode = s_ScalingModeMap.GetKey(command);
+				return;
+			}
+		}
+
+		/// <summary>
+		/// Called when a command gets a response from the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
 			string data = args.Response;
@@ -175,7 +212,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 		}
 
 		/// <summary>
-		///     Called when a command is successful.
+		/// Called when a command is successful.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParseSuccess(SerialResponseEventArgs args)
@@ -239,7 +276,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			}
 			else
 			{
-				string command = s_InputMap[m_RequestedInput.Value];
+				string command = s_InputMap.GetValue(m_RequestedInput.Value);
 				if (m_RequestedInput == responseInput || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
 					HdmiInput = responseInput;
@@ -264,7 +301,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			}
 			else
 			{
-				string command = s_ScalingModeMap[m_RequestedAspect.Value];
+				string command = s_ScalingModeMap.GetValue(m_RequestedAspect.Value);
 				if (m_RequestedAspect == responseScalingMode || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
 					ScalingMode = responseScalingMode;
@@ -288,7 +325,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			}
 			else
 			{
-				string command = s_PowerMap[m_RequestedPowerStatus.Value];
+				string command = s_PowerMap.GetValue(m_RequestedPowerStatus.Value);
 				if (m_RequestedPowerStatus == responsePower || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
 					IsPowered = responsePower;

@@ -15,10 +15,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay
 		where TSettings : AbstractSimplDisplaySettings, new()
 	{
-		private bool m_IsPowered;
-		private int? m_HdmiInput;
-		private eScalingMode m_ScalingMode;
-
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
@@ -34,6 +30,10 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		private bool m_IsPowered;
+		private int? m_HdmiInput;
+		private eScalingMode m_ScalingMode;
+
 		#region Callbacks
 
 		public SimplDisplayPowerOnCallback PowerOnCallback { get; set; }
@@ -47,6 +47,11 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		#endregion
 
 		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get; set; }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -153,6 +158,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOnCallback handler = PowerOnCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = true;
 		}
 
 		/// <summary>
@@ -163,6 +171,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOffCallback handler = PowerOffCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = false;
 		}
 
 		/// <summary>
@@ -174,6 +185,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplaySetHdmiInputCallback handler = SetHdmiInputCallback;
 			if (handler != null)
 				handler(this, address);
+
+			if (Trust)
+				HdmiInput = address;
 		}
 
 		/// <summary>
@@ -185,6 +199,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplaySetScalingModeCallback handler = SetScalingModeCallback;
 			if (handler != null)
 				handler(this, mode);
+
+			if (Trust)
+				ScalingMode = mode;
 		}
 
 		#endregion
@@ -200,6 +217,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			base.CopySettingsFinal(settings);
 
 			settings.InputCount = InputCount;
+			settings.Trust = Trust;
 		}
 
 		/// <summary>
@@ -210,6 +228,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			base.ClearSettingsFinal();
 
 			InputCount = 0;
+			Trust = false;
 		}
 
 		/// <summary>
@@ -222,10 +241,10 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			base.ApplySettingsFinal(settings, factory);
 
 			InputCount = settings.InputCount;
+			Trust = settings.Trust;
 		}
 
 		#endregion
-
 
 		#region Console
 
