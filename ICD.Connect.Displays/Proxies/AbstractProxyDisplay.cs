@@ -41,11 +41,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// <summary>
 		/// When true assume TX is successful even if a request times out.
 		/// </summary>
-		public bool Trust { get { return m_Trust; }
-			set
-			{
-				CallMethod(DisplayApi.PROPERTY_TRUST);
-			} }
+		public bool Trust { get { return m_Trust; } set { SetProperty(DisplayApi.PROPERTY_TRUST, value); } }
 
 		/// <summary>
 		/// Gets the powered state.
