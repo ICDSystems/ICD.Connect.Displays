@@ -15,13 +15,12 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays.Sharp.Devices.PN
+namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 {
 	/// <summary>
-	/// Driver for the Sharp PN professional series of displays.
-	/// PN uses the same API as the consumer model and a baud of 115200.
+	/// Driver for the Sharp professional displays that use the consumer API.
 	/// </summary>
-	public sealed class SharpPnDisplay : AbstractDisplayWithAudio<SharpPnDisplaySettings>
+	public sealed class SharpProsumerDisplay : AbstractDisplayWithAudio<SharpProsumerDisplaySettings>
 	{
 		/// <summary>
 		/// TCP drops connection every 3 minutes without a command.
@@ -94,7 +93,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.PN
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public SharpPnDisplay()
+		public SharpProsumerDisplay()
 		{
 			m_KeepAliveTimer = new SafeTimer(KeepAliveCallback, KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL);
 		}
