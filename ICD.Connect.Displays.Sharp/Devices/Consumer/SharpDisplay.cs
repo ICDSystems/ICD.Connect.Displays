@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Displays.Devices;
@@ -31,8 +31,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// <summary>
 		/// Maps the Sharp view mode to the command.
 		/// </summary>
-		private static readonly Dictionary<int, string> s_ViewModeMap =
-			new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_ViewModeMap =
+			new BiDictionary<int, string>
 			{
 				{2, SharpDisplayCommands.SCALING_MODE_4_X3},
 				{3, SharpDisplayCommands.SCALING_MODE_ZOOM},
@@ -43,8 +43,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
-		private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-			new Dictionary<eScalingMode, string>
+		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, SharpDisplayCommands.SCALING_MODE_16_X9},
 				{eScalingMode.Square4X3, SharpDisplayCommands.SCALING_MODE_4_X3},
@@ -55,7 +55,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
-		private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, SharpDisplayCommands.INPUT_HDMI_1},
 			{2, SharpDisplayCommands.INPUT_HDMI_2},
@@ -227,7 +227,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// <param name="mode" />
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendCommand(s_ScalingModeMap[mode]);
+			SendCommand(s_ScalingModeMap.GetValue(mode));
 			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
 		}
 
@@ -309,6 +309,19 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		}
 
 		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
 		/// Called when a command gets a response from the physical display.
 		/// </summary>
 		/// <param name="sender"></param>
@@ -375,7 +388,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 					if (m_RequestedInput != null)
 						if (responseValue != (int)m_RequestedInput)
 						{
-							SendCommand(s_InputMap[(int)m_RequestedInput]);
+							SendCommand(s_InputMap.GetValue((int)m_RequestedInput));
 							SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 						}
 						else
@@ -385,7 +398,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 				case SharpDisplayCommands.SCALING_MODE_QUERY:
 					if (s_ViewModeMap.ContainsKey(responseValue))
 					{
-						string command = s_ViewModeMap[responseValue];
+						string command = s_ViewModeMap.GetValue(responseValue);
 						ScalingMode = s_ScalingModeMap.GetKey(command);
 					}
 					else

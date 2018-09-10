@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -71,12 +73,16 @@ namespace ICD.Connect.Displays.Nec.Devices
             {3, INPUT_HDMI_3}
 		};
 
+		#region Properties
+
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
 		public override int InputCount { get { return s_InputMap.Count; } }
 
 		public byte MonitorId { get; set; }
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -219,6 +225,23 @@ namespace ICD.Connect.Displays.Nec.Devices
 			return commandA.MessageType == commandB.MessageType &&
 			       commandA.OpCodePage == commandB.OpCodePage &&
 			       commandA.OpCode == commandB.OpCode;
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			NecDisplayCommand command = args.Data as NecDisplayCommand;
+			if (command == null)
+				return;
+
+			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -375,5 +398,16 @@ namespace ICD.Connect.Displays.Nec.Devices
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Monitor ID", MonitorId);
+		}
 	}
 }

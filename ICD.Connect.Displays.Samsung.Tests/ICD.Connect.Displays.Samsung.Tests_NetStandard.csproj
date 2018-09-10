@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-	<RootNamespace>ICD.Connect.Displays.Christie.Tests</RootNamespace>
-	<AssemblyName>ICD.Connect.Displays.Christie.Tests</AssemblyName>
+	<RootNamespace>ICD.Connect.Displays.Samsung.Tests</RootNamespace>
+	<AssemblyName>ICD.Connect.Displays.Samsung.Tests</AssemblyName>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ICD.Connect.Displays.Christie\ICD.Connect.Displays.Christie_NetStandard.csproj" />
+    <ProjectReference Include="..\ICD.Connect.Displays.Samsung\ICD.Connect.Displays.Samsung_NetStandard.csproj" />
   </ItemGroup>
 
   <ItemGroup>

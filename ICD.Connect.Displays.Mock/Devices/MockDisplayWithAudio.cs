@@ -110,6 +110,15 @@ namespace ICD.Connect.Displays.Mock.Devices
 		}
 
 		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+		}
+
+		/// <summary>
 		/// Called when a command gets a response from the physical display.
 		/// </summary>
 		/// <param name="sender"></param>

@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Properties;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
 	public abstract class AbstractSamsungProCommand : ISerialData
 	{
-		protected const byte ID_ALL = 0xFE;
+		public const byte ID_ALL = 0xFE;
 		public const byte HEADER = 0xAA;
 
 		private readonly byte m_Command;
@@ -22,16 +21,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// Gets the command id.
 		/// </summary>
 		public byte Id { get { return m_Id; } }
-
-		/// <summary>
-		/// Creates the command for all ids.
-		/// </summary>
-		/// <param name="command"></param>
-		[PublicAPI]
-		protected AbstractSamsungProCommand(byte command)
-			: this(command, ID_ALL)
-		{
-		}
 
 		/// <summary>
 		/// Creates the command for the given id.
@@ -81,16 +70,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		public byte Data { get { return m_Data; } }
 
 		/// <summary>
-		/// Creates the command for all ids.
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="data"></param>
-		public SamsungProCommand(byte command, byte data)
-			: this(command, ID_ALL, data)
-		{
-		}
-
-		/// <summary>
 		/// Creates the command for the given id.
 		/// </summary>
 		/// <param name="command"></param>
@@ -126,15 +105,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 	public sealed class SamsungProQuery : AbstractSamsungProCommand
 	{
-		/// <summary>
-		/// Creates the command for all ids.
-		/// </summary>
-		/// <param name="command"></param>
-		public SamsungProQuery(byte command)
-			: base(command)
-		{
-		}
-
 		/// <summary>
 		/// Creates the command for the given id.
 		/// </summary>

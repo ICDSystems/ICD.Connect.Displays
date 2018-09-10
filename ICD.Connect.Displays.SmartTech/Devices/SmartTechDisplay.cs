@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -59,8 +58,8 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// <summary>
         /// Maps scaling mode to command.
         /// </summary>
-        private static readonly Dictionary<eScalingMode, string> s_ScalingModeMap =
-            new Dictionary<eScalingMode, string>
+        private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
+			new BiDictionary<eScalingMode, string>
 			{
 				{eScalingMode.Wide16X9, ASPECT_WIDE},
 				{eScalingMode.Square4X3, ASPECT_NORMAL},
@@ -71,14 +70,19 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// <summary>
         /// Maps index to an input command.
         /// </summary>
-        private static readonly Dictionary<int, string> s_InputMap = new Dictionary<int, string>
+		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI1},
             {2, INPUT_HDMI2},
 			{3, INPUT_HDMI3}
 		};
 
-        #region Methods
+	    /// <summary>
+	    /// Gets the number of HDMI inputs.
+	    /// </summary>
+	    public override int InputCount { get { return s_InputMap.Count; } }
+
+	    #region Methods
         /// <summary>
         /// Sets and configures the port for communication with the physical display.
         /// </summary>
@@ -130,12 +134,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
                                 false);
         }
 
-        /// <summary>
-        /// Gets the number of HDMI inputs.
-        /// </summary>
-        public override int InputCount { get { return s_InputMap.Count; } }
-
-        public override void PowerOn()
+	    public override void PowerOn()
         {
             SendNonFormattedCommand(POWER_ON);
         }
@@ -147,18 +146,14 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 
         public override void SetHdmiInput(int address)
         {
-            if (s_InputMap.ContainsKey(address))
-            {
-                SendNonFormattedCommand(s_InputMap[address]);
-            }
+	        if (s_InputMap.ContainsKey(address))
+		        SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
 
         public override void SetScalingMode(eScalingMode mode)
         {
-            if (s_ScalingModeMap.ContainsKey(mode))
-            {
-                SendNonFormattedCommand(s_ScalingModeMap[mode]);
-            }
+	        if (s_ScalingModeMap.ContainsKey(mode))
+		        SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
         }
 
         /// <summary>
@@ -218,7 +213,62 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             Log(eSeverity.Alert, "Command Timed Out: " + args.Data.Serialize());
         }
 
-        /// <summary>
+	    /// <summary>
+	    /// Called when a command is sent to the physical display.
+	    /// </summary>
+	    /// <param name="sender"></param>
+	    /// <param name="args"></param>
+	    protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+	    {
+		    if (!Trust)
+			    return;
+
+		    string command = args.Data.Serialize();
+
+			// Strip the carriage return
+		    command = command.TrimEnd(CARR_RETURN);
+
+		    switch (command)
+		    {
+			    case POWER_ON:
+				    IsPowered = true;
+				    return;
+
+				case POWER_OFF:
+				    IsPowered = false;
+					return;
+
+				case MUTE_ON:
+				    IsMuted = true;
+					return;
+
+				case MUTE_OFF:
+				    IsMuted = false;
+					return;
+		    }
+
+		    if (s_InputMap.ContainsValue(command))
+		    {
+			    HdmiInput = s_InputMap.GetKey(command);
+			    return;
+		    }
+
+		    if (s_ScalingModeMap.ContainsValue(command))
+		    {
+			    ScalingMode = s_ScalingModeMap.GetKey(command);
+			    return;
+		    }
+
+			// Volume set "set volume={0}"
+		    if (command.StartsWith("set volume="))
+		    {
+			    command = command.Replace("set volume=", string.Empty).Trim();
+			    Volume = int.Parse(command);
+			    return;
+		    }
+	    }
+
+	    /// <summary>
         /// Called when a command gets a response from the physical display.
         /// </summary>
         /// <param name="sender"></param>

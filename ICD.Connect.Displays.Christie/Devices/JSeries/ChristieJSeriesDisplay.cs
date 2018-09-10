@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Nodes;
@@ -130,13 +131,17 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		public override void PowerOn()
 		{
 			SendCommand(string.Format(POWER, (int)ePowerState.PowerOn));
-			SendCommand(string.Format(POWER, QUERY));
+
+			if (!Trust)
+				SendCommand(string.Format(POWER, QUERY));
 		}
 
 		public override void PowerOff()
 		{
 			SendCommand(string.Format(POWER, (int)ePowerState.PowerOff));
-			SendCommand(string.Format(POWER, QUERY));
+
+			if (!Trust)
+				SendCommand(string.Format(POWER, QUERY));
 		}
 
 		public override void SetHdmiInput(int address)
@@ -145,7 +150,9 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 				throw new ArgumentOutOfRangeException("address");
 
 			SendCommand(string.Format(INPUT, INPUT_HDMI_1));
-			SendCommand(string.Format(INPUT, QUERY));
+
+			if (!Trust)
+				SendCommand(string.Format(INPUT, QUERY));
 		}
 
 		public override void SetScalingMode(eScalingMode mode)
@@ -191,6 +198,34 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize());
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			string command = args.Data.Serialize();
+
+			if (command.Contains(QUERY))
+				return;
+
+			if (command.Contains("PWR"))
+			{
+				IsPowered = command.Contains("1");
+				return;
+			}
+
+			if (command.Contains("SIN"))
+			{
+				HdmiInput = 1;
+				return;
+			}
 		}
 
 		/// <summary>

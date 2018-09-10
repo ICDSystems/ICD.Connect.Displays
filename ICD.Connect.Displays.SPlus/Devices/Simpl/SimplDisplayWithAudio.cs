@@ -148,6 +148,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioSetVolumeCallback handler = SetVolumeCallback;
 			if (handler != null)
 				handler(this, raw);
+
+			if (Trust)
+				Volume = raw;
 		}
 
 		/// <summary>
@@ -178,6 +181,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteOnCallback handler = MuteOnCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = true;
 		}
 
 		/// <summary>
@@ -188,6 +194,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteOffCallback handler = MuteOffCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = false;
 		}
 
 		/// <summary>
@@ -198,6 +207,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteToggleCallback handler = MuteToggleCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = !IsMuted;
 		}
 
 		#endregion
