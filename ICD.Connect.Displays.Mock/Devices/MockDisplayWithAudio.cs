@@ -1,6 +1,9 @@
-﻿using ICD.Connect.Displays.Devices;
+﻿using System.Linq;
+using ICD.Common.Utils.Services;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
+using ICD.Connect.Routing.RoutingGraphs;
 
 namespace ICD.Connect.Displays.Mock.Devices
 {
@@ -10,10 +13,28 @@ namespace ICD.Connect.Displays.Mock.Devices
 	/// </summary>
 	public sealed class MockDisplayWithAudio : AbstractDisplayWithAudio<MockDisplayWithAudioSettings>
 	{
+		private IRoutingGraph m_CachedRoutingGraph;
+
+		/// <summary>
+		/// Gets the routing graph.
+		/// </summary>
+		public IRoutingGraph RoutingGraph
+		{
+			get { return m_CachedRoutingGraph = m_CachedRoutingGraph ?? ServiceProvider.GetService<IRoutingGraph>(); }
+		}
+
 		/// <summary>
 		/// Gets the number of HDMI inputs.
 		/// </summary>
-		public override int InputCount { get { return 1; } }
+		public override int InputCount
+		{
+			get
+			{
+				return RoutingGraph.Connections
+				                   .GetInputConnections(Id, 0)
+				                   .Count();
+			}
+		}
 
 		#region Methods
 
