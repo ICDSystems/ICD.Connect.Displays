@@ -7,7 +7,7 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices
 {
-	public sealed class DisplayVolumeDeviceControl : AbstractVolumeRawLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
+	public sealed class DisplayVolumeDeviceControl : AbstractVolumeLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
 	{
 		#region Properties
 
@@ -107,7 +107,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Increments the raw volume once.
 		/// </summary>
-		public override void VolumeLevelIncrement()
+		public override void VolumeIncrement()
 		{
 			Parent.VolumeUpIncrement();
 		}
@@ -115,7 +115,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Decrements the raw volume once.
 		/// </summary>
-		public override void VolumeLevelDecrement()
+		public override void VolumeDecrement()
 		{
 			Parent.VolumeDownIncrement();
 		}
