@@ -7,7 +7,7 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices
 {
-	public sealed class DisplayVolumeDeviceControl : AbstractVolumeRawLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
+	public sealed class DisplayVolumeDeviceControl : AbstractVolumeLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
 	{
 		#region Properties
 
@@ -36,7 +36,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public override float? VolumeRawMax { get { return Parent.VolumeSafetyMax; }}
 
-		public override float VolumeRaw
+		public override float VolumeLevel
 		{
 			get { return Parent.Volume; }
 		}
@@ -82,7 +82,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the raw volume. This will be clamped to the min/max and safety min/max.
 		/// </summary>
 		/// <param name="volume"></param>
-		public override void SetVolumeRaw(float volume)
+		public override void SetVolumeLevel(float volume)
 		{
 			Parent.SetVolume(volume);
 		}
@@ -107,7 +107,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Increments the raw volume once.
 		/// </summary>
-		public override void VolumeLevelIncrement()
+		public override void VolumeIncrement()
 		{
 			Parent.VolumeUpIncrement();
 		}
@@ -115,7 +115,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Decrements the raw volume once.
 		/// </summary>
-		public override void VolumeLevelDecrement()
+		public override void VolumeDecrement()
 		{
 			Parent.VolumeDownIncrement();
 		}
