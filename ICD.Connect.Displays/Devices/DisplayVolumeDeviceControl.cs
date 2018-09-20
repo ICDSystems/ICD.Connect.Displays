@@ -36,7 +36,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public override float? VolumeRawMax { get { return Parent.VolumeSafetyMax; }}
 
-		public override float VolumeRaw
+		public override float VolumeLevel
 		{
 			get { return Parent.Volume; }
 		}
@@ -82,7 +82,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the raw volume. This will be clamped to the min/max and safety min/max.
 		/// </summary>
 		/// <param name="volume"></param>
-		public override void SetVolumeRaw(float volume)
+		public override void SetVolumeLevel(float volume)
 		{
 			Parent.SetVolume(volume);
 		}
