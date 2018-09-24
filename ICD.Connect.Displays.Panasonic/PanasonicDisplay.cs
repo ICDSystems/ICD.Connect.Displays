@@ -8,42 +8,68 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Panasonic
 {
     public sealed class PanasonicDisplay : AbstractDisplayWithAudio<PanasonicDisplaySettings>
-    {
-        private const string FAILURE_BUSY = "\x02ER401\x03";
-        private const string FAILURE_PARAMETER = "\x02ER402\x03";
+	{
+		#region Command Constants
 
-        private const string POWER_ON = "\x02ADZZ;PON\x03";
-        private const string POWER_OFF = "\x02ADZZ;POF\x03";
-	    private const string QUERY_POWER = "\x02ADZZ;QPW\x03";
+		private const string START_MESSAGE = "\x02";
+	    private const string END_MESSAGE = "\x03";
 
-		private const string MUTE_ON = "\x02ADZZ;AMT:1\x03";
-        private const string MUTE_OFF = "\x02ADZZ;AMT:0\x03";
+		//ASCII = ADZZ;
+	    private const string COMMAND_PREFIX = "\x41\x44\x5A\x5A\x3B";
+		//ASCII = ER
+	    private const string ERROR_PREFIX = "\x45\x52";
 
-		private const string VOLUME_UP = "\x02ADZZ;AUU\x03";
-        private const string VOLUME_DOWN = "\x02ADZZ;AUD\x03";
-        private const string QUERY_VOLUME = "\x02ADZZ;QAV\x03";
+	    private const string FAILURE_BUSY = START_MESSAGE + ERROR_PREFIX + "401" + END_MESSAGE;
+	    private const string FAILURE_PARAMETER = START_MESSAGE + ERROR_PREFIX + "402" + END_MESSAGE;
 
-        private const string VOLUME_SET_TEMPLATE = "\x02ADZZ;AVL:{0}\x03";
+		//ASCII = PON
+		private const string POWER_ON = START_MESSAGE + COMMAND_PREFIX + "\x50\x4F\x4E" + END_MESSAGE;
+		//ASCII = POF
+		private const string POWER_OFF = START_MESSAGE + COMMAND_PREFIX + "\x50\x4F\x46" + END_MESSAGE;
+		//ACII = QPW
+		private const string QUERY_POWER = START_MESSAGE + COMMAND_PREFIX + "\x51\x50\x57" + END_MESSAGE;
 
-        private const string INPUT_HDMI = "\x02ADZZ;IIS:HD1\x03";
-	    private const string QUERY_INPUT = "\x02ADZZ;QIN\x03";
+		//ASCII = AMT:1
+		private const string MUTE_ON = START_MESSAGE + COMMAND_PREFIX + "\x41\x4d\x54\x3a\x31" + END_MESSAGE;
+		//ASCII = AMT:0
+		private const string MUTE_OFF = START_MESSAGE + COMMAND_PREFIX + "\x41\x4d\x54\x3a\x30" + END_MESSAGE;
 
-		private const string ASPECT_AUTO = "\x02ADZZ;VSE:0\x03";
-        private const string ASPECT_4_X3 = "\x02ADZZ;VSE:1\x03";
-        private const string ASPECT_16_X9 = "\x02ADZZ;VSE:2\x03";
-        private const string ASPECT_NATIVE = "\x02ADZZ;VSE:5\x03";
-        private const string ASPECT_FULL = "\x02ADZZ;VSE:6\x03";
-	    private const string QUERY_ASPECT = "\x02ADZZ;QSE\x03";
+		//ASCII == AUU
+		private const string VOLUME_UP = START_MESSAGE + COMMAND_PREFIX + "\x41\x55\x55" + END_MESSAGE;
+		//ASCII == AUD
+		private const string VOLUME_DOWN = START_MESSAGE + COMMAND_PREFIX + "\x41\x55\x44" + END_MESSAGE;
+		//ASCII = QAV
+		private const string QUERY_VOLUME = START_MESSAGE + COMMAND_PREFIX + "\x51\x41\x56" + END_MESSAGE;
+
+		//ASCII = AVL:
+		private const string VOLUME_SET_TEMPLATE = START_MESSAGE + COMMAND_PREFIX + "\x41\x56\x4c\x3a{0}" + END_MESSAGE;
+
+		//ASCII = IIS:HD1
+		private const string INPUT_HDMI = START_MESSAGE + COMMAND_PREFIX + "\x49\x49\x53\x3a\x48\x44\x31" + END_MESSAGE;
+		//ASCII = QIN
+		private const string QUERY_INPUT = START_MESSAGE + COMMAND_PREFIX + "\x51\x49\x4e" + END_MESSAGE;
+
+		//ASCII = VSE:0
+		private const string ASPECT_AUTO = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x30" + END_MESSAGE;
+		//ASCII = VSE:1
+		private const string ASPECT_4_X3 = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x31" + END_MESSAGE;
+		//ASCII = VSE:2
+		private const string ASPECT_16_X9 = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x32" + END_MESSAGE;
+		//ASCII = VSE:5
+		private const string ASPECT_NATIVE = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x35" + END_MESSAGE;
+		//ASCII = VSE:6
+		private const string ASPECT_FULL = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x36" + END_MESSAGE;
+		//ASCII = QSE
+		private const string QUERY_ASPECT = START_MESSAGE + COMMAND_PREFIX + "\x51\x53\x45" + END_MESSAGE;
+		#endregion
 
 		/// <summary>
 		/// Maps scaling mode to command.
@@ -248,12 +274,15 @@ namespace ICD.Connect.Displays.Panasonic
         /// <param name="args"></param>
         private void ParseSuccess(SerialResponseEventArgs args)
         {
-            string response = args.Data.Serialize();
+	        string response = args.Response;
             string command = ExtractCommand(response);
+
+			Logger.AddEntry(eSeverity.Debug, "command response is {0}", command);
 
             int newVol;
             if (StringUtils.TryParse(command, out newVol))
             {
+				Logger.AddEntry(eSeverity.Debug, "try parse volume {0}", newVol);
                 Volume = newVol;
                 IsMuted = false;
             }
@@ -277,9 +306,11 @@ namespace ICD.Connect.Displays.Panasonic
                     case "VSE":
                         ScalingMode = GetScalingMode(ExtractParameter(response, 1));
                         break;
-                } 
+					default:
+						Logger.AddEntry(eSeverity.Error, "Failed to parse {0}", args.Response);
+		                break;
+                }
             }
-            
         }
 
         /// <summary>
