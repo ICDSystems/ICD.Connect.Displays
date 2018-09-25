@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings.Core;
@@ -291,6 +293,45 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 			settings.DisplayOnRelay = DisplayOnRelay == null ? null : (int?)DisplayOnRelay.Id;
 			settings.RelayLatch = m_RelayLatch;
 			settings.RelayHoldTime = m_RelayHoldTime;
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+			addRow("Latch Relay", RelayLatch);
+			addRow("Relay Hold Time", RelayHoldTime);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state", (b) => ActivateDisplayRelays(b));
+			yield return new ConsoleCommand("OpenRelays", "Opens all relays", () => OpenAllRelays());
+			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", (i) => SetRelayHoldTime(i));
+		}
+
+		private void SetRelayHoldTime(int holdTime)
+		{
+			m_RelayHoldTime = holdTime;
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
