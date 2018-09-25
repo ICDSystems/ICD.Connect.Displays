@@ -72,6 +72,8 @@
   <ItemGroup>
     <Compile Include="Devices\AbstractDisplay.cs" />
     <Compile Include="Devices\DisplayRouteDestinationControl.cs" />
+    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControl.cs" />
+    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControlSettings.cs" />
     <Compile Include="Devices\DisplayVolumeDeviceControl.cs" />
     <Compile Include="Devices\AbstractDisplayWithAudio.cs" />
     <Compile Include="Devices\IDisplayWithAudio.cs" />
