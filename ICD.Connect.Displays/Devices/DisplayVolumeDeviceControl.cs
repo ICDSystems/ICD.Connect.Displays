@@ -9,6 +9,15 @@ namespace ICD.Connect.Displays.Devices
 {
 	public sealed class DisplayVolumeDeviceControl : AbstractVolumeLevelDeviceControl<IDisplayWithAudio>, IVolumeMuteFeedbackDeviceControl
 	{
+		#region Events
+
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
+
+		#endregion
+
 		#region Properties
 
 		/// <summary>
@@ -36,15 +45,15 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public override float? VolumeRawMax { get { return Parent.VolumeSafetyMax; }}
 
-		public override float VolumeLevel
-		{
-			get { return Parent.Volume; }
-		}
+		/// <summary>
+		/// Gets the current volume, in the parent device's format
+		/// </summary>
+		public override float VolumeLevel { get { return Parent.Volume; } }
 
-		public bool VolumeIsMuted
-		{
-			get { return Parent.IsMuted; }
-		}
+		/// <summary>
+		/// Gets the muted state.
+		/// </summary>
+		public bool VolumeIsMuted { get { return Parent.IsMuted; } }
 
 		#endregion
 
@@ -59,24 +68,20 @@ namespace ICD.Connect.Displays.Devices
 			Subscribe(parent);
 		}
 
-		#region Events
-
-		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
-
-		#endregion
-
-		#region Methods
-
 		/// <summary>
 		/// Override to release resources.
 		/// </summary>
 		/// <param name="disposing"></param>
 		protected override void DisposeFinal(bool disposing)
 		{
+			OnMuteStateChanged = null;
+
 			base.DisposeFinal(disposing);
 
 			Unsubscribe(Parent);
 		}
+
+		#region Methods
 
 		/// <summary>
 		/// Sets the raw volume. This will be clamped to the min/max and safety min/max.
@@ -99,6 +104,9 @@ namespace ICD.Connect.Displays.Devices
 				Parent.MuteOff();
 		}
 
+		/// <summary>
+		/// Toggles the current mute state.
+		/// </summary>
 		public void VolumeMuteToggle()
 		{
 			Parent.MuteToggle();
