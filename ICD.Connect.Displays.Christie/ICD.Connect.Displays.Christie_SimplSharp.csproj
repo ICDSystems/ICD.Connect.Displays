@@ -68,12 +68,12 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChristieDisplay.cs" />
-    <Compile Include="ChristieDisplayBuffer.cs" />
-    <Compile Include="ChristieDisplaySettings.cs" />
-    <Compile Include="JSeries\ChristieJSeriesDisplay.cs" />
-    <Compile Include="JSeries\ChristieJSeriesDisplayBuffer.cs" />
-    <Compile Include="JSeries\ChristieJSeriesDisplaySettings.cs" />
+    <Compile Include="Devices\ChristieDisplay.cs" />
+    <Compile Include="Devices\ChristieDisplayBuffer.cs" />
+    <Compile Include="Devices\ChristieDisplaySettings.cs" />
+    <Compile Include="Devices\JSeries\ChristieJSeriesDisplay.cs" />
+    <Compile Include="Devices\JSeries\ChristieJSeriesDisplayBuffer.cs" />
+    <Compile Include="Devices\JSeries\ChristieJSeriesDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

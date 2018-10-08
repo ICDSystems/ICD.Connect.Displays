@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using ICD.Connect.Displays.Christie.JSeries;
+using ICD.Connect.Displays.Christie.Devices.JSeries;
 using NUnit.Framework;
 
-namespace ICD.Common.Utils.Tests.JSeries
+namespace ICD.Connect.Displays.Christie.Tests.JSeries
 {
 	[TestFixture]
 	public sealed class ChristieJSeriesDisplayBufferTest

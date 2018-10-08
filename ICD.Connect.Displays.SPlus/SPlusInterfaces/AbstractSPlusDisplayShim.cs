@@ -8,16 +8,16 @@ using ICD.Connect.Displays.SPlus.Devices.Simpl;
 
 namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 {
-	public delegate void SPlusDisplayShimPowerOnCallback(object sender);
+	public delegate void SPlusDisplayShimPowerOnCallback();
 
-	public delegate void SPlusDisplayShimPowerOffCallback(object sender);
+	public delegate void SPlusDisplayShimPowerOffCallback();
 
-	public delegate void SPlusDisplayShimSetHdmiInputCallback(object sender, ushort hdmiInput);
+	public delegate void SPlusDisplayShimSetHdmiInputCallback(ushort hdmiInput);
 
-	public delegate void SPlusDisplayShimSetScalingModeCallback(object sender, ushort scalingMode);
+	public delegate void SPlusDisplayShimSetScalingModeCallback(ushort scalingMode);
 
 	public abstract class AbstractSPlusDisplayShim<TOriginator> : AbstractSPlusDeviceShim<TOriginator>
-		where TOriginator : ISimplDisplay
+		where TOriginator : class, ISimplDisplay
 	{
 		#region Events
 
@@ -128,7 +128,10 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 				if (originator == null)
 					return;
 
-				originator.HdmiInput = value;
+				// Input 0 turns into null
+				int? input = (value == 0) ? (int?)null : value;
+
+				originator.HdmiInput = input;
 			}
 		}
 
@@ -239,6 +242,9 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		{
 			base.Unsubscribe(originator);
 
+			if (originator == null)
+				return;
+
 			originator.OnHdmiInputChanged += OriginatorOnHdmiInputChanged;
 			originator.OnIsPoweredChanged += OriginatorOnIsPoweredChanged;
 			originator.OnScalingModeChanged += OriginatorOnScalingModeChanged;
@@ -266,30 +272,30 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 		private void OriginatorSetScalingModeCallback(ISimplDisplay sender, eScalingMode scalingMode)
 		{
-			SPlusDisplayShimSetScalingModeCallback handler = SetScalingModeCallback;
-			if (handler != null)
-				handler(this, (ushort)scalingMode);
+			SPlusDisplayShimSetScalingModeCallback callback = SetScalingModeCallback;
+			if (callback != null)
+				callback((ushort)scalingMode);
 		}
 
 		private void OriginatorSetHdmiInputCallback(ISimplDisplay sender, int address)
 		{
-			SPlusDisplayShimSetHdmiInputCallback handler = SetHdmiInputCallback;
-			if (handler != null)
-				handler(this, (ushort)address);
+			SPlusDisplayShimSetHdmiInputCallback callback = SetHdmiInputCallback;
+			if (callback != null)
+				callback((ushort)address);
 		}
 
 		private void OriginatorPowerOffCallback(ISimplDisplay sender)
 		{
-			SPlusDisplayShimPowerOffCallback handler = PowerOffCallback;
-			if (handler != null)
-				handler(this);
+			SPlusDisplayShimPowerOffCallback callback = PowerOffCallback;
+			if (callback != null)
+				callback();
 		}
 
 		private void OriginatorPowerOnCallback(ISimplDisplay sender)
 		{
-			SPlusDisplayShimPowerOnCallback handler = PowerOnCallback;
-			if (handler != null)
-				handler(this);
+			SPlusDisplayShimPowerOnCallback callback = PowerOnCallback;
+			if (callback != null)
+				callback();
 		}
 
 		#endregion

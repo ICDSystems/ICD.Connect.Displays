@@ -69,9 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="NecDisplay.cs" />
-    <Compile Include="NecDisplayCommand.cs" />
-    <Compile Include="NecDisplaySettings.cs" />
+    <Compile Include="Devices\NecDisplay.cs" />
+    <Compile Include="Devices\NecDisplayCommand.cs" />
+    <Compile Include="Devices\NecDisplaySettings.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />

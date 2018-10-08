@@ -14,6 +14,9 @@ namespace ICD.Connect.Displays.Devices
 	/// </summary>
 	public sealed class DisplayRouteDestinationControl : AbstractRouteInputSelectControl<IDisplay>
 	{
+		/// <summary>
+		/// Raised when an input source status changes.
+		/// </summary>
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
 
 		/// <summary>
@@ -74,11 +77,32 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Gets the input at the given address.
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+		public override ConnectorInfo GetInput(int input)
+		{
+			return GetInputs().First(i => i.Address == input);
+		}
+
+		/// <summary>
+		/// Returns true if the destination contains an input at the given address.
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+		public override bool ContainsInput(int input)
+		{
+			return GetInputs().Any(i => i.Address == input);
+		}
+
+		/// <summary>
 		/// Returns the inputs.
 		/// </summary>
 		/// <returns></returns>
 		public override IEnumerable<ConnectorInfo> GetInputs()
 		{
+			// TODO - This will not work properly for sparse inputs
 			return Enumerable.Range(1, Parent.InputCount)
 			                 .Select(i => new ConnectorInfo(i, eConnectionType.Audio | eConnectionType.Video));
 		}

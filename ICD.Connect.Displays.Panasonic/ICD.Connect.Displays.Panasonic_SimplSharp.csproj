@@ -63,8 +63,8 @@
   <ItemGroup>
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
-    <Compile Include="PanasonicDisplay.cs" />
-    <Compile Include="PanasonicDisplaySettings.cs" />
+    <Compile Include="Devices\PanasonicDisplay.cs" />
+    <Compile Include="Devices\PanasonicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

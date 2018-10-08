@@ -7,6 +7,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
@@ -56,7 +57,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_Volume = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Raw volume set to {1}", StringUtils.NiceName(m_Volume));
+				Log(eSeverity.Informational, "Raw volume set to {0}", StringUtils.NiceName(m_Volume));
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
@@ -75,7 +76,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_IsMuted = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Mute set to {1}", m_IsMuted);
+				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
@@ -113,7 +114,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public SimplDisplayWithAudio()
 		{
-			Controls.Add(new DisplayVolumeDeviceControl(this, 1));
+			VolumeDeviceMin = ushort.MinValue;
+			VolumeDeviceMax = ushort.MaxValue;
+			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		/// <summary>
@@ -145,6 +148,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioSetVolumeCallback handler = SetVolumeCallback;
 			if (handler != null)
 				handler(this, raw);
+
+			if (Trust)
+				Volume = raw;
 		}
 
 		/// <summary>
@@ -175,6 +181,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteOnCallback handler = MuteOnCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = true;
 		}
 
 		/// <summary>
@@ -185,6 +194,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteOffCallback handler = MuteOffCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = false;
 		}
 
 		/// <summary>
@@ -195,6 +207,52 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayWithAudioMuteToggleCallback handler = MuteToggleCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsMuted = !IsMuted;
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(SimplDisplayWithAudioSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.VolumeDefault = VolumeDefault;
+			settings.VolumeSafetyMin = VolumeSafetyMin;
+			settings.VolumeSafetyMax = VolumeSafetyMax;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			VolumeSafetyMin = null;
+			VolumeSafetyMax = null;
+			VolumeDefault = null;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(SimplDisplayWithAudioSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			VolumeSafetyMin = settings.VolumeSafetyMin;
+			VolumeSafetyMax = settings.VolumeSafetyMax;
+			VolumeDefault = settings.VolumeDefault;
 		}
 
 		#endregion

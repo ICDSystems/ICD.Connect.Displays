@@ -37,6 +37,12 @@ namespace ICD.Connect.Displays.Devices
 		#region Properties
 
 		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		[ApiProperty(DisplayApi.PROPERTY_TRUST, DisplayApi.HELP_PROPERTY_TRUST)]
+		bool Trust { get; set; }
+
+		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_IS_POWERED, DisplayApi.HELP_PROPERTY_IS_POWERED)]

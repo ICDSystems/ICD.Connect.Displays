@@ -64,8 +64,8 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SurfaceHubDisplay.cs" />
-    <Compile Include="SurfaceHubDisplaySettings.cs" />
+    <Compile Include="Devices\SurfaceHubDisplay.cs" />
+    <Compile Include="Devices\SurfaceHubDisplaySettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

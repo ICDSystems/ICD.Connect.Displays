@@ -6,6 +6,7 @@
 		public const string EVENT_HDMI_INPUT = "OnHdmiInputChanged";
 		public const string EVENT_SCALING_MODE = "OnScalingModeChanged";
 
+		public const string PROPERTY_TRUST = "Trust";
 		public const string PROPERTY_IS_POWERED = "IsPowered";
 		public const string PROPERTY_INPUT_COUNT = "InputCount";
 		public const string PROPERTY_HDMI_INPUT = "HdmiInput";
@@ -20,6 +21,7 @@
 		public const string HELP_EVENT_HDMI_INPUT = "Raised when the selected HDMI input changes.";
 		public const string HELP_EVENT_SCALING_MODE = "Raised when the scaling mode changes.";
 
+		public const string HELP_PROPERTY_TRUST = "When true assume TX is successful even if a request times out.";
 		public const string HELP_PROPERTY_IS_POWERED = "Gets the powered state for the display.";
 		public const string HELP_PROPERTY_INPUT_COUNT = "Gets the HDMI input count for the display.";
 		public const string HELP_PROPERTY_HDMI_INPUT = "Gets the current HDMI input for the display.";

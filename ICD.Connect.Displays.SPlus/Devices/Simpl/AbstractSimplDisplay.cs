@@ -8,16 +8,13 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay
 		where TSettings : AbstractSimplDisplaySettings, new()
 	{
-		private bool m_IsPowered;
-		private int? m_HdmiInput;
-		private eScalingMode m_ScalingMode;
-
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
@@ -32,6 +29,10 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// Raised when the scaling mode changes.
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
+
+		private bool m_IsPowered;
+		private int? m_HdmiInput;
+		private eScalingMode m_ScalingMode;
 
 		#region Callbacks
 
@@ -48,6 +49,11 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		#region Properties
 
 		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get; set; }
+
+		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
 		public bool IsPowered
@@ -60,7 +66,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_IsPowered = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
 
 				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
 			}
@@ -85,7 +91,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 				int? oldInput = m_HdmiInput;
 				m_HdmiInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
 
 				if (oldInput.HasValue)
 					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
@@ -108,7 +114,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_ScalingMode = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
+				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
 				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
@@ -152,6 +158,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOnCallback handler = PowerOnCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = true;
 		}
 
 		/// <summary>
@@ -162,6 +171,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOffCallback handler = PowerOffCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = false;
 		}
 
 		/// <summary>
@@ -173,6 +185,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplaySetHdmiInputCallback handler = SetHdmiInputCallback;
 			if (handler != null)
 				handler(this, address);
+
+			if (Trust)
+				HdmiInput = address;
 		}
 
 		/// <summary>
@@ -184,6 +199,49 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplaySetScalingModeCallback handler = SetScalingModeCallback;
 			if (handler != null)
 				handler(this, mode);
+
+			if (Trust)
+				ScalingMode = mode;
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.InputCount = InputCount;
+			settings.Trust = Trust;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			InputCount = 0;
+			Trust = false;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			InputCount = settings.InputCount;
+			Trust = settings.Trust;
 		}
 
 		#endregion
@@ -210,6 +268,8 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
+
+			addRow("Input Count", InputCount);
 
 			DisplayConsole.BuildConsoleStatus(this, addRow);
 		}

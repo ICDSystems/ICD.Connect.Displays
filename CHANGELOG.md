@@ -6,6 +6,40 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.0.1] - 2018-09-14
+### Changed
+ - Fixed dependencies on volume controls
+
+## [8.0.0] - 2018-09-14
+### Added
+ - Added additional inputs to SamsungProDisplay
+ - Added Sharp prosumer display
+
+### Changed
+ - Fixed NEC wall id not being saved properly
+ - Fixed bug where SamsingProDisplay would sometimes power back on by itself
+ - Significant routing performance improvements
+
+## [7.2.2] - 2018-07-02
+### Changed
+ - Fixed SamsungProDisplay not correctly pulling WallId from settings
+
+## [7.2.1] - 2018-06-19
+### Changed
+ - Fixes for SharpPro control over TCP
+
+## [7.2.0] - 2018-06-04
+### Changed
+ - Serial devices use ConnectionStateManager for maintaining connection to remote endpoints
+ - SPlus shim improvements
+ - Sharp warmup fix
+
+## [7.1.0] - 2018-05-24
+### Changed
+ - Fixed AbstractSPlusDisplayShim TOriginator constraint
+ - SPlus shim improvements
+ - Potential Samsung warmup fix
+
 ## [7.0.0] - 2018-05-09
 ### Added
  - Added display property setters for S+
