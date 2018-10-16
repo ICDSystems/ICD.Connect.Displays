@@ -5,12 +5,10 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Sony
 {
@@ -36,11 +34,11 @@ namespace ICD.Connect.Displays.Sony
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		[PublicAPI]
-		public void SetPort(ISerialPort port)
+		protected override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			IComPort comPort = port as IComPort;
+			if (comPort != null)
+				ConfigureComPort(comPort);
 
 			ISerialBuffer buffer = new DelimiterSerialBuffer(SonyBraviaCommand.FOOTER);
 			SerialQueue queue = new SerialQueue();
@@ -51,7 +49,7 @@ namespace ICD.Connect.Displays.Sony
 			SetSerialQueue(queue);
 
 			if (port != null)
-				SendCommand(SonyBraviaCommand.Enquiry(POWER_FUNCTION));
+				QueryState();
 		}
 
 		/// <summary>
@@ -59,7 +57,7 @@ namespace ICD.Connect.Displays.Sony
 		/// </summary>
 		/// <param name="port"></param>
 		[PublicAPI]
-		public static void ConfigureComPort(IComPort port)
+		public override void ConfigureComPort(IComPort port)
 		{
 			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
 			                    eComDataBits.ComspecDataBits8,
@@ -182,6 +180,17 @@ namespace ICD.Connect.Displays.Sony
 		}
 
 		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+		}
+
+		/// <summary>
 		/// Called when a command gets a response from the physical display.
 		/// </summary>
 		/// <param name="sender"></param>
@@ -256,54 +265,5 @@ namespace ICD.Connect.Displays.Sony
 		{
 			Log(eSeverity.Error, "Command timed out - {0}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
 		}
-
-		#region Settings
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(SonyBraviaDisplaySettings settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
-		}
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-			
-			SetPort(null);
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(SonyBraviaDisplaySettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				if (port == null)
-					IcdErrorLog.Error("No Serial Port with id {0}", settings.Port);
-			}
-
-			SetPort(port);
-		}
-
-		#endregion
 	}
 }
