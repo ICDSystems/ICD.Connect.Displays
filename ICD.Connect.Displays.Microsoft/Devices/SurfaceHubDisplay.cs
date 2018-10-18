@@ -12,7 +12,7 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays.Microsoft.SurfaceHub.Devices
+namespace ICD.Connect.Displays.Microsoft.Devices
 {
     public sealed class SurfaceHubDisplay : AbstractDisplayWithAudio<SurfaceHubDisplaySettings>
     {
