@@ -263,27 +263,35 @@ namespace ICD.Connect.Displays.Microsoft.Devices
         /// </summary>
         /// <param name="args"></param>
         private void ParseSuccess(SerialResponseEventArgs args)
-        {
-            string response = args.Data.Serialize();
+	    {
+		    string response = args.Data.Serialize();
 
-            if (response == POWER_ON_RESPONSE)
-                IsPowered = true;
-            else if (response == POWER_OFF_RESPONSE)
-                IsPowered = false;
-            else if (response == INPUT_CHANGE_RESPONSE)
-                HdmiInput = 1;
-            else if (response.StartsWith(VOLUME_CHANGE_RESPONSE))
-            {
-                Volume = int.Parse(response.Split(' ')[2]);
-                IsMuted = false;
-            }
-            else
-            {
-                Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
-            }
-        }
+		    switch (response)
+		    {
+			    case POWER_ON_RESPONSE:
+				    IsPowered = true;
+				    break;
+			    case POWER_OFF_RESPONSE:
+				    IsPowered = false;
+				    break;
+			    case INPUT_CHANGE_RESPONSE:
+				    HdmiInput = 1;
+				    break;
+			    default:
+				    if (response.StartsWith(VOLUME_CHANGE_RESPONSE))
+				    {
+					    Volume = int.Parse(response.Split(' ')[2]);
+					    IsMuted = false;
+				    }
+				    else
+				    {
+					    Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
+				    }
+				    break;
+		    }
+	    }
 
-        /// <summary>
+	    /// <summary>
         /// Called when a command fails.
         /// </summary>
         /// <param name="args"></param>
