@@ -187,7 +187,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
             if (!IsPowered)
                 return;
 
-			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, raw.ToString());
+			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, ((ushort)raw).ToString());
 
 			SendCommand(command, CommandComparer);
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);

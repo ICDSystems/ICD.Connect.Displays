@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - Renamed Microsoft.SurfaceHub project to Microsoft
+ - Fixed volume ramping for sharp displays
 
 ## [8.0.1] - 2018-09-14
 ### Changed
