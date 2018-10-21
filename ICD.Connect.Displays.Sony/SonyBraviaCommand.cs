@@ -80,6 +80,19 @@ namespace ICD.Connect.Displays.Sony
 		#region Constructors
 
 		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="function"></param>
+		/// <param name="parameter"></param>
+		private SonyBraviaCommand(eCommand type, string function, string parameter)
+		{
+			Type = type;
+			Function = function;
+			Parameter = parameter;
+		}
+
+		/// <summary>
 		/// Creates a command for the given function and parameter.
 		/// </summary>
 		/// <param name="function"></param>
@@ -87,7 +100,7 @@ namespace ICD.Connect.Displays.Sony
 		/// <returns></returns>
 		public static SonyBraviaCommand Control(string function, string parameter)
 		{
-			return Command(eCommand.Control, function, parameter);
+			return new SonyBraviaCommand(eCommand.Control, function, parameter);
 		}
 
 		/// <summary>
@@ -98,24 +111,27 @@ namespace ICD.Connect.Displays.Sony
 		public static SonyBraviaCommand Enquiry(string function)
 		{
 			string parameter = StringUtils.Repeat(PARAMETER_NONE, 16);
-			return Command(eCommand.Enquiry, function, parameter);
+			return new SonyBraviaCommand(eCommand.Enquiry, function, parameter);
 		}
 
 		/// <summary>
-		/// Creates a command with the given parameters.
+		/// Deserializes the response into a command.
 		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="function"></param>
-		/// <param name="parameter"></param>
+		/// <param name="response"></param>
 		/// <returns></returns>
-		public static SonyBraviaCommand Command(eCommand type, string function, string parameter)
+		public static SonyBraviaCommand Response(string response)
 		{
-			return new SonyBraviaCommand
-			{
-				Type = type,
-				Function = function,
-				Parameter = parameter
-			};
+			// Type
+			char typeCode = response[2];
+			eCommand type = s_CommandCodes.GetKey(typeCode);
+
+			// Function
+			string function = response.Substring(3, 4);
+
+			// Parameter
+			string parameter = response.Substring(7, 16);
+
+			return new SonyBraviaCommand(type, function, parameter);
 		}
 
 		#endregion

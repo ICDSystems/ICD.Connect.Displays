@@ -36,6 +36,12 @@ namespace ICD.Connect.Displays.Sony
 		/// </summary>
 		protected override void ConfigurePort(ISerialPort port)
 		{
+			if (port != null)
+			{
+				port.DebugRx = eDebugMode.Ascii;
+				port.DebugTx = eDebugMode.Ascii;
+			}
+
 			IComPort comPort = port as IComPort;
 			if (comPort != null)
 				ConfigureComPort(comPort);
@@ -188,6 +194,8 @@ namespace ICD.Connect.Displays.Sony
 		{
 			if (!Trust)
 				return;
+
+			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -197,25 +205,22 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			throw new NotImplementedException();
-			/*
-			SonyBraviaCommand request 
-			SonyBraviaCommand response = new SonyBraviaCommand(args.Response);
+			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
+			SonyBraviaCommand response = SonyBraviaCommand.Response(args.Response);
 
 			if (response.Parameter == SonyBraviaCommand.ERROR)
 				ParseError(args);
-			else if ((args.Data as SonyBraviaCommand).Type == SonyBraviaCommand.TYPE_ENQUIRY && response.Type == SonyBraviaCommand.TYPE_ANSWER)
-				ParseQuery(args);
-			*/
+			else if (command.Type == SonyBraviaCommand.eCommand.Enquiry &&
+					 response.Type == SonyBraviaCommand.eCommand.Answer)
+				ParseQuery(response);
 		}
 
 		/// <summary>
 		/// Called when a query command is successful.
 		/// </summary>
 		/// <param name="response"></param>
-		private void ParseResponse(SonyBraviaCommand response)
+		private void ParseQuery(SonyBraviaCommand response)
 		{
-			/*
 			switch (response.Function)
 			{
 				case POWER_FUNCTION:
@@ -223,17 +228,18 @@ namespace ICD.Connect.Displays.Sony
 					break;
 
 				case VOLUME_FUNCTION:
-					Volume = (ushort)responseValue;
+					Volume = float.Parse(response.Parameter);
 					break;
 
 				case MUTE_FUNCTION:
-					IsMuted = responseValue == 1;
+					IsMuted = int.Parse(response.Parameter) == 1;
 					break;
 
 				case INPUT_FUNCTION:
-					HdmiInput = responseValue;
+					//HdmiInput = responseValue;
 					break;
-
+				
+				/*
 				case SCALING_MODE_QUERY:
 					if (s_ViewModeMap.ContainsKey(responseValue))
 					{
@@ -243,8 +249,8 @@ namespace ICD.Connect.Displays.Sony
 					else
 						ScalingMode = eScalingMode.Unknown;
 					break;
+				*/
 			}
-			 */
 		}
 
 		/// <summary>
