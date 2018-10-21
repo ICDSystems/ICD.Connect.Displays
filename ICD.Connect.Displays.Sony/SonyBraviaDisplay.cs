@@ -36,12 +36,6 @@ namespace ICD.Connect.Displays.Sony
 		/// </summary>
 		protected override void ConfigurePort(ISerialPort port)
 		{
-			if (port != null)
-			{
-				port.DebugRx = eDebugMode.Ascii;
-				port.DebugTx = eDebugMode.Ascii;
-			}
-
 			IComPort comPort = port as IComPort;
 			if (comPort != null)
 				ConfigureComPort(comPort);
