@@ -48,7 +48,7 @@ namespace ICD.Connect.Displays.Sony
 
 			SetSerialQueue(queue);
 
-			if (port != null)
+			if (port != null && port.IsConnected)
 				QueryState();
 		}
 

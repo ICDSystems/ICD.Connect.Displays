@@ -109,7 +109,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 			
 			SetSerialQueue(queue);
 
-			if (port != null)
+			if (port != null && port.IsConnected)
 				QueryState();
 		}
 

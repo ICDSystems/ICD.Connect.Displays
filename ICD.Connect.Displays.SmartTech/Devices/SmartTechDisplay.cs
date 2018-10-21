@@ -99,7 +99,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 
             SetSerialQueue(queue);
 
-            if (port != null)
+            if (port != null && port.IsConnected)
                 QueryState();
         }
 

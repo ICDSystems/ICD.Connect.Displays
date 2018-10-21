@@ -104,8 +104,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 			SetSerialQueue(queue);
 
-			if (port != null)
-				SendCommand(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+			if (port != null && port.IsConnected)
+				QueryState();
 		}
 
 		/// <summary>
