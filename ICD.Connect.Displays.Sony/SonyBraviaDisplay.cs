@@ -50,7 +50,7 @@ namespace ICD.Connect.Displays.Sony
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 10 * 1000;
+			queue.Timeout = 20 * 1000;
 
 			SetSerialQueue(queue);
 
@@ -97,7 +97,7 @@ namespace ICD.Connect.Displays.Sony
 
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 
 		/// <summary>
@@ -195,7 +195,13 @@ namespace ICD.Connect.Displays.Sony
 			if (!Trust)
 				return;
 
-			throw new NotImplementedException();
+			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
+			if (command == null)
+				return;
+
+			// Hack - Treat the command like a response
+			if (command.Type == SonyBraviaCommand.eCommand.Control)
+				ParseQuery(command);
 		}
 
 		/// <summary>
@@ -234,30 +240,23 @@ namespace ICD.Connect.Displays.Sony
 					break;
 
 				case INPUT_FUNCTION:
-					//HdmiInput = responseValue;
+					HdmiInput = SonyBraviaCommand.GetHdmiInputParameter(response.Parameter);
 					break;
-				
-				/*
-				case SCALING_MODE_QUERY:
-					if (s_ViewModeMap.ContainsKey(responseValue))
-					{
-						string command = s_ViewModeMap[responseValue];
-						ScalingMode = s_ScalingModeMap.GetKey(command);
-					}
-					else
-						ScalingMode = eScalingMode.Unknown;
-					break;
-				*/
 			}
 		}
 
 		/// <summary>
-		///     Called when a command fails.
+		/// Called when a command fails.
 		/// </summary>
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			Log(eSeverity.Error, "Command failed - {0}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
+
+			if (command == null)
+				Log(eSeverity.Error, "Error - {0}", StringUtils.ToMixedReadableHexLiteral(args.Response));
+			else
+				Log(eSeverity.Error, "Command failed - {0}", StringUtils.ToMixedReadableHexLiteral(command.Serialize()));
 		}
 
 		/// <summary>

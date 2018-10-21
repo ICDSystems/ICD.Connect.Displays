@@ -45,8 +45,6 @@ namespace ICD.Connect.Displays.Sony
 		public const char FOOTER = (char)0x0A;
 
 		private const char PARAMETER_NONE = '#';
-		private const char PARAMETER_SUCCESS = '0';
-		private const char PARAMETER_ERROR = 'F';
 
 		public const string ERROR = "FFFFFFFFFFFFFFFF";
 
@@ -172,6 +170,19 @@ namespace ICD.Connect.Displays.Sony
 		public static string SetHdmiInputParameter(int address)
 		{
 			return "10000" + address.ToString().PadLeft(4, '0');
+		}
+
+		/// <summary>
+		/// Returns the HDMI input described by the given parameter.
+		/// </summary>
+		/// <param name="parameter"></param>
+		/// <returns></returns>
+		public static int? GetHdmiInputParameter(string parameter)
+		{
+			char mode = parameter[7];
+			string input = parameter.Substring(12, 4);
+
+			return mode == '1' ? int.Parse(input) : (int?)null;
 		}
 	}
 }
