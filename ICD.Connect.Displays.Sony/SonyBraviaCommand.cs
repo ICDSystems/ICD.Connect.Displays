@@ -1,4 +1,6 @@
-﻿using ICD.Common.Utils;
+﻿using System.Text;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Sony
@@ -33,14 +35,14 @@ namespace ICD.Connect.Displays.Sony
 	/// </summary>
 	public sealed class SonyBraviaCommand : ISerialData
 	{
-		private static readonly char[] s_Header = { '*', 'S' };
+		private const string HEADER = "*S";
 
-		public const char TYPE_CONTROL = 'C';
-		public const char TYPE_ENQUIRY = 'E';
-		public const char TYPE_ANSWER = 'A';
-		public const char TYPE_NOTIFY = 'N';
+		private const char TYPE_CONTROL = 'C';
+		private const char TYPE_ENQUIRY = 'E';
+		private const char TYPE_ANSWER = 'A';
+		private const char TYPE_NOTIFY = 'N';
 
-		internal const char FOOTER = (char)0x0A;
+		public const char FOOTER = (char)0x0A;
 
 		private const char PARAMETER_NONE = '#';
 		private const char PARAMETER_SUCCESS = '0';
@@ -56,28 +58,26 @@ namespace ICD.Connect.Displays.Sony
 			Notify
 		}
 
-		private readonly string m_Data;
+		private static readonly BiDictionary<eCommand, char> s_CommandCodes =
+			new BiDictionary<eCommand, char>
+			{
+				{ eCommand.Control, TYPE_CONTROL },
+				{ eCommand.Enquiry, TYPE_ENQUIRY },
+				{ eCommand.Answer, TYPE_ANSWER },
+				{ eCommand.Notify, TYPE_NOTIFY }
+			};
 
 		#region Properties
 
-		public char Type { get { return m_Data[2]; } }
+		public eCommand Type { get; set; }
 
-		public string Function { get { return m_Data.Substring(3, 4); } }
+		public string Function { get; set; }
 
-		public string Parameter { get { return m_Data.Substring(7, 16); } }
+		public string Parameter { get; set; }
 
 		#endregion
 
 		#region Constructors
-
-		/// <summary>
-		/// Constructor.
-		/// </summary>
-		/// <param name="data"></param>
-		public SonyBraviaCommand(string data)
-		{
-			m_Data = data;
-		}
 
 		/// <summary>
 		/// Creates a command for the given function and parameter.
@@ -87,7 +87,7 @@ namespace ICD.Connect.Displays.Sony
 		/// <returns></returns>
 		public static SonyBraviaCommand Control(string function, string parameter)
 		{
-			return Command(TYPE_CONTROL, function, parameter);
+			return Command(eCommand.Control, function, parameter);
 		}
 
 		/// <summary>
@@ -98,7 +98,7 @@ namespace ICD.Connect.Displays.Sony
 		public static SonyBraviaCommand Enquiry(string function)
 		{
 			string parameter = StringUtils.Repeat(PARAMETER_NONE, 16);
-			return Command(TYPE_ENQUIRY, function, parameter);
+			return Command(eCommand.Enquiry, function, parameter);
 		}
 
 		/// <summary>
@@ -108,16 +108,14 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="function"></param>
 		/// <param name="parameter"></param>
 		/// <returns></returns>
-		public static SonyBraviaCommand Command(char type, string function, string parameter)
+		public static SonyBraviaCommand Command(eCommand type, string function, string parameter)
 		{
-			parameter = parameter.PadLeft(16, '0');
-
-			string data = new string(s_Header) +
-			              type +
-			              function +
-			              parameter;
-
-			return new SonyBraviaCommand(data);
+			return new SonyBraviaCommand
+			{
+				Type = type,
+				Function = function,
+				Parameter = parameter
+			};
 		}
 
 		#endregion
@@ -128,7 +126,26 @@ namespace ICD.Connect.Displays.Sony
 		/// <returns></returns>
 		public string Serialize()
 		{
-			return m_Data;
+			StringBuilder builder = new StringBuilder();
+
+			// Header
+			builder.Append(HEADER);
+
+			// Type
+			char typeCode = s_CommandCodes.GetValue(Type);
+			builder.Append(typeCode);
+
+			// Function
+			builder.Append(Function);
+
+			// Parameter
+			string parameter = (Parameter ?? string.Empty).PadLeft(16, '0');
+			builder.Append(parameter);
+
+			// Footer
+			builder.Append(FOOTER);
+
+			return builder.ToString();
 		}
 
 		/// <summary>

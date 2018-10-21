@@ -14,7 +14,7 @@ namespace ICD.Connect.Displays.Sony
 {
 	public sealed class SonyBraviaDisplay : AbstractDisplayWithAudio<SonyBraviaDisplaySettings>
 	{
-		private const string POWER_FUNCTION = "POWER";
+		private const string POWER_FUNCTION = "POWR";
 		private const string VOLUME_FUNCTION = "VOLU";
 		private const string MUTE_FUNCTION = "AMUT";
 		private const string INPUT_FUNCTION = "INPT";
