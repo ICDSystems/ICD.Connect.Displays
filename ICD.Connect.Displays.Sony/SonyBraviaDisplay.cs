@@ -83,7 +83,7 @@ namespace ICD.Connect.Displays.Sony
 
 		public override void PowerOff()
 		{
-			SonyBraviaCommand command = SonyBraviaCommand.Control(POWER_FUNCTION, "2");
+			SonyBraviaCommand command = SonyBraviaCommand.Control(POWER_FUNCTION, "0");
 			SendCommand(command);
 		}
 
