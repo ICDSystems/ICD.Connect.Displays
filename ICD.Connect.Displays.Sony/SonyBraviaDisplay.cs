@@ -205,13 +205,11 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
 			SonyBraviaCommand response = SonyBraviaCommand.Response(args.Response);
 
 			if (response.Parameter == SonyBraviaCommand.ERROR)
 				ParseError(args);
-			else if (command.Type == SonyBraviaCommand.eCommand.Enquiry &&
-					 response.Type == SonyBraviaCommand.eCommand.Answer)
+			else if (response.Type == SonyBraviaCommand.eCommand.Answer)
 				ParseQuery(response);
 		}
 
