@@ -148,6 +148,7 @@ namespace ICD.Connect.Displays.Devices
 				ConfigurePort = ConfigurePort
 			};
 			m_ConnectionStateManager.OnIsOnlineStateChanged += PortOnIsOnlineStateChanged;
+			m_ConnectionStateManager.OnConnectedStateChanged += PortOnConnectedStateChanged;
 
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
@@ -282,6 +283,12 @@ namespace ICD.Connect.Displays.Devices
 		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs eventArgs)
 		{
 			UpdateCachedOnlineStatus();
+		}
+
+		private void PortOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			if (m_ConnectionStateManager.IsConnected)
+				QueryState();
 		}
 
 		#endregion
