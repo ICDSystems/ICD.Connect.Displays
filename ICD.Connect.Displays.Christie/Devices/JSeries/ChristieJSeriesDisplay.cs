@@ -107,8 +107,8 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			SetSerialQueue(queue);
 
-			if (port != null)
-				SendCommand(string.Format(POWER, QUERY));
+			if (port != null && port.IsConnected)
+				QueryState();
 		}
 
 		/// <summary>
