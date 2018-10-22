@@ -71,7 +71,11 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SonyBraviaCommand.cs" />
+    <Compile Include="SonyBraviaDisplay.cs" />
+    <Compile Include="SonyBraviaDisplaySettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
+    <None Include="Simple IP Control for BRAVIA 2014 v0.6.pdf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_SimplSharp.csproj">
