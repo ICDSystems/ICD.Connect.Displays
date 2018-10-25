@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -291,9 +292,14 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			if (settings.Port != null)
 			{
-				port = factory.GetPortById((int)settings.Port) as IIrPort;
-				if (port == null)
-					Logger.AddEntry(eSeverity.Error, "Port {0} is not an IR Port", settings.Port);
+				try
+				{
+					port = factory.GetPortById((int)settings.Port) as IIrPort;
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No IR port with id {0}", settings.Port);
+				}
 			}
 
 			SetIrPort(port);
