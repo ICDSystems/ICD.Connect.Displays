@@ -69,18 +69,28 @@ namespace ICD.Connect.Displays.Sony
 			                    false);
 		}
 
+		/// <summary>
+		/// Powers the TV.
+		/// </summary>
 		public override void PowerOn()
 		{
 			SonyBraviaCommand command = SonyBraviaCommand.Control(POWER_FUNCTION, "1");
 			SendCommand(command);
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public override void PowerOff()
 		{
 			SonyBraviaCommand command = SonyBraviaCommand.Control(POWER_FUNCTION, "0");
 			SendCommand(command);
 		}
 
+		/// <summary>
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// </summary>
+		/// <param name="address"></param>
 		public override void SetHdmiInput(int address)
 		{
 			string parameter = SonyBraviaCommand.SetHdmiInputParameter(address);
@@ -89,6 +99,10 @@ namespace ICD.Connect.Displays.Sony
 			SendCommand(command);
 		}
 
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public override void SetScalingMode(eScalingMode mode)
 		{
 			throw new NotSupportedException();
