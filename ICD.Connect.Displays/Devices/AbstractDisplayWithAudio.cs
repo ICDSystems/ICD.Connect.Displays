@@ -305,7 +305,6 @@ namespace ICD.Connect.Displays.Devices
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-
 			foreach (IConsoleCommand command in DisplayWithAudioConsole.GetConsoleCommands(this))
 				yield return command;
 		}
