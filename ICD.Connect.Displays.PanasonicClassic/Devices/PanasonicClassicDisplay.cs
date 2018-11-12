@@ -24,26 +24,29 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 		// the hex notated first character, ie \x02AMT:0 becomes *MT:0
 		// so these commands are entirely in hex
 
-		private const string FAILURE = "\x02\x45\x52\x34\x30\x31\x03\x0D";
+		private const char STX = '\x02';
+		private const char ETX = '\x03';
 
-		private const string POWER_ON = "\x02PON\x03\x0D";
-		private const string POWER_OFF = "\x02POF\x03\x0D";
-		private const string QUERY_POWER = "\x02QPW\x03\x0D";
+		private const string FAILURE = "\x02\x45\x52\x34\x30\x31\x03";
 
-		private const string MUTE_ON = "\x02\x41\x4d\x54\x3a\x31\x03\x0D";
-		private const string MUTE_OFF = "\x02\x41\x4d\x54\x3a\x30\x03\x0D";
+		private const string POWER_ON = "\x02PON\x03";
+		private const string POWER_OFF = "\x02POF\x03";
+		private const string QUERY_POWER = "\x02QPW\x03";
+
+		private const string MUTE_ON = "\x02\x41\x4d\x54\x3a\x31\x03";
+		private const string MUTE_OFF = "\x02\x41\x4d\x54\x3a\x30\x03";
 		private const string QUERY_MUTE = "\x02QAM\x03";
 
-		private const string VOLUME_SET_TEMPLATE = "\x02\x41\x56\x4c\x3a{0}\x03\x0D";
-		private const string QUERY_VOLUME = "\x02QAV\x03\x0D";
+		private const string VOLUME_SET_TEMPLATE = "\x02\x41\x56\x4c\x3a{0}\x03";
+		private const string QUERY_VOLUME = "\x02QAV\x03";
 
-		private const string INPUT_TOGGLE = "\x02IMS\x03\x0D";
-		private const string INPUT_HDMI1 = "\x02IMS:HM1\x03\x0D";
-		private const string INPUT_HDMI2 = "\x02IMS:HM2\x03\x0D";
-		private const string INPUT_DVI = "\x02IMS:DV1\x03\x0D";
-		private const string INPUT_PC = "\x02IMS:PC1\x03\x0D";
-		private const string INPUT_VIDEO = "\x02IMS:VD1\x03\x0D";
-		private const string INPUT_USB = "\x02IMS:UD1\x03\x0D";
+		private const string INPUT_TOGGLE = "\x02IMS\x03";
+		private const string INPUT_HDMI1 = "\x02IMS:HM1\x03";
+		private const string INPUT_HDMI2 = "\x02IMS:HM2\x03";
+		private const string INPUT_DVI = "\x02IMS:DV1\x03";
+		private const string INPUT_PC = "\x02IMS:PC1\x03";
+		private const string INPUT_VIDEO = "\x02IMS:VD1\x03";
+		private const string INPUT_USB = "\x02IMS:UD1\x03";
 
 		#endregion
 
@@ -94,7 +97,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 				//Todo: Connection State Manager for IP
 			}
 
-			ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
+			ISerialBuffer buffer = new BoundedSerialBuffer(STX, ETX);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
