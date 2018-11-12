@@ -56,7 +56,7 @@ namespace ICD.Connect.Displays.Devices
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0}", StringUtils.NiceName(m_Volume));
+				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
 
 				// If the volume went outside of safe limits clamp the volume to a safe value.
 				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());

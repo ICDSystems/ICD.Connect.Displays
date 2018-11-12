@@ -97,6 +97,10 @@
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc.CrestronPro\ICD.Connect.Misc.CrestronPro_SimplSharp.csproj">
+      <Project>{46CD87DE-F3EF-41D4-8783-9ECF21183765}</Project>
+      <Name>ICD.Connect.Misc.CrestronPro_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing\ICD.Connect.Routing_SimplSharp.csproj">
       <Project>{B0C0CA1C-FA55-4BEA-8A8B-EDB2141C523E}</Project>
       <Name>ICD.Connect.Routing_SimplSharp</Name>
