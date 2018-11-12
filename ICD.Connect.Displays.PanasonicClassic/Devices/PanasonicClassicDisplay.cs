@@ -199,7 +199,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 		[PublicAPI]
 		public override void SetHdmiInput(int address)
 		{
-			if (!IsPowered)
+			if (!IsPowered && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
 				return;
 			SendNonFormattedCommand(s_InputMap[address]);
 			m_TargetInput = address;
