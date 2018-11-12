@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
@@ -92,7 +91,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 			if (port is AsyncTcpClient)
 			{
 				m_IsIpControlled = true;
-				ConnectionStateManager.ActiveMonitoring = false;
+				//Todo: Connection State Manager for IP
 			}
 
 			ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
