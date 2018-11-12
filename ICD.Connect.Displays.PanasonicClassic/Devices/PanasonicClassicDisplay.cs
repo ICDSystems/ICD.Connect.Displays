@@ -335,10 +335,8 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 		private static string GenerateSetVolumeCommand(int volumePercent)
 		{
 			volumePercent = MathUtils.Clamp(volumePercent, 0, 100);
-			string volumeString = volumePercent.ToString();
 			// protocol expects volume percent to always be three characters
-			while (volumeString.Length < 3)
-				volumeString = "0" + volumeString;
+			string volumeString = volumePercent.ToString("D3");
 			return string.Format(VOLUME_SET_TEMPLATE, volumeString);
 		}
 
