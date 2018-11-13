@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Added Crestron Connect Display
+
+### Changed
+ - Removed InputCount and HdmiInput properties, displays properly support sparse addressing
 
 ## [9.0.0] - 2018-10-30
 ### Added
