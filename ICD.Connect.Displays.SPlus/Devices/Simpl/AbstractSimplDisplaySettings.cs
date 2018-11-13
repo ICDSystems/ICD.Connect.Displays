@@ -1,16 +1,11 @@
-﻿using ICD.Common.Properties;
-using ICD.Common.Utils.Xml;
+﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices.Simpl;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	public abstract class AbstractSimplDisplaySettings : AbstractSimplDeviceSettings
 	{
-		private const string INPUT_COUNT_ELEMENT = "InputCount";
 		private const string TRUST_ELEMENT = "Trust";
-
-		[PublicAPI]
-		public int InputCount { get; set; }
 
 		public bool Trust { get; set; }
 
@@ -22,7 +17,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(INPUT_COUNT_ELEMENT, IcdXmlConvert.ToString(InputCount));
 			writer.WriteElementString(TRUST_ELEMENT, IcdXmlConvert.ToString(Trust));
 		}
 
@@ -34,7 +28,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.ParseXml(xml);
 
-			InputCount = XmlUtils.TryReadChildElementContentAsInt(xml, INPUT_COUNT_ELEMENT) ?? 0;
 			Trust = XmlUtils.TryReadChildElementContentAsBoolean(xml, TRUST_ELEMENT) ?? false;
 		}
 	}

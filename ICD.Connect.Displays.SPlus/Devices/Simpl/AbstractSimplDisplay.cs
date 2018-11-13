@@ -73,11 +73,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		}
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount { get; set; }
-
-		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
 		public int? ActiveInput
@@ -216,7 +211,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.InputCount = InputCount;
 			settings.Trust = Trust;
 		}
 
@@ -227,7 +221,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.ClearSettingsFinal();
 
-			InputCount = 0;
 			Trust = false;
 		}
 
@@ -240,7 +233,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			InputCount = settings.InputCount;
 			Trust = settings.Trust;
 		}
 
@@ -268,8 +260,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
-
-			addRow("Input Count", InputCount);
 
 			DisplayConsole.BuildConsoleStatus(this, addRow);
 		}
