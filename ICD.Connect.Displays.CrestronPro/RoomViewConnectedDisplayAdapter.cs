@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 #if SIMPLSHARP
@@ -522,15 +521,11 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				case RoomViewConnectedDisplay.SourceSelectFeedbackEventId:
 				case RoomViewConnectedDisplay.CurrentSourceFeedbackEventId:
-					BoolOutputSig selected =
-						m_Display.SourceSelectFeedbackSigs
-						         .Values
-						         .FirstOrDefault(s => s.BoolValue);
-					ActiveInput = selected == null ? null : (int?)selected.Number;
-					break;
-
-				default:
-					IcdConsole.PrintLine(eConsoleColor.Magenta, "{0} EventId={1} Index={2}", this, args.EventId, args.Index);
+					KeyValuePair<uint, BoolOutputSig> active;
+					bool any =
+						(m_Display.SourceSelectFeedbackSigs as IEnumerable<KeyValuePair<uint, BoolOutputSig>>)
+							.TryFirst(kvp => kvp.Value.BoolValue, out active);
+					ActiveInput = any ? (int?)active.Key : null;
 					break;
 			}
 		}
