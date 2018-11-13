@@ -17,7 +17,6 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 {
 	public sealed class PanasonicClassicDisplay : AbstractDisplayWithAudio<PanasonicClassicDisplaySettings>
 	{
-
 		#region Commands
 
 		//When the first char of the actual command is A-E, the combined notation interprets it as a part of 
@@ -71,15 +70,6 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 			{5, INPUT_VIDEO},
 			{6, INPUT_USB}
 		};
-
-		#region Properties
-
-		/// <summary>
-		/// Gets the number of inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
-		#endregion
 
 		#region Methods
 
@@ -197,7 +187,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 		}
 
 		[PublicAPI]
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			if (!IsPowered && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
 				return;
@@ -229,7 +219,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 
 		private void QueryPower()
 		{
-			var input = HdmiInput == null || HdmiInput.Value == 0 ? 1 : HdmiInput.Value;
+			var input = ActiveInput == null || ActiveInput.Value == 0 ? 1 : ActiveInput.Value;
 			var command = s_InputMap[input];
 			SendNonFormattedCommandPriority(command, 2);
 		}
@@ -262,6 +252,19 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 		private void SendNonFormattedCommandPriority(string data, int priority)
 		{
 			SendCommandPriority(new SerialData(data), priority);
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
+			if (!Trust)
+				return;
+
+			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -324,7 +327,7 @@ namespace ICD.Connect.Displays.PanasonicClassic.Devices
 					}
 					else
 					{
-						HdmiInput = m_TargetInput;
+						ActiveInput = m_TargetInput;
 					}
 					break;
 			}
