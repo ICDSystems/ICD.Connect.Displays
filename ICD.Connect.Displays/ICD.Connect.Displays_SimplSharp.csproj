@@ -74,6 +74,8 @@
     <Compile Include="Devices\DisplayConsole.cs" />
     <Compile Include="Devices\DisplayPowerDeviceControl.cs" />
     <Compile Include="Devices\DisplayRouteDestinationControl.cs" />
+    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControl.cs" />
+    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControlSettings.cs" />
     <Compile Include="Devices\DisplayVolumeDeviceControl.cs" />
     <Compile Include="Devices\AbstractDisplayWithAudio.cs" />
     <Compile Include="Devices\DisplayWithAudioConsole.cs" />
