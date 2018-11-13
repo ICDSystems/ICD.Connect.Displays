@@ -115,11 +115,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		#region Properties
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
-		/// <summary>
 		/// Override if the display volume minimum is not 0.
 		/// </summary>
 		public override float VolumeDeviceMin { get { return 0; } }
@@ -257,7 +252,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			SendCommand(s_InputMap.GetValue(address));
 			SendCommand(INPUT_HDMI_QUERY);
@@ -393,7 +388,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 					break;
 
 				case INPUT_HDMI_QUERY:
-					HdmiInput = s_ResponseToInputMap.ContainsKey(responseValue)
+					ActiveInput = s_ResponseToInputMap.ContainsKey(responseValue)
 						            ? s_ResponseToInputMap.GetValue(responseValue)
 						            : (int?)null;
 					break;

@@ -75,11 +75,6 @@ namespace ICD.Connect.Displays.Nec.Devices
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
 		public byte MonitorId { get; set; }
 
 		#endregion
@@ -140,7 +135,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOff)));
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
 		}
@@ -343,7 +338,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 
 					if (page == INPUT_PAGE && code == INPUT_CODE)
 					{
-						HdmiInput = s_InputMap.ContainsValue(value)
+						ActiveInput = s_InputMap.ContainsValue(value)
 							            ? s_InputMap.GetKey(value)
 							            : (int?)null;
 					}

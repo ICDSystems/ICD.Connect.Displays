@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.EventArguments;
@@ -33,7 +32,7 @@ namespace ICD.Connect.Displays.Devices
 				throw new ArgumentNullException("instance");
 
 			addRow("Powered", instance.IsPowered);
-			addRow("Hdmi Input", instance.HdmiInput);
+			addRow("Active Input", instance.ActiveInput);
 			addRow("Scaling Mode", instance.ScalingMode);
 		}
 
@@ -49,10 +48,7 @@ namespace ICD.Connect.Displays.Devices
 
 			yield return new ConsoleCommand("PowerOn", "Turns on the display", () => instance.PowerOn());
 			yield return new ConsoleCommand("PowerOff", "Turns off the display", () => instance.PowerOff());
-
-			string hdmiRange = StringUtils.RangeFormat(1, instance.InputCount);
-			yield return new GenericConsoleCommand<int>("SetHdmiInput", "SetHdmiInput x " + hdmiRange, i => instance.SetHdmiInput(i));
-
+			yield return new GenericConsoleCommand<int>("SetActiveInput", "SetActiveInput <ADDRESS>", i => instance.SetActiveInput(i));
 			yield return new EnumConsoleCommand<eScalingMode>("SetScalingMode", a => instance.SetScalingMode(a));
 		}
 	}

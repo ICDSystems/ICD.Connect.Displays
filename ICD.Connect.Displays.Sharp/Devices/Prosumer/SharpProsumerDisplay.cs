@@ -72,11 +72,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
 		public override bool IsPowered
 		{
 			get { return base.IsPowered; }
@@ -215,7 +210,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			m_RequestedInput = address;
 			//SendCommand(s_InputMap[address]);
@@ -385,7 +380,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 					break;
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
-					HdmiInput = responseValue;
+					ActiveInput = responseValue;
 					if (m_RequestedInput != null)
 						if (responseValue != (int)m_RequestedInput)
 						{

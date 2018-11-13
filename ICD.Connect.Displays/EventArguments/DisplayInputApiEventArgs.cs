@@ -7,22 +7,22 @@ using ICD.Connect.Displays.Proxies;
 namespace ICD.Connect.Displays.EventArguments
 {
 	[Serializable]
-	public sealed class DisplayHdmiInputState
+	public sealed class DisplayInputState
 	{
-		public int HdmiInput { get; set; }
+		public int Input { get; set; }
 		public bool Active { get; set; }
 	}
 
-	public sealed class DisplayHmdiInputApiEventArgs : AbstractGenericApiEventArgs<DisplayHdmiInputState>
+	public sealed class DisplayInputApiEventArgs : AbstractGenericApiEventArgs<DisplayInputState>
 	{
 		/// <summary>
-		/// Gets the HDMI input address for this event.
+		/// Gets the input address for this event.
 		/// </summary>
 		[PublicAPI]
-		public int HdmiInput { get { return Data.HdmiInput; } }
+		public int Input { get { return Data.Input; } }
 
 		/// <summary>
-		/// Gets the active state of the HDMI input.
+		/// Gets the active state of the input.
 		/// </summary>
 		[PublicAPI]
 		public bool Active { get { return Data.Active; } }
@@ -30,10 +30,10 @@ namespace ICD.Connect.Displays.EventArguments
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="hdmiInput"></param>
+		/// <param name="input"></param>
 		/// <param name="active"></param>
-		public DisplayHmdiInputApiEventArgs(int hdmiInput, bool active)
-			: base(DisplayApi.EVENT_HDMI_INPUT, new DisplayHdmiInputState { HdmiInput = hdmiInput, Active = active})
+		public DisplayInputApiEventArgs(int input, bool active)
+			: base(DisplayApi.EVENT_ACTIVE_INPUT, new DisplayInputState { Input = input, Active = active})
 		{
 		}
 
@@ -45,7 +45,7 @@ namespace ICD.Connect.Displays.EventArguments
 		{
 			base.ToString(addProperty);
 
-			addProperty("HdmiInput", HdmiInput);
+			addProperty("Input", Input);
 			addProperty("Active", Active);
 		}
 	}

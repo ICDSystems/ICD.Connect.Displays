@@ -46,11 +46,6 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 			{1, INPUT_HDMI},
 		};
 
-        /// <summary>
-        /// Gets the number of HDMI inputs.
-        /// </summary>
-        public override int InputCount { get { return s_InputMap.Count; } }
-
 	    /// <summary>
 	    ///     Sets and configures the port for communication with the physical display.
 	    /// </summary>
@@ -98,7 +93,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
             SendNonFormattedCommand(POWER_OFF);
         }
 
-        public override void SetHdmiInput(int address)
+        public override void SetActiveInput(int address)
         {
             SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
@@ -228,7 +223,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 
 		    if (s_InputMap.ContainsValue(command))
 		    {
-			    HdmiInput = s_InputMap.GetKey(command);
+			    ActiveInput = s_InputMap.GetKey(command);
 			    return;
 		    }
 
@@ -275,7 +270,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 				    IsPowered = false;
 				    break;
 			    case INPUT_CHANGE_RESPONSE:
-				    HdmiInput = 1;
+				    ActiveInput = 1;
 				    break;
 			    default:
 				    if (response.StartsWith(VOLUME_CHANGE_RESPONSE))

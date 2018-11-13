@@ -65,11 +65,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
         #region Properties
 
-        /// <summary>
-        /// Gets the number of HDMI inputs.
-        /// </summary>
-        public override int InputCount { get { return s_InputMap.Count; } }
-
         #endregion
 
         #region Methods
@@ -166,7 +161,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             SendNonFormattedCommand(setVolCommand);
         }
 
-        public override void SetHdmiInput(int address)
+        public override void SetActiveInput(int address)
         {
             SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
@@ -231,7 +226,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		    if (s_InputMap.ContainsValue(command))
 		    {
-			    HdmiInput = s_InputMap.GetKey(command);
+			    ActiveInput = s_InputMap.GetKey(command);
 			    return;
 		    }
 
@@ -316,7 +311,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
                         IsMuted = param == "1";
                         break;
                     case "IIS":
-                        HdmiInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
+                        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
                         break;
                     case "VSE":
                         ScalingMode = GetScalingMode(ExtractParameter(response, 1));

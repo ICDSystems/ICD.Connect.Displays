@@ -36,7 +36,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -46,7 +46,7 @@ namespace ICD.Connect.Displays.Devices
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
@@ -60,11 +60,6 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the connection state manager instance.
 		/// </summary>
 		protected ConnectionStateManager ConnectionStateManager { get { return m_ConnectionStateManager; } }
-
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public abstract int InputCount { get; }
 
 		/// <summary>
 		/// Gets and sets the serial port.
@@ -94,26 +89,26 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
-		/// Gets the current hdmi input address.
+		/// Gets the current active input address.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			protected set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput == null ? "NULL" : m_HdmiInput.ToString());
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -214,7 +209,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public abstract void SetHdmiInput(int address);
+		public abstract void SetActiveInput(int address);
 
 		/// <summary>
 		/// Sets the scaling mode.
@@ -228,7 +223,7 @@ namespace ICD.Connect.Displays.Devices
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnIsPoweredChanged = null;
-			OnHdmiInputChanged = null;
+			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
 			base.DisposeFinal(disposing);
