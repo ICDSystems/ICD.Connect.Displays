@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils.Services;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
 using ICD.Connect.Routing.Controls;
+using ICD.Connect.Routing.Endpoints;
 using ICD.Connect.Routing.EventArguments;
+using ICD.Connect.Routing.RoutingGraphs;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -18,6 +21,16 @@ namespace ICD.Connect.Displays.Devices
 		/// Raised when an input source status changes.
 		/// </summary>
 		public override event EventHandler<SourceDetectionStateChangeEventArgs> OnSourceDetectionStateChange;
+
+		private IRoutingGraph m_CachedRoutingGraph;
+
+		/// <summary>
+		/// Gets the routing graph.
+		/// </summary>
+		public IRoutingGraph RoutingGraph
+		{
+			get { return m_CachedRoutingGraph = m_CachedRoutingGraph ?? ServiceProvider.GetService<IRoutingGraph>(); }
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -52,7 +65,7 @@ namespace ICD.Connect.Displays.Devices
 		public override void SetActiveInput(int? input)
 		{
 			if (input.HasValue)
-				Parent.SetHdmiInput(input.Value);
+				Parent.SetActiveInput(input.Value);
 		}
 
 		/// <summary>
@@ -83,7 +96,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		public override ConnectorInfo GetInput(int input)
 		{
-			return GetInputs().First(i => i.Address == input);
+			Connection connection = RoutingGraph.Connections.GetInputConnection(new EndpointInfo(Parent.Id, Id, input));
+			if (connection == null)
+				throw new ArgumentOutOfRangeException("input");
+
+			return new ConnectorInfo(connection.Destination.Address, connection.ConnectionType);
 		}
 
 		/// <summary>
@@ -93,7 +110,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		public override bool ContainsInput(int input)
 		{
-			return GetInputs().Any(i => i.Address == input);
+			return RoutingGraph.Connections.GetInputConnection(new EndpointInfo(Parent.Id, Id, input)) != null;
 		}
 
 		/// <summary>
@@ -102,9 +119,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		public override IEnumerable<ConnectorInfo> GetInputs()
 		{
-			// TODO - This will not work properly for sparse inputs
-			return Enumerable.Range(1, Parent.InputCount)
-			                 .Select(i => new ConnectorInfo(i, eConnectionType.Audio | eConnectionType.Video));
+			return RoutingGraph.Connections
+			                   .GetInputConnections(Parent.Id, Id)
+			                   .Select(c => new ConnectorInfo(c.Destination.Address, c.ConnectionType));
 		}
 
 		#endregion
@@ -117,7 +134,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="parent"></param>
 		private void Subscribe(IDisplay parent)
 		{
-			parent.OnHdmiInputChanged += ParentOnHdmiInputChanged;
+			parent.OnActiveInputChanged += ParentOnActiveInputChanged;
 			parent.OnIsPoweredChanged += ParentOnIsPoweredChanged;
 		}
 
@@ -127,7 +144,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="parent"></param>
 		private void Unsubscribe(IDisplay parent)
 		{
-			parent.OnHdmiInputChanged -= ParentOnHdmiInputChanged;
+			parent.OnActiveInputChanged -= ParentOnActiveInputChanged;
 			parent.OnIsPoweredChanged -= ParentOnIsPoweredChanged;
 		}
 
@@ -146,14 +163,14 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void ParentOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs args)
+		private void ParentOnActiveInputChanged(object sender, DisplayInputApiEventArgs args)
 		{
 			UpdateInputState();
 		}
 
 		private void UpdateInputState()
 		{
-			ActiveInput = Parent.IsPowered ? Parent.HdmiInput : null;
+			ActiveInput = Parent.IsPowered ? Parent.ActiveInput : null;
 		}
 
 		#endregion

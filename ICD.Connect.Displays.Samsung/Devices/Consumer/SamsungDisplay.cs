@@ -187,7 +187,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			SendNonFormattedCommand(VOLUME_DOWN);
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			SendNonFormattedCommand(s_InputMap.GetValue(address));
 		}
@@ -311,7 +311,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 			if (s_InputMap.ContainsValue(command))
 			{
-				HdmiInput = s_InputMap.GetKey(command);
+				ActiveInput = s_InputMap.GetKey(command);
 				return;
 			}
 
@@ -357,7 +357,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			if (s_InputMap.Values.Contains(command))
 			{
 				IsPowered = true;
-				HdmiInput = s_InputMap.ContainsValue(command)
+				ActiveInput = s_InputMap.ContainsValue(command)
 					            ? s_InputMap.GetKey(command)
 					            : (int?)null;
 				return;

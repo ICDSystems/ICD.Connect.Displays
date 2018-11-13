@@ -26,7 +26,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -42,7 +42,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 		private IIrPort m_Port;
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
@@ -85,24 +85,24 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			private set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_ActiveInput);
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -178,7 +178,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
 			bool result;
 
@@ -201,7 +201,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			}
 
 			if (result)
-				HdmiInput = address;
+				ActiveInput = address;
 		}
 
 		/// <summary>

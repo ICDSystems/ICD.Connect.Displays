@@ -12,7 +12,7 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 	public delegate void SPlusDisplayShimPowerOffCallback();
 
-	public delegate void SPlusDisplayShimSetHdmiInputCallback(ushort hdmiInput);
+	public delegate void SPlusDisplayShimSetActiveInputCallback(ushort activeInput);
 
 	public delegate void SPlusDisplayShimSetScalingModeCallback(ushort scalingMode);
 
@@ -28,10 +28,10 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		public event EventHandler<UShortEventArgs> OnIsPoweredChanged;
 
 		/// <summary>
-		/// Raised when the selected HDMI input changes.
+		/// Raised when the selected active input changes.
 		/// </summary>
 		[PublicAPI("S+")]
-		public event EventHandler<UShortEventArgs> OnHdmiInputChanged;
+		public event EventHandler<UShortEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -50,7 +50,7 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		public SPlusDisplayShimPowerOffCallback PowerOffCallback { get; set; }
 
 		[PublicAPI("S+")]
-		public SPlusDisplayShimSetHdmiInputCallback SetHdmiInputCallback { get; set; }
+		public SPlusDisplayShimSetActiveInputCallback SetActiveInputCallback { get; set; }
 
 		[PublicAPI("S+")]
 		public SPlusDisplayShimSetScalingModeCallback SetScalingModeCallback { get; set; }
@@ -84,10 +84,10 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		}
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
+		/// Gets the active input.
 		/// </summary>
 		[PublicAPI("S+")]
-		public ushort InputCount
+		public ushort ActiveInput
 		{
 			get
 			{
@@ -95,31 +95,7 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 				if (originator == null)
 					return 0;
 
-				return (ushort)originator.InputCount;
-			}
-			set
-			{
-				TOriginator originator = Originator;
-				if (originator == null)
-					return;
-
-				originator.InputCount = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets the Hdmi input.
-		/// </summary>
-		[PublicAPI("S+")]
-		public ushort HdmiInput
-		{
-			get
-			{
-				TOriginator originator = Originator;
-				if (originator == null)
-					return 0;
-
-				int? input = originator.HdmiInput;
+				int? input = originator.ActiveInput;
 				return (ushort)(input.HasValue ? input.Value : 0);
 			}
 			set
@@ -131,7 +107,7 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 				// Input 0 turns into null
 				int? input = (value == 0) ? (int?)null : value;
 
-				originator.HdmiInput = input;
+				originator.ActiveInput = input;
 			}
 		}
 
@@ -186,15 +162,15 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		}
 
 		/// <summary>
-		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
+		/// Sets the active input of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
 		[PublicAPI("S+")]
-		public void SetHdmiInput(ushort address)
+		public void SetActiveInput(ushort address)
 		{
 			TOriginator originator = Originator;
 			if (originator != null)
-				originator.SetHdmiInput(address);
+				originator.SetActiveInput(address);
 		}
 
 		/// <summary>
@@ -224,13 +200,13 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 			if (originator == null)
 				return;
 
-			originator.OnHdmiInputChanged += OriginatorOnHdmiInputChanged;
+			originator.OnActiveInputChanged += OriginatorOnActiveInputChanged;
 			originator.OnIsPoweredChanged += OriginatorOnIsPoweredChanged;
 			originator.OnScalingModeChanged += OriginatorOnScalingModeChanged;
 
 			originator.PowerOnCallback = OriginatorPowerOnCallback;
 			originator.PowerOffCallback = OriginatorPowerOffCallback;
-			originator.SetHdmiInputCallback = OriginatorSetHdmiInputCallback;
+			originator.SetActiveInputCallback = OriginatorSetActiveInputCallback;
 			originator.SetScalingModeCallback = OriginatorSetScalingModeCallback;
 		}
 
@@ -245,13 +221,13 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 			if (originator == null)
 				return;
 
-			originator.OnHdmiInputChanged += OriginatorOnHdmiInputChanged;
+			originator.OnActiveInputChanged += OriginatorOnActiveInputChanged;
 			originator.OnIsPoweredChanged += OriginatorOnIsPoweredChanged;
 			originator.OnScalingModeChanged += OriginatorOnScalingModeChanged;
 
 			originator.PowerOnCallback = null;
 			originator.PowerOffCallback = null;
-			originator.SetHdmiInputCallback = null;
+			originator.SetActiveInputCallback = null;
 			originator.SetScalingModeCallback = null;
 		}
 
@@ -265,9 +241,9 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 			OnIsPoweredChanged.Raise(this, new UShortEventArgs(IsPowered));
 		}
 
-		private void OriginatorOnHdmiInputChanged(object sender, DisplayHmdiInputApiEventArgs displayHmdiInputApiEventArgs)
+		private void OriginatorOnActiveInputChanged(object sender, DisplayInputApiEventArgs displayInputApiEventArgs)
 		{
-			OnHdmiInputChanged.Raise(this, new UShortEventArgs(HdmiInput));
+			OnActiveInputChanged.Raise(this, new UShortEventArgs(ActiveInput));
 		}
 
 		private void OriginatorSetScalingModeCallback(ISimplDisplay sender, eScalingMode scalingMode)
@@ -277,9 +253,9 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 				callback((ushort)scalingMode);
 		}
 
-		private void OriginatorSetHdmiInputCallback(ISimplDisplay sender, int address)
+		private void OriginatorSetActiveInputCallback(ISimplDisplay sender, int address)
 		{
-			SPlusDisplayShimSetHdmiInputCallback callback = SetHdmiInputCallback;
+			SPlusDisplayShimSetActiveInputCallback callback = SetActiveInputCallback;
 			if (callback != null)
 				callback((ushort)address);
 		}

@@ -214,7 +214,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			m_RequestedInput = address;
 			//SendCommand(s_InputMap[address]);
@@ -384,7 +384,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 					break;
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
-					HdmiInput = responseValue;
+					ActiveInput = responseValue;
 					if (m_RequestedInput != null)
 						if (responseValue != (int)m_RequestedInput)
 						{

@@ -144,7 +144,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             SendNonFormattedCommand(POWER_OFF);
         }
 
-        public override void SetHdmiInput(int address)
+        public override void SetActiveInput(int address)
         {
 	        if (s_InputMap.ContainsKey(address))
 		        SendNonFormattedCommand(s_InputMap.GetValue(address));
@@ -249,7 +249,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 
 		    if (s_InputMap.ContainsValue(command))
 		    {
-			    HdmiInput = s_InputMap.GetKey(command);
+			    ActiveInput = s_InputMap.GetKey(command);
 			    return;
 		    }
 
@@ -422,16 +422,16 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             switch (response.Substring(INPUT_RESPONSE.Length).ToLower())
             {
                 case "hdmi1":
-                    HdmiInput = 1;
+                    ActiveInput = 1;
                     break;
                 case "hdmi2":
-                    HdmiInput = 2;
+                    ActiveInput = 2;
                     break;
                 case "hdmi3/pc":
-                    HdmiInput = 3;
+                    ActiveInput = 3;
                     break;
                 default:
-                    HdmiInput = null;
+                    ActiveInput = null;
                     LogUnexpectedResponse(response);
                     break;
             }

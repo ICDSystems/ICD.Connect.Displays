@@ -135,7 +135,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SendCommand(new SamsungProCommand(POWER, WallId, 0));
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			SendCommand(new SamsungProCommand(INPUT, WallId, s_InputMap.GetValue(address)));
 		}
@@ -250,7 +250,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 					return;
 
 				case INPUT:
-					HdmiInput = s_InputMap.GetKey(command.Data);
+					ActiveInput = s_InputMap.GetKey(command.Data);
 					return;
 
 				case SCREEN_MODE:
@@ -355,7 +355,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 				case INPUT:
 					byte inputCode = response.Values[0];
-					HdmiInput = s_InputMap.ContainsValue(inputCode)
+					ActiveInput = s_InputMap.ContainsValue(inputCode)
 						            ? s_InputMap.GetKey(inputCode)
 						            : s_InputPcMap.ContainsValue(inputCode)
 							              ? s_InputPcMap.GetKey(inputCode)

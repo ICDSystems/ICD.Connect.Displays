@@ -122,7 +122,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			SendCommand(POWER_OFF);
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			SendCommand(s_InputMap.GetValue(address));
 		}
@@ -161,7 +161,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 			if (s_InputMap.ContainsValue(command))
 			{
-				HdmiInput = s_InputMap.GetKey(command);
+				ActiveInput = s_InputMap.GetKey(command);
 				return;
 			}
 
@@ -271,7 +271,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			int responseInput = s_InputMap.Where(p => p.Value[11] == response[1]).Select(p => p.Key).FirstOrDefault();
 			if (m_RequestedInput == null)
 			{
-				HdmiInput = responseInput;
+				ActiveInput = responseInput;
 				ResetRetryCount(INPUT_QUERY);
 			}
 			else
@@ -279,7 +279,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				string command = s_InputMap.GetValue(m_RequestedInput.Value);
 				if (m_RequestedInput == responseInput || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
-					HdmiInput = responseInput;
+					ActiveInput = responseInput;
 					ResetRetryCount(command);
 				}
 				else

@@ -23,7 +23,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -31,7 +31,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Callbacks
@@ -40,7 +40,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		public SimplDisplayPowerOffCallback PowerOffCallback{ get; set; }
 
-		public SimplDisplaySetHdmiInputCallback SetHdmiInputCallback{ get; set; }
+		public SimplDisplaySetActiveInputCallback SetActiveInputCallback{ get; set; }
 
 		public SimplDisplaySetScalingModeCallback SetScalingModeCallback{ get; set; }
 
@@ -80,24 +80,24 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput);
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -137,12 +137,12 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnIsPoweredChanged = null;
-			OnHdmiInputChanged = null;
+			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
 			PowerOnCallback = null;
 			PowerOffCallback = null;
-			SetHdmiInputCallback = null;
+			SetActiveInputCallback = null;
 			SetScalingModeCallback = null;
 
 			base.DisposeFinal(disposing);
@@ -180,14 +180,14 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
-			SimplDisplaySetHdmiInputCallback handler = SetHdmiInputCallback;
+			SimplDisplaySetActiveInputCallback handler = SetActiveInputCallback;
 			if (handler != null)
 				handler(this, address);
 
 			if (Trust)
-				HdmiInput = address;
+				ActiveInput = address;
 		}
 
 		/// <summary>

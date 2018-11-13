@@ -29,7 +29,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -51,7 +51,7 @@ namespace ICD.Connect.Displays.CrestronPro
 #endif
 
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 		private float m_Volume;
 		private bool m_IsMuted;
@@ -96,24 +96,24 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Gets the current hdmi input address.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			private set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput == null ? "NULL" : m_HdmiInput.ToString());
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -252,7 +252,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnIsPoweredChanged = null;
-			OnHdmiInputChanged = null;
+			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 			OnVolumeChanged = null;
 			OnMuteStateChanged = null;
@@ -332,7 +332,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
@@ -546,7 +546,7 @@ namespace ICD.Connect.Displays.CrestronPro
 						m_Display.SourceSelectFeedbackSigs
 						         .Values
 						         .FirstOrDefault(s => s.BoolValue);
-					HdmiInput = selected == null ? null : (int?)selected.Number;
+					ActiveInput = selected == null ? null : (int?)selected.Number;
 					break;
 
 				default:

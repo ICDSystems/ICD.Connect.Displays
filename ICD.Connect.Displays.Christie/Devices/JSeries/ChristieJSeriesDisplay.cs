@@ -144,7 +144,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 				SendCommand(string.Format(POWER, QUERY));
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			if (address != 1)
 				throw new ArgumentOutOfRangeException("address");
@@ -223,7 +223,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			if (command.Contains("SIN"))
 			{
-				HdmiInput = 1;
+				ActiveInput = 1;
 				return;
 			}
 		}
@@ -278,7 +278,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 				return;
 
 			// HDMI 1 is 4 :/
-			HdmiInput = responseInput == 4 ? 1 : (int?)null;
+			ActiveInput = responseInput == 4 ? 1 : (int?)null;
 		}
 
 		private void PowerQueryResponse(string response)

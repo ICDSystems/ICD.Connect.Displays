@@ -91,7 +91,7 @@ namespace ICD.Connect.Displays.Sony
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			string parameter = SonyBraviaCommand.SetHdmiInputParameter(address);
 			SonyBraviaCommand command = SonyBraviaCommand.Control(INPUT_FUNCTION, parameter);
@@ -248,7 +248,7 @@ namespace ICD.Connect.Displays.Sony
 					break;
 
 				case INPUT_FUNCTION:
-					HdmiInput = SonyBraviaCommand.GetHdmiInputParameter(response.Parameter);
+					ActiveInput = SonyBraviaCommand.GetHdmiInputParameter(response.Parameter);
 					break;
 			}
 		}

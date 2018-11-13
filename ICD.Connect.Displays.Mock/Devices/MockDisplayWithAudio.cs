@@ -58,9 +58,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// Sets the HDMI input.
 		/// </summary>
 		/// <param name="index"></param>
-		public override void SetHdmiInput(int index)
+		public override void SetActiveInput(int index)
 		{
-			HdmiInput = index;
+			ActiveInput = index;
 		}
 
 		/// <summary>
