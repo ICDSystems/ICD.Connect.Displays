@@ -46,11 +46,6 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 			{1, INPUT_HDMI},
 		};
 
-        /// <summary>
-        /// Gets the number of HDMI inputs.
-        /// </summary>
-        public override int InputCount { get { return s_InputMap.Count; } }
-
 	    /// <summary>
 	    ///     Sets and configures the port for communication with the physical display.
 	    /// </summary>

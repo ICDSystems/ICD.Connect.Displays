@@ -67,11 +67,6 @@ namespace ICD.Connect.Displays.CrestronPro
 		public bool Trust { get { return false; } set { throw new NotSupportedException(); } }
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount { get { return m_Display == null ? 0 : m_Display.SourceSelectFeedbackSigs.Count; } }
-
-		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
 		public bool IsPowered

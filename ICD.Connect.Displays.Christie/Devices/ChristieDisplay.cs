@@ -69,12 +69,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 		private int? m_RequestedInput;
 		private eScalingMode? m_RequestedAspect;
 
-		#region Properties
-
-		public override int InputCount { get { return s_InputMap.Count; } }
-
-		#endregion
-
 		#region Methods
 
 		/// <summary>

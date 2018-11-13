@@ -46,8 +46,6 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 		#region Properties
 
-		public override int InputCount { get { return 1; } }
-
 		public ePowerState PowerState
 		{
 			get { return m_PowerState; }

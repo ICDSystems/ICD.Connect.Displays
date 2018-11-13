@@ -22,11 +22,6 @@ namespace ICD.Connect.Displays.Sony
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return 4; } }
-
 		#endregion
 
 		#region Methods

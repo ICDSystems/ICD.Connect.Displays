@@ -62,11 +62,6 @@ namespace ICD.Connect.Displays.Devices
 		protected ConnectionStateManager ConnectionStateManager { get { return m_ConnectionStateManager; } }
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public abstract int InputCount { get; }
-
-		/// <summary>
 		/// Gets and sets the serial port.
 		/// </summary>
 		protected ISerialQueue SerialQueue { get; private set; }

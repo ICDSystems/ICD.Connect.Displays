@@ -77,11 +77,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 			{3, INPUT_HDMI3}
 		};
 
-	    /// <summary>
-	    /// Gets the number of HDMI inputs.
-	    /// </summary>
-	    public override int InputCount { get { return s_InputMap.Count; } }
-
 	    #region Methods
         /// <summary>
         /// Sets and configures the port for communication with the physical display.

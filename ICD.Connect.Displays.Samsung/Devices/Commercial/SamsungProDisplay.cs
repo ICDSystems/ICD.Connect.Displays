@@ -79,11 +79,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		[PublicAPI]
 		public byte WallId { get; set; }
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
 		#endregion
 
 		#region Methods

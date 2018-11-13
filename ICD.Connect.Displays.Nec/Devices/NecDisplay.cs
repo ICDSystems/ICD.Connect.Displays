@@ -75,11 +75,6 @@ namespace ICD.Connect.Displays.Nec.Devices
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
 		public byte MonitorId { get; set; }
 
 		#endregion

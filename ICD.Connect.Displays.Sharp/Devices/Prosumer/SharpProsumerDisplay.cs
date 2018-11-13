@@ -72,11 +72,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		#region Properties
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
 		public override bool IsPowered
 		{
 			get { return base.IsPowered; }

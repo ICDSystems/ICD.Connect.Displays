@@ -115,11 +115,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		#region Properties
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
-
-		/// <summary>
 		/// Override if the display volume minimum is not 0.
 		/// </summary>
 		public override float VolumeDeviceMin { get { return 0; } }
