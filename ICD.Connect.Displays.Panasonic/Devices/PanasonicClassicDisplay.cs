@@ -13,7 +13,7 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
-namespace ICD.Connect.Displays.PanasonicClassic.Devices
+namespace ICD.Connect.Displays.Panasonic.Devices
 {
 	public sealed class PanasonicClassicDisplay : AbstractDisplayWithAudio<PanasonicClassicDisplaySettings>
 	{

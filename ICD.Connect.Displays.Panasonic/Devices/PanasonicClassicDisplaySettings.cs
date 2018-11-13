@@ -2,7 +2,7 @@
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Displays.PanasonicClassic.Devices
+namespace ICD.Connect.Displays.Panasonic.Devices
 {
 	[KrangSettings(FACTORY_NAME)]
 	public sealed class PanasonicClassicDisplaySettings : AbstractDisplayWithAudioSettings
