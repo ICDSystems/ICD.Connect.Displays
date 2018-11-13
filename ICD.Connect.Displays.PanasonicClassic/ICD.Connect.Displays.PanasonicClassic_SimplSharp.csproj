@@ -1,15 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{FCC7D685-B801-43A5-AEB3-774442027A0D}</ProjectGuid>
+    <ProjectGuid>{91E75BB7-41E8-4172-AA41-9259B17C1D4F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ICD.Connect.Displays</RootNamespace>
-    <AssemblyName>ICD.Connect.Displays</AssemblyName>
+    <RootNamespace>ICD.Connect.Displays.PanasonicClassic</RootNamespace>
+    <AssemblyName>ICD.Connect.Displays.PanasonicClassic_SimplSharp</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
@@ -19,7 +18,6 @@
     <NativePlatformName>Windows CE</NativePlatformName>
     <FormFactorID>
     </FormFactorID>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <AllowedReferenceRelatedFileExtensions>.allowedReferenceRelatedFileExtensions</AllowedReferenceRelatedFileExtensions>
@@ -27,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;SIMPLSHARP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <FileAlignment>512</FileAlignment>
@@ -46,6 +44,7 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+    <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -57,52 +56,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpHelperInterface.dll</HintPath>
     </Reference>
-    <Reference Include="SimplSharpNewtonsoft, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpNewtonsoft.dll</HintPath>
-    </Reference>
-    <Reference Include="SimplSharpReflectionInterface, Version=1.0.5583.25238, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpReflectionInterface.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Devices\AbstractDisplay.cs" />
-    <Compile Include="Devices\DisplayConsole.cs" />
-    <Compile Include="Devices\DisplayPowerDeviceControl.cs" />
-    <Compile Include="Devices\DisplayRouteDestinationControl.cs" />
-    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControl.cs" />
-    <Compile Include="Devices\DisplayScreenRelayControl\DisplayScreenRelayControlSettings.cs" />
-    <Compile Include="Devices\DisplayVolumeDeviceControl.cs" />
-    <Compile Include="Devices\AbstractDisplayWithAudio.cs" />
-    <Compile Include="Devices\DisplayWithAudioConsole.cs" />
-    <Compile Include="Devices\IDisplayWithAudio.cs" />
-    <None Include="ObfuscationSettings.cs" />
-    <Compile Include="Devices\IDisplay.cs" />
-    <Compile Include="Devices\IrDisplay\IrDisplayCommands.cs" />
-    <Compile Include="Devices\IrDisplay\IrDisplayDevice.cs" />
-    <Compile Include="Devices\IrDisplay\IrDisplaySettings.cs" />
-    <Compile Include="EventArguments\DisplayInputApiEventArgs.cs" />
-    <Compile Include="EventArguments\DisplayMuteApiEventArgs.cs" />
-    <Compile Include="EventArguments\DisplayPowerStateApiEventArgs.cs" />
-    <Compile Include="EventArguments\DisplayVolumeApiEventArgs.cs" />
     <Compile Include="KrangPlugin.cs" />
+    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Devices\PanasonicClassicDisplay.cs" />
+    <Compile Include="Devices\PanasonicClassicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EventArguments\DisplayScalingModeApiEventArgs.cs" />
-    <Compile Include="Proxies\AbstractProxyDisplay.cs" />
-    <Compile Include="Proxies\DisplayApi.cs" />
-    <Compile Include="Proxies\DisplayWithAudioApi.cs" />
-    <Compile Include="Proxies\IProxyDisplay.cs" />
-    <Compile Include="Proxies\IProxyDisplayWithAudio.cs" />
-    <Compile Include="Proxies\ProxyDisplay.cs" />
-    <Compile Include="Proxies\ProxyDisplayWithAudio.cs" />
-    <Compile Include="Settings\AbstractDisplaySettings.cs" />
-    <Compile Include="Settings\AbstractDisplayWithAudioSettings.cs" />
-    <Compile Include="Settings\IDisplaySettings.cs" />
-    <Compile Include="Settings\IDisplayWithAudioSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -114,21 +77,21 @@
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio\ICD.Connect.Audio_SimplSharp.csproj">
-      <Project>{8ED25D96-E9A5-4E9A-A890-B4EF3AB62041}</Project>
-      <Name>ICD.Connect.Audio_SimplSharp</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
+      <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
+      <Name>ICD.Connect.Protocol.Network_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
+      <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
+      <Name>ICD.Connect.Displays_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_SimplSharp.csproj">
       <Project>{2E4E01B8-D4EA-4FB1-9FCE-0A0DC8D83C8A}</Project>
       <Name>ICD.Connect.Protocol_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing\ICD.Connect.Routing_SimplSharp.csproj">
-      <Project>{B0C0CA1C-FA55-4BEA-8A8B-EDB2141C523E}</Project>
-      <Name>ICD.Connect.Routing_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
@@ -140,6 +103,4 @@
     <PostBuildEvent>if /I "$(ConfigurationName)" == "Release" Eazfuscator.NET.exe "$(TargetPath)" --msbuild-project-path "$(ProjectPath)" --msbuild-project-configuration "$(ConfigurationName)" --msbuild-project-platform "$(PlatformName)" --msbuild-solution-path "$(SolutionPath)" -n --newline-flush -v 5.2 --configuration-file="$(ProjectDir)ObfuscationSettings.cs"
 rem S# Pro preparation will execute after these operations</PostBuildEvent>
   </PropertyGroup>
-  <Target Name="PlatformVerificationTask">
-  </Target>
 </Project>
