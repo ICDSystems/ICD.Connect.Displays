@@ -6,6 +6,8 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.EventArguments;
+using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings.Core;
 
@@ -173,9 +175,9 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 
 		}
 
-		private void DisplayOnIsPoweredChanged(object sender, BoolEventArgs boolEventArgs)
+		private void DisplayOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
-			ActivateDisplayRelays(boolEventArgs.Data);
+			ActivateDisplayRelays(args.Data);
 		}
 
 		public void ActivateDisplayRelays(bool displayPower)
@@ -219,7 +221,7 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 			relay.OnIsOnlineStateChanged -= RelayOnIsOnlineStateChanged;
 		}
 
-		private void RelayOnIsOnlineStateChanged(object sender, BoolEventArgs boolEventArgs)
+		private void RelayOnIsOnlineStateChanged(object sender, DeviceBaseOnlineStateApiEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
 		}
