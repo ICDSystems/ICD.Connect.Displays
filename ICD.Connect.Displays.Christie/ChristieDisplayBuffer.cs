@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
@@ -11,20 +12,23 @@ namespace ICD.Connect.Displays.Christie
 {
 	public sealed class ChristieDisplayBuffer : ISerialBuffer
 	{
+		/// <summary>
+		/// Raised when a complete message has been buffered.
+		/// </summary>
 		public event EventHandler<StringEventArgs> OnCompletedSerial;
 
-		private readonly StringBuilder m_RxData;
-		private readonly Queue<string> m_Queue;
-		private readonly SafeCriticalSection m_QueueSection;
-		private readonly SafeCriticalSection m_ParseSection;
-
-		private static readonly char[] s_Headers =
+		private static readonly IcdHashSet<char> s_Headers = new IcdHashSet<char>
 		{
 			ChristieDisplay.RESPONSE_SUCCESS,
 			ChristieDisplay.RESPONSE_ERROR,
 			ChristieDisplay.RESPONSE_BAD_COMMAND,
 			ChristieDisplay.RESPONSE_DATA_REPLY
 		};
+
+		private readonly StringBuilder m_RxData;
+		private readonly Queue<string> m_Queue;
+		private readonly SafeCriticalSection m_QueueSection;
+		private readonly SafeCriticalSection m_ParseSection;
 
 		/// <summary>
 		/// Constructor.
@@ -88,7 +92,7 @@ namespace ICD.Connect.Displays.Christie
 						bool isHeader = s_Headers.Contains(c);
 
 						// Have to start with a header
-						if (m_RxData.Length == 0 || !isHeader)
+						if (m_RxData.Length == 0 && !isHeader)
 							continue;
 
 						// We hit a second header
@@ -117,16 +121,19 @@ namespace ICD.Connect.Displays.Christie
 		/// <returns></returns>
 		private static bool IsComplete(string data)
 		{
-			IcdConsole.PrintLine(StringUtils.ToHexLiteral(data));
+			if (string.IsNullOrEmpty(data))
+				return false;
 
-			switch (data.First())
+			switch (data[0])
 			{
 				case ChristieDisplay.RESPONSE_SUCCESS:
 				case ChristieDisplay.RESPONSE_BAD_COMMAND:
 					return data.Length >= 1;
+
 				case ChristieDisplay.RESPONSE_DATA_REPLY:
 				case ChristieDisplay.RESPONSE_ERROR:
 					return data.Length >= 3;
+
 				default:
 					return false;
 			}
