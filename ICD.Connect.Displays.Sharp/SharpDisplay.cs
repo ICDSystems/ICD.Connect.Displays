@@ -400,7 +400,6 @@ namespace ICD.Connect.Displays.Sharp
 
 		private void RetryCommand(string command)
 		{
-			//Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToMixedReadableHexLiteral(args.Data));
 			IncrementRetryCount(command);
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
 				SerialQueue.EnqueuePriority(new SerialData(command));
