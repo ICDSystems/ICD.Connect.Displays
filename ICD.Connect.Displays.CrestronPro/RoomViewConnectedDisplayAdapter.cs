@@ -52,7 +52,6 @@ namespace ICD.Connect.Displays.CrestronPro
 
 		private bool m_IsPowered;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 		private float m_Volume;
 		private bool m_IsMuted;
 		private float? m_VolumeSafetyMin;
@@ -115,21 +114,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Gets the scaling mode.
 		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			private set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
-			}
-		}
+		public eScalingMode ScalingMode { get { return eScalingMode.Unknown; } }
 
 		/// <summary>
 		/// Gets the raw volume of the display.
