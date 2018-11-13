@@ -88,7 +88,7 @@ namespace ICD.Connect.Displays.Christie
 						bool isHeader = s_Headers.Contains(c);
 
 						// Have to start with a header
-						if (m_RxData.Length == 0 || !isHeader)
+						if (m_RxData.Length == 0 && !isHeader)
 							continue;
 
 						// We hit a second header
