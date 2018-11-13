@@ -290,10 +290,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void PowerOn()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.PowerOn();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -301,10 +305,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void PowerOff()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.PowerOff();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -313,10 +321,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <param name="address"></param>
 		public void SetActiveInput(int address)
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.SourceSelectSigs[(uint)address].BoolValue = true;
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -334,12 +346,16 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
 
 			m_Display.Volume.UShortValue = (ushort)MathUtils.MapRange(VolumeDeviceMin, VolumeDeviceMax, 0, ushort.MaxValue, raw);
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -347,10 +363,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.VolumeUp();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -358,10 +378,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.VolumeDown();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -369,10 +393,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void MuteOn()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.MuteOn();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -380,10 +408,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void MuteOff()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.MuteOff();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
@@ -391,10 +423,14 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public void MuteToggle()
 		{
+#if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
 			m_Display.MuteToggle();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>
