@@ -323,13 +323,10 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	        string response = args.Response;
             string command = ExtractCommand(response);
 
-			Logger.AddEntry(eSeverity.Debug, "command response is {0}", command);
-
-            int newVol;
+			int newVol;
             if (StringUtils.TryParse(command, out newVol))
             {
-				Logger.AddEntry(eSeverity.Debug, "try parse volume {0}", newVol);
-                Volume = newVol;
+				Volume = newVol;
                 IsMuted = false;
             }
             else
@@ -353,7 +350,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
                         ScalingMode = GetScalingMode(ExtractParameter(response, 1));
                         break;
 					default:
-						Logger.AddEntry(eSeverity.Error, "Failed to parse {0}", args.Response);
+						Log(eSeverity.Error, "Failed to parse {0}", args.Response);
 		                break;
                 }
             }
