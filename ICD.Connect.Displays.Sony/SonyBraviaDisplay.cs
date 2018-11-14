@@ -20,10 +20,6 @@ namespace ICD.Connect.Displays.Sony
 		private const string INPUT_FUNCTION = "INPT";
 		private const string IRCODE_FUNCTION = "IRCC";
 
-		#region Properties
-
-		#endregion
-
 		#region Methods
 
 		/// <summary>
@@ -214,11 +210,14 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
+			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
 			SonyBraviaCommand response = SonyBraviaCommand.Response(args.Response);
 
 			if (response.Parameter == SonyBraviaCommand.ERROR)
 				ParseError(args);
 			else if (response.Type == SonyBraviaCommand.eCommand.Notify)
+				ParseQuery(response);
+			else if (command != null && command.Type == SonyBraviaCommand.eCommand.Enquiry && response.Type == SonyBraviaCommand.eCommand.Answer)
 				ParseQuery(response);
 		}
 
