@@ -3,6 +3,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -28,6 +29,9 @@ namespace ICD.Connect.Displays.Samsung
 		private const byte INPUT_HDMI_2_PC = 0x24;
 		private const byte INPUT_HDMI_3 = 0x31;
 		private const byte INPUT_HDMI_3_PC = 0x31;
+		private const byte INPUT_DISPLAYPORT = 0x25;
+		private const byte INPUT_DVI = 0x18;
+		private const byte INPUT_DVI_VIDEO = 0x1F;
 
 		private const byte ASPECT_16_X9 = 0x01;
 		private const byte ASPECT_WIDE = 0x04;
@@ -55,14 +59,17 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
-			{3, INPUT_HDMI_3}
+			{3, INPUT_HDMI_3},
+			{4, INPUT_DISPLAYPORT},
+			{5, INPUT_DVI},
 		};
 
 		private static readonly Dictionary<int, byte> s_InputPcMap = new Dictionary<int, byte>
 		{
 			{1, INPUT_HDMI_1_PC},
 			{2, INPUT_HDMI_2_PC},
-			{3, INPUT_HDMI_3_PC}
+			{3, INPUT_HDMI_3_PC},
+			{5, INPUT_DVI_VIDEO}
 		};
 
 		#region Properties
@@ -94,7 +101,7 @@ namespace ICD.Connect.Displays.Samsung
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 10 * 1000;
+			queue.Timeout = 3 * 1000;
 
 			SetSerialQueue(queue);
 
@@ -152,6 +159,8 @@ namespace ICD.Connect.Displays.Samsung
 		protected override void VolumeSetRawFinal(float raw)
 		{
 			SendCommand(new SamsungProCommand(VOLUME, WallId, (byte)raw), CommandComparer);
+
+			// Display unmutes on volume change
 			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), CommandComparer);
 		}
 
@@ -196,16 +205,19 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			base.QueryState();
 
+			// Important - Some SamsungPro models get really upset if you try to send commands
+			// while it's warming up. Sending the queries first by priority seems to solve this problem.
+
 			// Query the state of the device
-			SendCommand(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+			SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), int.MinValue);
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(new SamsungProCommand(VOLUME, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(INPUT, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery());
+			SerialQueue.EnqueuePriority(new SamsungProCommand(VOLUME, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(INPUT, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery(), int.MinValue);
+			SerialQueue.EnqueuePriority(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), int.MinValue);
 		}
 
 		/// <summary>
@@ -215,18 +227,49 @@ namespace ICD.Connect.Displays.Samsung
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
+			IcdConsole.PrintLine(eConsoleColor.Magenta, StringUtils.ToHexLiteral(args.Response));
+
 			SamsungProResponse response = new SamsungProResponse(args.Response);
 
-			if (!response.IsValid)
-				return;
+			switch (response.Header)
+			{
+				case 0xAA:
+					if (response.Id != WallId)
+						return;
 
-			if (response.Id != WallId)
-				return;
+					switch (response.Code)
+					{
+						// Normal response
+						case 0xFF:
+							if (!response.IsValid)
+								return;
 
-			if (response.Success)
-				ParseSuccess(response);
-			else
-				ParseError(args);
+							if (response.Success)
+								ParseSuccess(response);
+							else
+								ParseError(args);
+							break;
+
+						// Cooldown
+						case 0xE1:
+							// Ignore unsolicited cooldown message
+							return;
+					}
+					break;
+				
+				case 0xFF:
+				case 0x1C:
+					switch (response.Code)
+					{
+						// Warmup
+						case 0x1C:
+						case 0xC4:
+							// Keep sending power query until fully powered on
+							SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+							break;
+					}
+					break;
+			}
 		}
 
 		/// <summary>
@@ -237,6 +280,10 @@ namespace ICD.Connect.Displays.Samsung
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+
+			// Keep sending power query until fully powered on
+			if (SerialQueue.TimeoutCount < 10)
+				SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
 		}
 
 		/// <summary>
@@ -323,5 +370,16 @@ namespace ICD.Connect.Displays.Samsung
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Wall ID", WallId);
+		}
 	}
 }
