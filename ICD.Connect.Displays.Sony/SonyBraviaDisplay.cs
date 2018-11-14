@@ -218,7 +218,7 @@ namespace ICD.Connect.Displays.Sony
 
 			if (response.Parameter == SonyBraviaCommand.ERROR)
 				ParseError(args);
-			else if (response.Type == SonyBraviaCommand.eCommand.Answer)
+			else if (response.Type == SonyBraviaCommand.eCommand.Notify)
 				ParseQuery(response);
 		}
 
