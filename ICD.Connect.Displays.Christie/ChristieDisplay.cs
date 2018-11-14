@@ -145,8 +145,10 @@ namespace ICD.Connect.Displays.Christie
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
 			string data = args.Response;
+			if (string.IsNullOrEmpty(data))
+				return;
 
-			switch (data.First())
+			switch (data[0])
 			{
 				case RESPONSE_SUCCESS:
 					ParseSuccess(args);
@@ -173,7 +175,11 @@ namespace ICD.Connect.Displays.Christie
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			RetryCommand(args.Data.Serialize());
+			ISerialData command = args.Data;
+			if (command == null)
+				return;
+
+			RetryCommand(command.Serialize());
 		}
 
 		/// <summary>
@@ -182,23 +188,27 @@ namespace ICD.Connect.Displays.Christie
 		/// <param name="args"></param>
 		private void ParseSuccess(SerialResponseEventArgs args)
 		{
-			string command = args.Data.Serialize();
+			ISerialData command = args.Data;
+			if (command == null)
+				return;
+
+			string data = args.Data.Serialize();
 
 			// HDMI
-			if (s_InputMap.Values.Contains(command))
+			if (s_InputMap.Values.Contains(data))
 				SerialQueue.EnqueuePriority(new SerialData(INPUT_QUERY));
 
 			// Scaling Mode
-			else if (s_ScalingModeMap.Values.Contains(command))
+			else if (s_ScalingModeMap.Values.Contains(data))
 				SerialQueue.EnqueuePriority(new SerialData(ASPECT_QUERY));
 
 			else
 			{
-				switch (command)
+				switch (data)
 				{
 					case POWER_ON:
 					case POWER_OFF:
-						m_RequestedPowerStatus = command == POWER_ON;
+						m_RequestedPowerStatus = data == POWER_ON;
 						SerialQueue.EnqueuePriority(new SerialData(POWER_QUERY));
 						break;
 				}
@@ -207,7 +217,11 @@ namespace ICD.Connect.Displays.Christie
 
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			RetryCommand(args.Data.Serialize());
+			ISerialData command = args.Data;
+			if (command == null)
+				return;
+
+			RetryCommand(command.Serialize());
 		}
 
 		private void ParseBadCommand(SerialResponseEventArgs args)
@@ -217,7 +231,11 @@ namespace ICD.Connect.Displays.Christie
 
 		private void ParseDataReply(SerialResponseEventArgs args)
 		{
-			switch (args.Data.Serialize())
+			ISerialData command = args.Data;
+			if (command == null)
+				return;
+
+			switch (command.Serialize())
 			{
 				case POWER_QUERY:
 					PowerQueryResponse(args.Response);
