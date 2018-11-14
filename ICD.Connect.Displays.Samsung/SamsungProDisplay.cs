@@ -72,6 +72,8 @@ namespace ICD.Connect.Displays.Samsung
 			{5, INPUT_DVI_VIDEO}
 		};
 
+		private int m_SerialQueueTimeoutCount;
+
 		#region Properties
 
 		/// <summary>
@@ -227,6 +229,7 @@ namespace ICD.Connect.Displays.Samsung
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
+			m_SerialQueueTimeoutCount = 0;
 			IcdConsole.PrintLine(eConsoleColor.Magenta, StringUtils.ToHexLiteral(args.Response));
 
 			SamsungProResponse response = new SamsungProResponse(args.Response);
@@ -281,8 +284,10 @@ namespace ICD.Connect.Displays.Samsung
 		{
 			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
 
+			m_SerialQueueTimeoutCount++;
+
 			// Keep sending power query until fully powered on
-			if (SerialQueue.TimeoutCount < 10)
+			if (m_SerialQueueTimeoutCount < 10)
 				SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
 		}
 
