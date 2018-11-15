@@ -96,7 +96,7 @@ namespace ICD.Connect.Displays.Christie
 							continue;
 
 						// We hit a second header
-						if (m_RxData.Length > 0)
+						if (m_RxData.Length > 0 && isHeader)
 							OnCompletedSerial.Raise(this, new StringEventArgs(m_RxData.Pop()));
 
 						m_RxData.Append(c);

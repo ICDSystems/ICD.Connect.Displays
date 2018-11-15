@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils.EventArguments;
-using ICD.Connect.Displays.Christie.Devices;
 using NUnit.Framework;
 
 namespace ICD.Connect.Displays.Christie.Tests
@@ -15,19 +13,18 @@ namespace ICD.Connect.Displays.Christie.Tests
 			Assert.Inconclusive();
 		}
 
-		[TestCase("\x06\x06\x06", new[] { "\x06", "\x06", "\x06" })]
-		public void Enqueue(string data, IEnumerable<string> expectedFeedback)
+		[TestCase("\x06\x06\x06", "\x06", "\x06", "\x06")]
+		[TestCase("\x1D\x01\x00", "\x1D\x01\x00")]
+		public void Enqueue(string data, params string[] expected)
 		{
-			List<StringEventArgs> feedback = new List<StringEventArgs>();
+			List<string> feedback = new List<string>();
 
 			ChristieDisplayBuffer buffer = new ChristieDisplayBuffer();
-			buffer.OnCompletedSerial += (sender, args) => feedback.Add(args);
+			buffer.OnCompletedSerial += (sender, args) => feedback.Add(args.Data);
 
 			buffer.Enqueue(data);
 
-			bool equals = feedback.Select(args => args.Data).SequenceEqual(expectedFeedback);
-
-			Assert.IsTrue(equals);
+			Assert.IsTrue(feedback.SequenceEqual(expected));
 		}
 
 		[Test]
