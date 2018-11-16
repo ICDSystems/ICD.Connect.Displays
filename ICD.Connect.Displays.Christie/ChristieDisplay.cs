@@ -87,7 +87,7 @@ namespace ICD.Connect.Displays.Christie
 				ConfigureComPort(port as IComPort);
 
 			ISerialBuffer buffer = new ChristieDisplayBuffer();
-			RateLimitedQueue queue = new RateLimitedQueue(100);
+			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
