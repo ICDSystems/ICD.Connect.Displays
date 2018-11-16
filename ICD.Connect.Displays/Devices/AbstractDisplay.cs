@@ -18,6 +18,7 @@ using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Routing.Connections;
 using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Devices
@@ -429,6 +430,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="factory"></param>
 		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
 		{
+			// Display inputs rely on available connections
+			factory.LoadOriginators<Connection>();
+
 			base.ApplySettingsFinal(settings, factory);
 
 			ISerialPort port = null;
