@@ -62,10 +62,18 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the current active input.
 		/// </summary>
 		/// <param name="input"></param>
-		public override void SetActiveInput(int? input)
+		public void SetActiveInput(int? input)
 		{
 			if (input.HasValue)
 				Parent.SetActiveInput(input.Value);
+		}
+
+		/// <summary>
+		/// Sets the current active input.
+		/// </summary>
+		public override void SetActiveInput(int? input, eConnectionType type)
+		{
+			SetActiveInput(input);
 		}
 
 		/// <summary>
@@ -77,16 +85,6 @@ namespace ICD.Connect.Displays.Devices
 		public override bool GetSignalDetectedState(int input, eConnectionType type)
 		{
 			return true;
-		}
-
-		/// <summary>
-		/// Returns the true if the input is actively being used by the source device.
-		/// For example, a display might true if the input is currently on screen,
-		/// while a switcher may return true if the input is currently routed.
-		/// </summary>
-		public override bool GetInputActiveState(int input, eConnectionType type)
-		{
-			return ActiveInput == input;
 		}
 
 		/// <summary>
@@ -170,7 +168,8 @@ namespace ICD.Connect.Displays.Devices
 
 		private void UpdateInputState()
 		{
-			ActiveInput = Parent.IsPowered ? Parent.ActiveInput : null;
+			int? activeInput = Parent.IsPowered ? Parent.ActiveInput : null;
+			SetCachedActiveInput(activeInput, eConnectionType.Audio | eConnectionType.Video);
 		}
 
 		#endregion
