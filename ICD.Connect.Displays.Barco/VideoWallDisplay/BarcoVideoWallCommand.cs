@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using Crestron.SimplSharp;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 {
+// ReSharper disable UnusedMember.Global
 	public enum eCommandKeyword
 	{
 		Get,
@@ -20,8 +18,10 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		SelInput,
 		Tiling,
 		DisplayMode,
+// ReSharper disable InconsistentNaming
 		EDID,
 		EDIDList,
+// ReSharper restore InconsistentNaming
 		BezCorr,
 		DispOrientation,
 		WallSize,
@@ -29,8 +29,9 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		TargetBrightness,
 		TargetBrightnesRange
 	};
+// ReSharper restore UnusedMember.Global
 
-	public class BarcoVideoWallCommand : ISerialData, IEquatable<BarcoVideoWallCommand>
+	public sealed class BarcoVideoWallCommand : ISerialData, IEquatable<BarcoVideoWallCommand>
 	{
 		public string WallDisplayId { get; set; }
 
@@ -49,12 +50,12 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		public string Serialize()
 		{
 			StringBuilder cmd = new StringBuilder();
-			cmd.AppendFormat("{0} {1} {2}", WallDisplayId, CommandKeyword, Command);
+			cmd.AppendFormat("{1}{0}{2}{0}{3}",BarcoVideoWallDisplay.DELIMITER, WallDisplayId, CommandKeyword, Command);
 			if (!String.IsNullOrEmpty(Device))
 			{
-				cmd.AppendFormat(" {0}",Device);
+				cmd.AppendFormat("{0}{1}", BarcoVideoWallDisplay.DELIMITER, Device);
 				if (!String.IsNullOrEmpty(Attribute))
-					cmd.AppendFormat(" {0}", Attribute);
+					cmd.AppendFormat("{0}{1}",BarcoVideoWallDisplay.DELIMITER, Attribute);
 			}
 			cmd.Append(BarcoVideoWallDisplay.TERMINATOR);
 			return cmd.ToString();
