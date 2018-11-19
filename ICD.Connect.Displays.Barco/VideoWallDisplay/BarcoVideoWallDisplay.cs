@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
@@ -187,6 +188,12 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		private void ParseResponseSuccess(SerialResponseEventArgs args, string[] responseParts)
 		{
+			if (responseParts.Length < 3)
+			{
+				// Log
+				return;
+			}
+
 			// Make sure the response is for the right device
 			if (!responseParts[1].Equals(WallDeviceId))
 				return;
@@ -208,25 +215,47 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			switch (command)
 			{
 				case eCommand.OpState:
-					ParsePowerState(responseParts);
+					ParsePowerState(args, responseParts);
 					break;
 				case eCommand.SelInput:
 				case eCommand.ActiveInput:
-					ParseInput(responseParts);
+					ParseInput(args, responseParts);
 					break;
 			}
 		}
 
-		private void ParseInput(string[] responseParts)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void ParsePowerState(string[] responseParts)
+		private void ParseInput(SerialResponseEventArgs args, string[] responseParts)
 		{
 			if (responseParts.Length <= 5)
 			{
-				Logger.AddEntry(eSeverity.Error, "Power response has too few parts: {0}", responseParts);
+				Logger.AddEntry(eSeverity.Error, "Input response has too few parts: {0}", args.Response);
+				return;
+			}
+
+			if (responseParts[4].Equals(DEVICE_WALL, StringComparison.OrdinalIgnoreCase))
+				return;
+
+			KeyValuePair<int, string> input;
+
+			try
+			{
+				input = s_InputMap.First(kvp => String.Equals(kvp.Value, responseParts[5], StringComparison.OrdinalIgnoreCase));
+			}
+			catch (InvalidOperationException)
+			{
+				Logger.AddEntry(eSeverity.Error, "Unable to parse input: {0}", responseParts[5]);
+				return;
+			}
+
+			HdmiInput = input.Key;
+
+		}
+
+		private void ParsePowerState(SerialResponseEventArgs args, string[] responseParts)
+		{
+			if (responseParts.Length <= 5)
+			{
+				Logger.AddEntry(eSeverity.Error, "Power response has too few parts: {0}", args.Response);
 				return;
 			}
 
@@ -238,7 +267,40 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		private void ParseResponseError(SerialResponseEventArgs args, string[] responseParts)
 		{
-			throw new NotImplementedException();
+			if (responseParts.Length < 2)
+			{
+				Logger.AddEntry(eSeverity.Error, "Error response has too few parts: {0}", args.Response);
+				return;
+			}
+
+			if (responseParts[2].Equals("system_busy", StringComparison.OrdinalIgnoreCase))
+			{
+				Logger.AddEntry(eSeverity.Debug, "System Busy, resending command: {0}", args.Response);
+				SendCommandPriority(args.Data, 1);
+				return;
+			}
+
+			if (responseParts[2].Equals("incomplete_action", StringComparison.OrdinalIgnoreCase))
+			{
+				Logger.AddEntry(eSeverity.Debug, "Incomplete Action, resending command: {0}", args.Response);
+				SendCommandPriority(args.Data, 1);
+				return;
+			}
+
+			if (responseParts[2].Equals("syntax_error", StringComparison.OrdinalIgnoreCase))
+			{
+				Logger.AddEntry(eSeverity.Error, "Syntax Error: {0}", args.Response);
+				return;
+			}
+
+			if (responseParts[2].Equals("not_supported", StringComparison.OrdinalIgnoreCase))
+			{
+				Logger.AddEntry(eSeverity.Error, "Command Not Supported: {0}", args.Response);
+				return;
+			}
+
+			Logger.AddEntry(eSeverity.Error, "Unknown Error: {0}", args.Response);
+		
 		}
 
 		private void SendCommand(BarcoVideoWallCommand command)
