@@ -154,6 +154,11 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 			UpdateCachedOnlineStatus();
 		}
 
+		private void SetRelayHoldTime(int holdTime)
+		{
+			m_RelayHoldTime = holdTime;
+		}
+
 		#region Display Subscritpion/Callback
 
 		private void Subscribe(IDisplay display)
@@ -319,14 +324,9 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state", (b) => ActivateDisplayRelays(b));
+			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state, true for on false for off", (b) => ActivateDisplayRelays(b));
 			yield return new ConsoleCommand("OpenRelays", "Opens all relays", () => OpenAllRelays());
 			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", (i) => SetRelayHoldTime(i));
-		}
-
-		private void SetRelayHoldTime(int holdTime)
-		{
-			m_RelayHoldTime = holdTime;
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()

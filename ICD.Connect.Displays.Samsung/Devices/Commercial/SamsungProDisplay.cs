@@ -261,8 +261,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			IcdConsole.PrintLine(eConsoleColor.Magenta, StringUtils.ToHexLiteral(args.Response));
-
 			SamsungProResponse response = new SamsungProResponse(args.Response);
 
 			switch (response.Header)
