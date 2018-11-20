@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [10.1.0] - 2018-11-20
+### Added
+ - Added screen relay device
+
+### Chaged
+ - Fixed issues with SonyBravia feedback parsing
+ - Fixed Christie Projector parsing
+
 ## [10.0.0] - 2018-11-13
 ### Added
  - Added Crestron Connect Display

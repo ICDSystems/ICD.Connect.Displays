@@ -4,5 +4,5 @@ using System.Reflection;
 [assembly: AssemblyCompany("ICD Systems")]
 [assembly: AssemblyProduct("ICD.Connect.Displays.SmartTech")]
 [assembly: AssemblyCopyright("Copyright © ICD Systems 2018")]
-[assembly: AssemblyVersion("10.0.0.0")]
+[assembly: AssemblyVersion("10.1.0.0")]
 
