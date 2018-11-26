@@ -9,9 +9,9 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings.Core;
 
-namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
+namespace ICD.Connect.Displays.Devices.ProjectorScreens
 {
-	public sealed class DisplayScreenRelayControl : AbstractDevice<DisplayScreenRelayControlSettings>
+	public sealed class RelayProjectorScreenDevice : AbstractDevice<RelayProjectorScreenDeviceSettings>
 	{
 
 		private const bool DISPLAY_OFF_KEY = false;
@@ -80,7 +80,7 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 
 		#endregion
 
-		public DisplayScreenRelayControl()
+		public RelayProjectorScreenDevice()
 		{
 			m_DisplayRelays = new Dictionary<bool, IRelayPort>();
 			m_ResetTimer = SafeTimer.Stopped(OpenAllRelays);
@@ -252,7 +252,7 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(DisplayScreenRelayControlSettings settings, IDeviceFactory factory)
+		protected override void ApplySettingsFinal(RelayProjectorScreenDeviceSettings settings, IDeviceFactory factory)
 		{
 			base.ApplySettingsFinal(settings, factory);
 
@@ -289,7 +289,7 @@ namespace ICD.Connect.Displays.Devices.DisplayScreenRelayControl
 		/// Override to apply properties to the settings instance.
 		/// </summary>
 		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(DisplayScreenRelayControlSettings settings)
+		protected override void CopySettingsFinal(RelayProjectorScreenDeviceSettings settings)
 		{
 			base.CopySettingsFinal(settings);
 
