@@ -1,4 +1,5 @@
-﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -25,7 +26,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;SIMPLSHARP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <FileAlignment>512</FileAlignment>
@@ -44,6 +45,7 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+    <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -71,14 +73,14 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SamsungDisplay.cs" />
-    <Compile Include="SamsungDisplaySerialBuffer.cs" />
-    <Compile Include="SamsungDisplaySettings.cs" />
-    <Compile Include="SamsungProCommand.cs" />
-    <Compile Include="SamsungProDisplay.cs" />
-    <Compile Include="SamsungProDisplayBuffer.cs" />
-    <Compile Include="SamsungProDisplaySettings.cs" />
-    <Compile Include="SamsungProResponse.cs" />
+    <Compile Include="Devices\Consumer\SamsungDisplay.cs" />
+    <Compile Include="Devices\Consumer\SamsungDisplaySerialBuffer.cs" />
+    <Compile Include="Devices\Consumer\SamsungDisplaySettings.cs" />
+    <Compile Include="Devices\Commercial\SamsungProCommand.cs" />
+    <Compile Include="Devices\Commercial\SamsungProDisplay.cs" />
+    <Compile Include="Devices\Commercial\SamsungProDisplayBuffer.cs" />
+    <Compile Include="Devices\Commercial\SamsungProDisplaySettings.cs" />
+    <Compile Include="Devices\Commercial\SamsungProResponse.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

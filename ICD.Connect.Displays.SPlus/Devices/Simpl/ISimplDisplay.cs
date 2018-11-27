@@ -8,7 +8,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 	public delegate void SimplDisplayPowerOffCallback(ISimplDisplay sender);
 
-	public delegate void SimplDisplaySetHdmiInputCallback(ISimplDisplay sender, int address);
+	public delegate void SimplDisplaySetActiveInputCallback(ISimplDisplay sender, int address);
 
 	public delegate void SimplDisplaySetScalingModeCallback(ISimplDisplay sender, eScalingMode scalingMode);
 
@@ -18,7 +18,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		SimplDisplayPowerOffCallback PowerOffCallback { get; set; }
 
-		SimplDisplaySetHdmiInputCallback SetHdmiInputCallback { get; set; }
+		SimplDisplaySetActiveInputCallback SetActiveInputCallback { get; set; }
 
 		SimplDisplaySetScalingModeCallback SetScalingModeCallback { get; set; }
 
@@ -28,14 +28,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		new bool IsPowered { get; set; }
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
+		/// Gets the active input.
 		/// </summary>
-		new int InputCount { get; set; }
-
-		/// <summary>
-		/// Gets the Hdmi input.
-		/// </summary>
-		new int? HdmiInput { get; set; }
+		new int? ActiveInput { get; set; }
 
 		/// <summary>
 		/// Gets the scaling mode.

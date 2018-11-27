@@ -10,17 +10,17 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 	[PublicAPI("S+")]
 	public sealed class SPlusDisplayWithAudioShim : AbstractSPlusDisplayShim<ISimplDisplayWithAudio>
 	{
-		public delegate void SPlusDisplayWithAudioInterfaceSetVolumeCallback(object sender, ushort raw);
+		public delegate void SPlusDisplayWithAudioInterfaceSetVolumeCallback(ushort raw);
 
-		public delegate void SPlusDisplayWithAudioInterfaceVolumeUpIncrementCallback(object sender);
+		public delegate void SPlusDisplayWithAudioInterfaceVolumeUpIncrementCallback();
 
-		public delegate void SPlusDisplayWithAudioInterfaceVolumeDownIncrementCallback(object sender);
+		public delegate void SPlusDisplayWithAudioInterfaceVolumeDownIncrementCallback();
 
-		public delegate void SPlusDisplayWithAudioInterfaceMuteOnCallback(object sender);
+		public delegate void SPlusDisplayWithAudioInterfaceMuteOnCallback();
 
-		public delegate void SPlusDisplayWithAudioInterfaceMuteOffCallback(object sender);
+		public delegate void SPlusDisplayWithAudioInterfaceMuteOffCallback();
 
-		public delegate void SPlusDisplayWithAudioInterfaceMuteToggleCallback(object sender);
+		public delegate void SPlusDisplayWithAudioInterfaceMuteToggleCallback();
 
 		/// <summary>
 		/// Raised when the volume changes.
@@ -36,16 +36,22 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 		#region Callbacks
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceSetVolumeCallback SetVolumeCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceVolumeUpIncrementCallback VolumeUpIncrementCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceVolumeDownIncrementCallback VolumeDownIncrementCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteOnCallback MuteOnCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteOffCallback MuteOffCallback { get; set; }
 
+		[PublicAPI("S+")]
 		public SPlusDisplayWithAudioInterfaceMuteToggleCallback MuteToggleCallback { get; set; }
 
 		#endregion
@@ -66,6 +72,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 				return (ushort)originator.Volume;
 			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.Volume = value;
+			}
 		}
 
 		/// <summary>
@@ -81,6 +95,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 					return 0;
 
 				return (ushort)(originator.IsMuted ? 1 : 0);
+			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.IsMuted = value.ToBool();
 			}
 		}
 
@@ -98,6 +120,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 
 				return (ushort)originator.VolumeDeviceMin;
 			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.VolumeDeviceMin = value;
+			}
 		}
 
 		/// <summary>
@@ -113,6 +143,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 					return 0;
 
 				return (ushort)originator.VolumeDeviceMax;
+			}
+			set
+			{
+				ISimplDisplayWithAudio originator = Originator;
+				if (originator == null)
+					return;
+
+				originator.VolumeDeviceMax = value;
 			}
 		}
 
@@ -249,42 +287,42 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		{
 			SPlusDisplayWithAudioInterfaceMuteToggleCallback callback = MuteToggleCallback;
 			if (callback != null)
-				callback(this);
+				callback();
 		}
 
 		private void OriginatorMuteOffCallback(ISimplDisplayWithAudio sender)
 		{
 			SPlusDisplayWithAudioInterfaceMuteOffCallback callback = MuteOffCallback;
 			if (callback != null)
-				callback(this);
+				callback();
 		}
 
 		private void OriginatorMuteOnCallback(ISimplDisplayWithAudio sender)
 		{
-			SPlusDisplayWithAudioInterfaceMuteToggleCallback callback = MuteToggleCallback;
+			SPlusDisplayWithAudioInterfaceMuteOnCallback callback = MuteOnCallback;
 			if (callback != null)
-				callback(this);
+				callback();
 		}
 
 		private void OriginatorVolumeDownIncrementCallback(ISimplDisplayWithAudio sender)
 		{
 			SPlusDisplayWithAudioInterfaceVolumeDownIncrementCallback callback = VolumeDownIncrementCallback;
 			if (callback != null)
-				callback(this);
+				callback();
 		}
 
 		private void OriginatorVolumeUpIncrementCallback(ISimplDisplayWithAudio sender)
 		{
 			SPlusDisplayWithAudioInterfaceVolumeUpIncrementCallback callback = VolumeUpIncrementCallback;
 			if (callback != null)
-				callback(this);
+				callback();
 		}
 
 		private void OriginatorSetVolumeCallback(ISimplDisplayWithAudio sender, float volume)
 		{
 			SPlusDisplayWithAudioInterfaceSetVolumeCallback callback = SetVolumeCallback;
 			if (callback != null)
-				callback(this, (ushort)volume);
+				callback((ushort)volume);
 		}
 
 		#endregion

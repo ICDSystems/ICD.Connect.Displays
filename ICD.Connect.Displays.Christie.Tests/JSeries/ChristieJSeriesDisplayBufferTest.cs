@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using ICD.Connect.Displays.Christie.JSeries;
+using System.Linq;
+using ICD.Connect.Displays.Christie.Devices.JSeries;
 using NUnit.Framework;
 
-namespace ICD.Common.Utils.Tests.JSeries
+namespace ICD.Connect.Displays.Christie.Tests.JSeries
 {
 	[TestFixture]
 	public sealed class ChristieJSeriesDisplayBufferTest
@@ -26,9 +27,7 @@ namespace ICD.Common.Utils.Tests.JSeries
 
 			buffer.Enqueue(data);
 
-			Assert.AreEqual(expected.Length, results.Count);
-			for (int index = 0; index < expected.Length; index++)
-				Assert.AreEqual(expected[index], results[index]);
+			Assert.IsTrue(results.SequenceEqual(expected));
 		}
 
 		[Test]

@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
@@ -11,23 +10,39 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Protocol.Settings;
-using ICD.Connect.Routing.RoutingGraphs;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices.IrDisplay
 {
 	public sealed class IrDisplayDevice : AbstractDevice<IrDisplaySettings>, IDisplay
 	{
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
 		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+
+		/// <summary>
+		/// Raised when the selected HDMI input changes.
+		/// </summary>
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private readonly IrDriverProperties m_IrDriverProperties;
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		bool IDisplay.Trust { get; set; }
+
 		private readonly IrDisplayCommands m_Commands;
 
 		private IIrPort m_Port;
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
@@ -52,42 +67,26 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		}
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount
-		{
-			get
-			{
-				return ServiceProvider.GetService<IRoutingGraph>()
-				                      .Connections
-				                      .GetChildren()
-				                      .Where(c => c.Destination.Device == Id)
-				                      .Distinct(c => c.Destination.Address)
-				                      .Count();
-			}
-		}
-
-		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			private set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_ActiveInput);
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -177,7 +176,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
 			bool result;
 
@@ -200,7 +199,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			}
 
 			if (result)
-				HdmiInput = address;
+				ActiveInput = address;
 		}
 
 		/// <summary>
@@ -296,9 +295,14 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			if (settings.Port != null)
 			{
-				port = factory.GetPortById((int)settings.Port) as IIrPort;
-				if (port == null)
-					Log(eSeverity.Error, "Port {0} is not an IR Port", settings.Port);
+				try
+				{
+					port = factory.GetPortById((int)settings.Port) as IIrPort;
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No IR port with id {0}", settings.Port);
+				}
 			}
 
 			SetIrPort(port);

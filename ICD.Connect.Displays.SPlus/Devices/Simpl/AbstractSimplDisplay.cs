@@ -8,16 +8,13 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
 	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay
 		where TSettings : AbstractSimplDisplaySettings, new()
 	{
-		private bool m_IsPowered;
-		private int? m_HdmiInput;
-		private eScalingMode m_ScalingMode;
-
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
@@ -26,12 +23,16 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
+
+		private bool m_IsPowered;
+		private int? m_ActiveInput;
+		private eScalingMode m_ScalingMode;
 
 		#region Callbacks
 
@@ -39,13 +40,18 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		public SimplDisplayPowerOffCallback PowerOffCallback{ get; set; }
 
-		public SimplDisplaySetHdmiInputCallback SetHdmiInputCallback{ get; set; }
+		public SimplDisplaySetActiveInputCallback SetActiveInputCallback{ get; set; }
 
 		public SimplDisplaySetScalingModeCallback SetScalingModeCallback{ get; set; }
 
 		#endregion
 
 		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get; set; }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -67,31 +73,26 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		}
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount { get; set; }
-
-		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput);
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -131,12 +132,12 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnIsPoweredChanged = null;
-			OnHdmiInputChanged = null;
+			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
 			PowerOnCallback = null;
 			PowerOffCallback = null;
-			SetHdmiInputCallback = null;
+			SetActiveInputCallback = null;
 			SetScalingModeCallback = null;
 
 			base.DisposeFinal(disposing);
@@ -152,6 +153,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOnCallback handler = PowerOnCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = true;
 		}
 
 		/// <summary>
@@ -162,17 +166,23 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplayPowerOffCallback handler = PowerOffCallback;
 			if (handler != null)
 				handler(this);
+
+			if (Trust)
+				IsPowered = false;
 		}
 
 		/// <summary>
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
-			SimplDisplaySetHdmiInputCallback handler = SetHdmiInputCallback;
+			SimplDisplaySetActiveInputCallback handler = SetActiveInputCallback;
 			if (handler != null)
 				handler(this, address);
+
+			if (Trust)
+				ActiveInput = address;
 		}
 
 		/// <summary>
@@ -184,6 +194,46 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			SimplDisplaySetScalingModeCallback handler = SetScalingModeCallback;
 			if (handler != null)
 				handler(this, mode);
+
+			if (Trust)
+				ScalingMode = mode;
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(TSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Trust = Trust;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			Trust = false;
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(TSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			Trust = settings.Trust;
 		}
 
 		#endregion

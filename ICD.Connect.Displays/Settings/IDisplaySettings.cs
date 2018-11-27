@@ -7,5 +7,7 @@ namespace ICD.Connect.Displays.Settings
 	public interface IDisplaySettings : IDeviceSettings, ISecureNetworkSettings, IComSpecSettings
 	{
 		int? Port { get; set; }
+
+		bool Trust { get; set; }
 	}
 }

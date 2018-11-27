@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -10,14 +11,18 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
+using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings;
+using ICD.Connect.Protocol.Ports.ComPort;
+using ICD.Connect.Routing.Connections;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -35,7 +40,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
@@ -45,8 +50,10 @@ namespace ICD.Connect.Displays.Devices
 		private readonly ComSpecProperties m_ComSpecProperties;
 		private readonly SecureNetworkProperties m_NetworkProperties;
 
+		private readonly ConnectionStateManager m_ConnectionStateManager;
+
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
@@ -62,14 +69,19 @@ namespace ICD.Connect.Displays.Devices
 		protected ISecureNetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
+		/// When true assume TX is successful even if a request times out.
 		/// </summary>
-		public abstract int InputCount { get; }
+		public bool Trust { get; set; }
+
+		/// <summary>
+		/// Gets the connection state manager instance.
+		/// </summary>
+		protected ConnectionStateManager ConnectionStateManager { get { return m_ConnectionStateManager; } }
 
 		/// <summary>
 		/// Gets and sets the serial port.
 		/// </summary>
-		protected virtual ISerialQueue SerialQueue { get; private set; }
+		protected ISerialQueue SerialQueue { get; private set; }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -94,26 +106,26 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
-		/// Gets the current hdmi input address.
+		/// Gets the current active input address.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			protected set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_HdmiInput);
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -146,8 +158,28 @@ namespace ICD.Connect.Displays.Devices
 			m_NetworkProperties = new SecureNetworkProperties();
 			m_ComSpecProperties = new ComSpecProperties();
 
+			m_ConnectionStateManager = new ConnectionStateManager(this)
+			{
+				ConfigurePort = ConfigurePort
+			};
+			m_ConnectionStateManager.OnIsOnlineStateChanged += PortOnIsOnlineStateChanged;
+			m_ConnectionStateManager.OnConnectedStateChanged += PortOnConnectedStateChanged;
+
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
+		}
+
+		public virtual void ConfigurePort(ISerialPort port)
+		{
+			// Com
+			if (port is IComPort)
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
+
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
 		}
 
 		#region Methods
@@ -156,7 +188,10 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
 		[PublicAPI]
-		public abstract void SetPort(ISerialPort port);
+		public void SetPort(ISerialPort port)
+		{
+			m_ConnectionStateManager.SetPort(port);
+		}
 
 		/// <summary>
 		/// Queues the command to be sent to the device.
@@ -169,6 +204,17 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Queues the command at the given priority level. Lower values are sent first.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="priority"></param>
+		[PublicAPI]
+		public void SendCommandPriority(ISerialData command, int priority)
+		{
+			SerialQueue.EnqueuePriority(command, priority);
+		}
+
+		/// <summary>
 		/// Queues the command to be sent to the device.
 		/// Replaces an existing command if it matches the comparer.
 		/// </summary>
@@ -176,7 +222,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="comparer"></param>
 		[PublicAPI]
 		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer)
-			where TData : ISerialData
+			where TData : class, ISerialData
 		{
 			SerialQueue.Enqueue(command, comparer);
 		}
@@ -195,7 +241,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public abstract void SetHdmiInput(int address);
+		public abstract void SetActiveInput(int address);
 
 		/// <summary>
 		/// Sets the scaling mode.
@@ -209,14 +255,13 @@ namespace ICD.Connect.Displays.Devices
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnIsPoweredChanged = null;
-			OnHdmiInputChanged = null;
+			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
 			base.DisposeFinal(disposing);
 
 			Unsubscribe(SerialQueue);
-		}
-
+		} 
 		#endregion
 
 		#region Private Methods
@@ -233,6 +278,9 @@ namespace ICD.Connect.Displays.Devices
 				SerialQueue.Dispose();
 
 			SerialQueue = serialQueue;
+
+			if (SerialQueue != null)
+				SerialQueue.Trust = Trust;
 
 			Subscribe(SerialQueue);
 
@@ -255,7 +303,19 @@ namespace ICD.Connect.Displays.Devices
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			return SerialQueue != null && SerialQueue.Port != null && SerialQueue.Port.IsOnline;
+			return m_ConnectionStateManager != null
+				&& m_ConnectionStateManager.IsOnline;
+		}
+
+		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs eventArgs)
+		{
+			UpdateCachedOnlineStatus();
+		}
+
+		private void PortOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		{
+			if (m_ConnectionStateManager.IsConnected)
+				QueryState();
 		}
 
 		#endregion
@@ -271,6 +331,7 @@ namespace ICD.Connect.Displays.Devices
 			if (serialQueue == null)
 				return;
 
+			serialQueue.OnSerialTransmission += SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse += SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout += SerialQueueOnTimeout;
 
@@ -289,6 +350,7 @@ namespace ICD.Connect.Displays.Devices
 			if (serialQueue == null)
 				return;
 
+			serialQueue.OnSerialTransmission -= SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse -= SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout -= SerialQueueOnTimeout;
 
@@ -297,6 +359,13 @@ namespace ICD.Connect.Displays.Devices
 
 			serialQueue.Port.OnIsOnlineStateChanged -= SerialQueueOnIsOnlineStateChanged;
 		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected abstract void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args);
 
 		/// <summary>
 		/// Called when a command gets a response from the physical display.
@@ -334,10 +403,9 @@ namespace ICD.Connect.Displays.Devices
 		{
 			base.CopySettingsFinal(settings);
 
-			if (SerialQueue != null && SerialQueue.Port != null)
-				settings.Port = SerialQueue.Port.Id;
-			else
-				settings.Port = null;
+			settings.Port = m_ConnectionStateManager.PortNumber;
+
+			settings.Trust = Trust;
 
 			settings.Copy(m_ComSpecProperties);
 			settings.Copy(m_NetworkProperties);
@@ -352,6 +420,8 @@ namespace ICD.Connect.Displays.Devices
 
 			SetPort(null);
 
+			Trust = false;
+
 			m_ComSpecProperties.Clear();
 			m_NetworkProperties.Clear();
 		}
@@ -363,6 +433,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="factory"></param>
 		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
 		{
+			// Display inputs rely on available connections
+			factory.LoadOriginators<Connection>();
+
 			base.ApplySettingsFinal(settings, factory);
 
 			m_NetworkProperties.Copy(settings);
@@ -372,12 +445,20 @@ namespace ICD.Connect.Displays.Devices
 
 			if (settings.Port != null)
 			{
-				port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				if (port == null)
+				try
+				{
+					port = factory.GetPortById((int)settings.Port) as ISerialPort;
+				}
+				catch (KeyNotFoundException)
+				{
 					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+				}
 			}
 
 			SetPort(port);
+			UpdateCachedOnlineStatus();
+
+			Trust = settings.Trust;
 		}
 
 		#endregion

@@ -24,18 +24,24 @@ namespace ICD.Connect.Displays.Proxies
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public event EventHandler<DisplayHmdiInputApiEventArgs> OnHdmiInputChanged;
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
 		/// Raised when the scaling mode changes.
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		private bool m_Trust;
 		private bool m_IsPowered;
-		private int? m_HdmiInput;
+		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get { return m_Trust; } set { SetProperty(DisplayApi.PROPERTY_TRUST, value); } }
 
 		/// <summary>
 		/// Gets the powered state.
@@ -58,32 +64,27 @@ namespace ICD.Connect.Displays.Proxies
 		}
 
 		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount { get; [UsedImplicitly] private set; }
-
-		/// <summary>
 		/// Gets the Hdmi input.
 		/// </summary>
-		public int? HdmiInput
+		public int? ActiveInput
 		{
-			get { return m_HdmiInput; }
+			get { return m_ActiveInput; }
 			[UsedImplicitly]
 			private set
 			{
-				if (value == m_HdmiInput)
+				if (value == m_ActiveInput)
 					return;
 
-				int? oldInput = m_HdmiInput;
-				m_HdmiInput = value;
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_HdmiInput);
+				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_ActiveInput);
 
 				if (oldInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(oldInput.Value, false));
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
 
-				if (m_HdmiInput.HasValue)
-					OnHdmiInputChanged.Raise(this, new DisplayHmdiInputApiEventArgs(m_HdmiInput.Value, true));
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
 
@@ -130,9 +131,9 @@ namespace ICD.Connect.Displays.Proxies
 		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
 		/// <param name="address"></param>
-		public void SetHdmiInput(int address)
+		public void SetActiveInput(int address)
 		{
-			CallMethod(DisplayApi.METHOD_SET_HDMI_INPUT, address);
+			CallMethod(DisplayApi.METHOD_SET_ACTIVE_INPUT, address);
 		}
 
 		/// <summary>
@@ -146,6 +147,8 @@ namespace ICD.Connect.Displays.Proxies
 
 		#endregion
 
+		#region API
+
 		/// <summary>
 		/// Override to build initialization commands on top of the current class info.
 		/// </summary>
@@ -156,11 +159,11 @@ namespace ICD.Connect.Displays.Proxies
 
 			ApiCommandBuilder.UpdateCommand(command)
 			                 .SubscribeEvent(DisplayApi.EVENT_IS_POWERED)
-			                 .SubscribeEvent(DisplayApi.EVENT_HDMI_INPUT)
+			                 .SubscribeEvent(DisplayApi.EVENT_ACTIVE_INPUT)
 			                 .SubscribeEvent(DisplayApi.EVENT_SCALING_MODE)
+							 .GetProperty(DisplayApi.PROPERTY_TRUST)
 			                 .GetProperty(DisplayApi.PROPERTY_IS_POWERED)
-			                 .GetProperty(DisplayApi.PROPERTY_INPUT_COUNT)
-			                 .GetProperty(DisplayApi.PROPERTY_HDMI_INPUT)
+			                 .GetProperty(DisplayApi.PROPERTY_ACTIVE_INPUT)
 			                 .GetProperty(DisplayApi.PROPERTY_SCALING_MODE)
 			                 .Complete();
 		}
@@ -180,12 +183,12 @@ namespace ICD.Connect.Displays.Proxies
 					IsPowered = result.GetValue<bool>();
 					break;
 
-				case DisplayApi.HELP_EVENT_HDMI_INPUT:
-					DisplayHdmiInputState state = result.GetValue<DisplayHdmiInputState>();
+				case DisplayApi.HELP_EVENT_ACTIVE_INPUT:
+					DisplayInputState state = result.GetValue<DisplayInputState>();
 					if (state.Active)
-						HdmiInput = state.HdmiInput;
-					else if (state.HdmiInput == HdmiInput)
-						HdmiInput = null;
+						ActiveInput = state.Input;
+					else if (state.Input == ActiveInput)
+						ActiveInput = null;
 					break;
 
 				case DisplayApi.EVENT_SCALING_MODE:
@@ -205,16 +208,16 @@ namespace ICD.Connect.Displays.Proxies
 
 			switch (name)
 			{
+				case DisplayApi.PROPERTY_TRUST:
+					m_Trust = result.GetValue<bool>();
+					break;
+
 				case DisplayApi.PROPERTY_IS_POWERED:
 					IsPowered = result.GetValue<bool>();
 					break;
 
-				case DisplayApi.PROPERTY_INPUT_COUNT:
-					InputCount = result.GetValue<int>();
-					break;
-
-				case DisplayApi.PROPERTY_HDMI_INPUT:
-					HdmiInput = result.GetValue<int?>();
+				case DisplayApi.PROPERTY_ACTIVE_INPUT:
+					ActiveInput = result.GetValue<int?>();
 					break;
 
 				case DisplayApi.PROPERTY_SCALING_MODE:
@@ -222,6 +225,8 @@ namespace ICD.Connect.Displays.Proxies
 					break;
 			}
 		}
+
+		#endregion
 
 		#region Console
 
