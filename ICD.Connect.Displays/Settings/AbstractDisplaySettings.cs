@@ -63,6 +63,14 @@ namespace ICD.Connect.Displays.Settings
 			set { m_NetworkProperties.NetworkPort = value; }
 		}
 
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void INetworkProperties.Clear()
+		{
+			m_NetworkProperties.Clear();
+		}
+
 		#endregion
 
 		#region Com Spec
@@ -137,6 +145,14 @@ namespace ICD.Connect.Displays.Settings
 		{
 			get { return m_ComSpecProperties.ComSpecReportCtsChanges; }
 			set { m_ComSpecProperties.ComSpecReportCtsChanges = value; }
+		}
+
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void IComSpecProperties.Clear()
+		{
+			m_ComSpecProperties.Clear();
 		}
 
 		#endregion

@@ -88,6 +88,14 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			set { m_IrDriverProperties.IrBetweenTime = value; }
 		}
 
+		/// <summary>
+		/// Clears the configured values.
+		/// </summary>
+		void IIrDriverProperties.Clear()
+		{
+			m_IrDriverProperties.Clear();
+		}
+
 		#endregion
 
 		/// <summary>
