@@ -9,9 +9,7 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Consumer
