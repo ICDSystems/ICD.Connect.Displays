@@ -32,13 +32,13 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			if (comSpecProperties == null)
 				throw new ArgumentNullException("comSpecProperties");
 
-			comSpecProperties.ApplyDefaultValues(eComBaudRates.ComspecBaudRate9600,
-			                                     eComDataBits.ComspecDataBits8,
-			                                     eComParityType.ComspecParityNone,
-			                                     eComStopBits.ComspecStopBits1,
-			                                     eComProtocolType.ComspecProtocolRS232,
-			                                     eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                                     eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
+			comSpecProperties.ApplyDefaultValues(eComBaudRates.BaudRate9600,
+			                                     eComDataBits.DataBits8,
+			                                     eComParityType.None,
+			                                     eComStopBits.StopBits1,
+			                                     eComProtocolType.Rs232,
+			                                     eComHardwareHandshakeType.None,
+			                                     eComSoftwareHandshakeType.None,
 			                                     false);
 		}
 	}

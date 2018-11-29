@@ -29,13 +29,13 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 			if (comSpecProperties == null)
 				throw new ArgumentNullException("comSpecProperties");
 
-			comSpecProperties.ApplyDefaultValues(eComBaudRates.ComspecBaudRate19200,
-			                                     eComDataBits.ComspecDataBits8,
-			                                     eComParityType.ComspecParityNone,
-			                                     eComStopBits.ComspecStopBits1,
-			                                     eComProtocolType.ComspecProtocolRS232,
-			                                     eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                                     eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
+			comSpecProperties.ApplyDefaultValues(eComBaudRates.BaudRate19200,
+			                                     eComDataBits.DataBits8,
+			                                     eComParityType.None,
+			                                     eComStopBits.StopBits1,
+			                                     eComProtocolType.Rs232,
+			                                     eComHardwareHandshakeType.None,
+			                                     eComSoftwareHandshakeType.None,
 			                                     false);
 		}
 	}
