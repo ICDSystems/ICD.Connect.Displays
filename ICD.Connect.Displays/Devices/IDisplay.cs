@@ -3,6 +3,7 @@ using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
+using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -18,6 +19,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Raised when the power state changes.
 		/// </summary>
 		[ApiEvent(DisplayApi.EVENT_IS_POWERED, DisplayApi.HELP_EVENT_IS_POWERED)]
+		[EventTelemetry("OnIsPoweredChanged")]
 		event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
 
 		/// <summary>
@@ -46,18 +48,21 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the powered state.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_IS_POWERED, DisplayApi.HELP_PROPERTY_IS_POWERED)]
+		[DynamicPropertyTelemetry("IsPowered", "OnIsPoweredChanged")]
 		bool IsPowered { get; }
 
 		/// <summary>
 		/// Gets the active input.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_ACTIVE_INPUT, DisplayApi.HELP_PROPERTY_ACTIVE_INPUT)]
+		[UpdatablePropertyTelemetry("ActiveInput")]
 		int? ActiveInput { get; }
 
 		/// <summary>
 		/// Gets the scaling mode.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_SCALING_MODE, DisplayApi.HELP_PROPERTY_SCALING_MODE)]
+		[StaticPropertyTelemetry("ScalingMode")]
 		eScalingMode ScalingMode { get; }
 
 		#endregion
@@ -68,12 +73,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Powers the TV.
 		/// </summary>
 		[ApiMethod(DisplayApi.METHOD_POWER_ON, DisplayApi.HELP_METHOD_POWER_ON)]
+		[MethodTelemetry("PowerOn")]
 		void PowerOn();
 
 		/// <summary>
 		/// Shuts down the TV.
 		/// </summary>
 		[ApiMethod(DisplayApi.METHOD_POWER_OFF, DisplayApi.HELP_METHOD_POWER_OFF)]
+		[MethodTelemetry("PowerOff")]
 		void PowerOff();
 
 		/// <summary>
@@ -81,6 +88,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="address"></param>
 		[ApiMethod(DisplayApi.METHOD_SET_ACTIVE_INPUT, DisplayApi.HELP_METHOD_SET_ACTIVE_INPUT)]
+		[MethodTelemetry("SetActiveInput")]
 		void SetActiveInput(int address);
 
 		/// <summary>
