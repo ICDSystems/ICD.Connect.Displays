@@ -13,7 +13,7 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Proxies
 {
-	public sealed class ProxyDisplayWithAudio : AbstractProxyDisplay, IProxyDisplayWithAudio
+	public sealed class ProxyDisplayWithAudio : AbstractProxyDisplay<ProxyDisplayWithAudioSettings>, IProxyDisplayWithAudio
 	{
 		/// <summary>
 		/// Raised when the volume changes.

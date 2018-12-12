@@ -14,7 +14,8 @@ using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Proxies
 {
-	public abstract class AbstractProxyDisplay : AbstractProxyDevice, IProxyDisplay
+	public abstract class AbstractProxyDisplay<TSettings> : AbstractProxyDevice<TSettings>, IProxyDisplay
+		where TSettings : IProxyDisplaySettings
 	{
 		/// <summary>
 		/// Raised when the power state changes.
