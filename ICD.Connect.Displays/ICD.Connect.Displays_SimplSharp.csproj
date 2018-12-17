@@ -85,6 +85,7 @@
     <Compile Include="Devices\IrDisplay\IrDisplayCommands.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplayDevice.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplaySettings.cs" />
+    <Compile Include="DisplayTelemetryNames.cs" />
     <Compile Include="EventArguments\DisplayInputApiEventArgs.cs" />
     <Compile Include="EventArguments\DisplayMuteApiEventArgs.cs" />
     <Compile Include="EventArguments\DisplayPowerStateApiEventArgs.cs" />

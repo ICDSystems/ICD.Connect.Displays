@@ -3,6 +3,7 @@ using ICD.Common.Utils;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
+using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -13,12 +14,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Raised when the volume changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
+		[EventTelemetry(DisplayTelemetryNames.VOLUME_CHANGED)]
 		event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		/// <summary>
 		/// Raised when the mute state changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_IS_MUTED, DisplayWithAudioApi.HELP_EVENT_IS_MUTED)]
+		[EventTelemetry(DisplayTelemetryNames.MUTE_STATE_CHANGED)]
 		event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
 		#region Properties
@@ -27,12 +30,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the current volume.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
+		[DynamicPropertyTelemetry(DisplayTelemetryNames.VOLUME, DisplayTelemetryNames.VOLUME_CHANGED)]
 		float Volume { get; }
 
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED, DisplayWithAudioApi.HELP_PROPERTY_IS_MUTED)]
+		[DynamicPropertyTelemetry(DisplayTelemetryNames.MUTE_STATE, DisplayTelemetryNames.MUTE_STATE_CHANGED)]
 		bool IsMuted { get; }
 
 		/// <summary>
@@ -74,6 +79,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="raw"></param>
 		[ApiMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, DisplayWithAudioApi.HELP_METHOD_SET_VOLUME)]
+		[MethodTelemetry(DisplayTelemetryNames.SET_VOLUME)]
 		void SetVolume(float raw);
 
 		/// <summary>
@@ -92,12 +98,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Mutes the display.
 		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_ON, DisplayWithAudioApi.HELP_METHOD_MUTE_ON)]
+		[MethodTelemetry(DisplayTelemetryNames.MUTE_ON)]
 		void MuteOn();
 
 		/// <summary>
 		/// Unmutes the display.
 		/// </summary>
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_OFF, DisplayWithAudioApi.HELP_METHOD_MUTE_OFF)]
+		[MethodTelemetry(DisplayTelemetryNames.MUTE_OFF)]
 		void MuteOff();
 
 		/// <summary>
