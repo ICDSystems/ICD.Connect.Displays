@@ -346,9 +346,9 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state, true for on false for off", (b) => ActivateDisplayRelays(b));
+			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state, true for on false for off", b => ActivateDisplayRelays(b));
 			yield return new ConsoleCommand("OpenRelays", "Opens all relays", () => OpenAllRelays());
-			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", (i) => SetRelayHoldTime(i));
+			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", i => SetRelayHoldTime(i));
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
