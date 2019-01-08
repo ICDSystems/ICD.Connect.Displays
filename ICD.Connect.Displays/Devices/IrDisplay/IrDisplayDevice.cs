@@ -276,7 +276,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			SetIrPort(null);
 			m_Commands.Clear();
 
-			m_IrDriverProperties.Clear();
+			m_IrDriverProperties.ClearIrProperties();
 		}
 
 		/// <summary>

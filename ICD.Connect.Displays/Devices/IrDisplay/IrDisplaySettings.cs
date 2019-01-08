@@ -91,9 +91,9 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Clears the configured values.
 		/// </summary>
-		void IIrDriverProperties.Clear()
+		void IIrDriverProperties.ClearIrProperties()
 		{
-			m_IrDriverProperties.Clear();
+			m_IrDriverProperties.ClearIrProperties();
 		}
 
 		#endregion

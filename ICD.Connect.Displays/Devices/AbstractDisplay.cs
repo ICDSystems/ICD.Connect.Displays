@@ -422,8 +422,8 @@ namespace ICD.Connect.Displays.Devices
 
 			Trust = false;
 
-			m_ComSpecProperties.Clear();
-			m_NetworkProperties.Clear();
+			m_ComSpecProperties.ClearComSpecProperties();
+			m_NetworkProperties.ClearNetworkProperties();
 		}
 
 		/// <summary>
