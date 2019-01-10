@@ -68,6 +68,11 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
+		/// </summary>
+		public float VolumePercent { get; private set; }
+
+		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
 		public bool IsMuted
@@ -203,6 +208,10 @@ namespace ICD.Connect.Displays.Devices
 				return;
 			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
 			VolumeSetRawFinal(raw);
+
+			VolumePercent = MathUtils.MapRange(this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax(), 
+											   0.0f, 1.0f,
+			                                   raw);
 		}
 
 		/// <summary>

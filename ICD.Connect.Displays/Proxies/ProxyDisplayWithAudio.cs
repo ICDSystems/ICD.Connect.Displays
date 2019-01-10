@@ -49,6 +49,8 @@ namespace ICD.Connect.Displays.Proxies
 			}
 		}
 
+		public float VolumePercent{get { return Volume; }}
+
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>

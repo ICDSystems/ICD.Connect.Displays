@@ -1,5 +1,6 @@
 ﻿using System;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Attributes;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
@@ -30,8 +31,15 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the current volume.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.VOLUME, DisplayTelemetryNames.VOLUME_CHANGED)]
 		float Volume { get; }
+
+		/// <summary>
+		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
+		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_PERCENT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_PERCENT)]
+		[DynamicPropertyTelemetry(DisplayTelemetryNames.VOLUME, DisplayTelemetryNames.VOLUME_CHANGED)]
+		[Range(0.0f, 1.0f)]
+		float VolumePercent { get; }
 
 		/// <summary>
 		/// Gets the muted state.
