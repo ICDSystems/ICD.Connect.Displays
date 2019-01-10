@@ -140,6 +140,11 @@ namespace ICD.Connect.Displays.CrestronPro
 		}
 
 		/// <summary>
+		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
+		/// </summary>
+		public float VolumePercent { get { return Volume / 100.0f; } }
+
+		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
 		public bool IsMuted
