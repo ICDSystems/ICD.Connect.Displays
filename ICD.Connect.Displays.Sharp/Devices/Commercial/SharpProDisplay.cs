@@ -10,7 +10,6 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -153,13 +152,12 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		#region Methods
 
 		/// <summary>
-		/// Sets and configures the port for communication with the physical display.
+		/// Configures the given port for communication with the device.
 		/// </summary>
-		[PublicAPI]
-		protected override void ConfigurePort(ISerialPort port)
+		/// <param name="port"></param>
+		public override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new SharpProSerialBuffer();
 			SerialQueue queue = new SerialQueue();
@@ -171,28 +169,17 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		}
 
 		/// <summary>
-		/// Configures a com port for communication with the physical display.
+		/// Powers the TV.
 		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public override void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
-		}
-
 		public override void PowerOn()
 		{
 			SendCommand(POWER_ON);
 			SendCommand(POWER_QUERY);
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public override void PowerOff()
 		{
 			SendCommand(POWER_OFF);

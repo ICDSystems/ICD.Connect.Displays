@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -10,10 +9,9 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Nec.Devices
 {
@@ -90,9 +88,10 @@ namespace ICD.Connect.Displays.Nec.Devices
 		#region Methods
 
 		/// <summary>
-		/// Sets and configures the port for communication with the physical display.
+		/// Configures the given port for communication with the device.
 		/// </summary>
-		protected override void ConfigurePort(ISerialPort port)
+		/// <param name="port"></param>
+		public override void ConfigurePort(ISerialPort port)
 		{
 			base.ConfigurePort(port);
 
@@ -109,27 +108,16 @@ namespace ICD.Connect.Displays.Nec.Devices
 		}
 
 		/// <summary>
-		/// Configures a com port for communication with the physical display.
+		/// Powers the TV.
 		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public override void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
-		}
-
 		public override void PowerOn()
 		{
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOn)));
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		public override void PowerOff()
 		{
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerControl.Concat(s_PowerOff)));
@@ -140,6 +128,10 @@ namespace ICD.Connect.Displays.Nec.Devices
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
 		}
 
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public override void SetScalingMode(eScalingMode mode)
 		{
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE, s_ScalingModeMap[mode]));

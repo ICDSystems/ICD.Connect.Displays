@@ -1,98 +1,251 @@
-﻿using ICD.Connect.Displays.Devices;
+﻿using System;
+using System.Collections.Generic;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
-using ICD.Connect.Protocol.EventArguments;
 
 namespace ICD.Connect.Displays.Mock.Devices
 {
 	/// <summary>
 	/// Mock display device for testing control systems.
-	/// TODO - Currently we're inheriting from some device that communicates over serial. Break this up.
 	/// </summary>
-	public sealed class MockDisplayWithAudio : AbstractDisplayWithAudio<MockDisplayWithAudioSettings>
+	public sealed class MockDisplayWithAudio : AbstractDevice<MockDisplayWithAudioSettings>, IDisplayWithAudio
 	{
-		#region Methods
+		/// <summary>
+		/// Raised when the power state changes.
+		/// </summary>
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
 
 		/// <summary>
-		/// Sets IsPowered to true.
+		/// Raised when the selected HDMI input changes.
 		/// </summary>
-		public override void PowerOn()
+		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
+
+		/// <summary>
+		/// Raised when the scaling mode changes.
+		/// </summary>
+		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
+
+		/// <summary>
+		/// Raised when the mute state changes.
+		/// </summary>
+		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
+
+		/// <summary>
+		/// Raised when the volume changes.
+		/// </summary>
+		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
+
+		private bool m_IsPowered;
+		private int? m_ActiveInput;
+		private eScalingMode m_ScalingMode;
+
+		private bool m_IsMuted;
+		private float m_Volume;
+
+		private float? m_VolumeSafetyMin;
+		private float? m_VolumeSafetyMax;
+		private float? m_VolumeDefault;
+
+		#region Properties
+
+		/// <summary>
+		/// When true assume TX is successful even if a request times out.
+		/// </summary>
+		public bool Trust { get; set; }
+
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		public bool IsPowered
 		{
-			IsPowered = true;
+			get { return m_IsPowered; }
+			private set
+			{
+				if (value == m_IsPowered)
+					return;
+
+				m_IsPowered = value;
+
+				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+
+				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+
+				if (IsPowered && VolumeDefault != null)
+					SetVolume((float)VolumeDefault);
+			}
 		}
 
 		/// <summary>
-		/// Sets IsPowered to false.
+		/// Gets the current active input address.
 		/// </summary>
-		public override void PowerOff()
+		public int? ActiveInput
 		{
-			IsPowered = false;
+			get { return m_ActiveInput; }
+			private set
+			{
+				if (value == m_ActiveInput)
+					return;
+
+				int? oldInput = m_ActiveInput;
+				m_ActiveInput = value;
+
+				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
+
+				if (oldInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
+
+				if (m_ActiveInput.HasValue)
+					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
+			}
 		}
 
 		/// <summary>
-		/// Sets the HDMI input.
+		/// Gets the scaling mode.
 		/// </summary>
-		/// <param name="index"></param>
-		public override void SetActiveInput(int index)
+		public eScalingMode ScalingMode
 		{
-			ActiveInput = index;
+			get { return m_ScalingMode; }
+			private set
+			{
+				if (value == m_ScalingMode)
+					return;
+
+				m_ScalingMode = value;
+
+				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
+
+				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
+			}
 		}
 
 		/// <summary>
-		/// Sets the scaling mode.
+		/// Gets the raw volume of the display.
 		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
+		public float Volume
 		{
-			ScalingMode = mode;
+			get { return m_Volume; }
+			private set
+			{
+				if (Math.Abs(value - m_Volume) < 0.01f)
+					return;
+
+				m_Volume = value;
+
+				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
+
+				// If the volume went outside of safe limits clamp the volume to a safe value.
+				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
+				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
+					SetVolume(safeVolume);
+
+				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
+			}
 		}
 
 		/// <summary>
-		/// Enables mute.
+		/// Gets the muted state.
 		/// </summary>
-		public override void MuteOn()
+		public bool IsMuted
 		{
-			IsMuted = true;
+			get { return m_IsMuted; }
+			private set
+			{
+				if (value == m_IsMuted)
+					return;
+
+				m_IsMuted = value;
+
+				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
+
+				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
+			}
 		}
 
 		/// <summary>
-		/// Disables mute.
+		/// Override if the display volume minimum is not 0.
 		/// </summary>
-		public override void MuteOff()
+		public float VolumeDeviceMin { get { return 0; } }
+
+		/// <summary>
+		/// Override if the display volume maximum is not 100.
+		/// </summary>
+		public float VolumeDeviceMax { get { return 100; } }
+
+		/// <summary>
+		/// Prevents the device from going below this volume.
+		/// </summary>
+		public float? VolumeSafetyMin
 		{
-			IsMuted = false;
+			get { return m_VolumeSafetyMin; }
+			set
+			{
+				if (value != null)
+					value = Math.Max((float)value, VolumeDeviceMin);
+				m_VolumeSafetyMin = value;
+			}
 		}
 
 		/// <summary>
-		/// Increments volume.
+		/// Prevents the device from going above this volume.
 		/// </summary>
-		public override void VolumeUpIncrement()
+		public float? VolumeSafetyMax
 		{
-            if (!IsPowered)
-                return;
-			if (Volume < 100)
-				Volume++;
+			get { return m_VolumeSafetyMax; }
+			set
+			{
+				if (value != null)
+					value = Math.Min((float)value, VolumeDeviceMax);
+				m_VolumeSafetyMax = value;
+			}
 		}
 
 		/// <summary>
-		/// Decrements volume.
+		/// The default volume to use when the display powers on.
 		/// </summary>
-		public override void VolumeDownIncrement()
-        {
-            if (!IsPowered)
-                return;
-			if (Volume > 0)
-				Volume--;
+		public float? VolumeDefault
+		{
+			get { return m_VolumeDefault; }
+			set
+			{
+				if (value != null)
+				{
+					value = MathUtils.Clamp((float)value, this.GetVolumeSafetyOrDeviceMin(),
+					                        this.GetVolumeSafetyOrDeviceMax());
+				}
+				m_VolumeDefault = value;
+			}
 		}
 
 		#endregion
 
-		#region Private Methods
-
-		protected override void VolumeSetRawFinal(float raw)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public MockDisplayWithAudio()
 		{
-            if (!IsPowered)
-                return;
-			Volume = raw;
+			Controls.Add(new DisplayRouteDestinationControl(this, 0));
+			Controls.Add(new DisplayPowerDeviceControl(this, 1));
+			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
+		}
+
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			OnIsPoweredChanged = null;
+			OnActiveInputChanged = null;
+			OnScalingModeChanged = null;
+			OnMuteStateChanged = null;
+			OnVolumeChanged = null;
+
+			base.DisposeFinal(disposing);
 		}
 
 		/// <summary>
@@ -104,31 +257,188 @@ namespace ICD.Connect.Displays.Mock.Devices
 			return true;
 		}
 
+		#region Methods
+
 		/// <summary>
-		/// Called when a command is sent to the physical display.
+		/// Powers the TV.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		public void PowerOn()
 		{
+			if (!IsPowered)
+				return;
+
+			IsPowered = true;
 		}
 
 		/// <summary>
-		/// Called when a command gets a response from the physical display.
+		/// Shuts down the TV.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
+		public void PowerOff()
 		{
+			if (!IsPowered)
+				return;
+
+			IsPowered = false;
 		}
 
 		/// <summary>
-		/// Called when a command times out.
+		/// Sets the Hdmi index of the TV, e.g. 1 = HDMI-1.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
+		/// <param name="address"></param>
+		public void SetActiveInput(int address)
 		{
+			if (!IsPowered)
+				return;
+
+			ActiveInput = address;
+		}
+
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
+		public void SetScalingMode(eScalingMode mode)
+		{
+			if (!IsPowered)
+				return;
+
+			ScalingMode = mode;
+		}
+
+		/// <summary>
+		/// Enables mute.
+		/// </summary>
+		public void MuteOn()
+		{
+			if (!IsPowered)
+				return;
+
+			IsMuted = true;
+		}
+
+		/// <summary>
+		/// Disables mute.
+		/// </summary>
+		public void MuteOff()
+		{
+			if (!IsPowered)
+				return;
+
+			IsMuted = false;
+		}
+
+		/// <summary>
+		/// Toggles mute.
+		/// </summary>
+		public void MuteToggle()
+		{
+			if (!IsPowered)
+				return;
+
+			if (IsMuted)
+				MuteOff();
+			else
+				MuteOn();
+		}
+
+		/// <summary>
+		/// Sets the raw volume.
+		/// </summary>
+		/// <param name="raw"></param>
+		public void SetVolume(float raw)
+		{
+			if (!IsPowered)
+				return;
+
+			Volume = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
+		}
+
+		/// <summary>
+		/// Increments the raw volume.
+		/// </summary>
+		public void VolumeUpIncrement()
+		{
+			if (!IsPowered)
+				return;
+
+			SetVolume(Volume + 1);
+		}
+
+		/// <summary>
+		/// Decrements the raw volume.
+		/// </summary>
+		public void VolumeDownIncrement()
+		{
+			if (!IsPowered)
+				return;
+
+			SetVolume(Volume - 1);
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			foreach (IConsoleNodeBase node in DisplayConsole.GetConsoleNodes(this))
+				yield return node;
+
+			foreach (IConsoleNodeBase node in DisplayWithAudioConsole.GetConsoleNodes(this))
+				yield return node;
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			DisplayConsole.BuildConsoleStatus(this, addRow);
+			DisplayWithAudioConsole.BuildConsoleStatus(this, addRow);
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			foreach (IConsoleCommand command in DisplayConsole.GetConsoleCommands(this))
+				yield return command;
+
+			foreach (IConsoleCommand command in DisplayWithAudioConsole.GetConsoleCommands(this))
+				yield return command;
+		}
+
+		/// <summary>
+		/// Workaround for the "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		#endregion

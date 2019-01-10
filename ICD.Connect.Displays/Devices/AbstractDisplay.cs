@@ -15,11 +15,14 @@ using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Extensions;
+using ICD.Connect.Protocol.Network.Ports;
+using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings;
+using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Routing.Connections;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -44,6 +47,9 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
+		private readonly ComSpecProperties m_ComSpecProperties;
+		private readonly SecureNetworkProperties m_NetworkProperties;
+
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 
 		private bool m_IsPowered;
@@ -51,6 +57,16 @@ namespace ICD.Connect.Displays.Devices
 		private eScalingMode m_ScalingMode;
 
 		#region Properties
+
+		/// <summary>
+		/// Gets the com spec properties.
+		/// </summary>
+		protected IComSpecProperties ComSpecProperties { get { return m_ComSpecProperties; } }
+
+		/// <summary>
+		/// Gets the network properties.
+		/// </summary>
+		protected ISecureNetworkProperties NetworkProperties { get { return m_NetworkProperties; } }
 
 		/// <summary>
 		/// When true assume TX is successful even if a request times out.
@@ -139,6 +155,9 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected AbstractDisplay()
 		{
+			m_NetworkProperties = new SecureNetworkProperties();
+			m_ComSpecProperties = new ComSpecProperties();
+
 			m_ConnectionStateManager = new ConnectionStateManager(this)
 			{
 				ConfigurePort = ConfigurePort
@@ -150,17 +169,29 @@ namespace ICD.Connect.Displays.Devices
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
-		protected virtual void ConfigurePort(ISerialPort port)
+		public virtual void ConfigurePort(ISerialPort port)
 		{
+			// Com
 			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
-		}
+				(port as IComPort).ApplyDeviceConfiguration(ComSpecProperties);
 
-		public virtual void ConfigureComPort(IComPort comPort)
-		{
+			// Network (TCP, UDP, SSH)
+			if (port is ISecureNetworkPort)
+				(port as ISecureNetworkPort).ApplyDeviceConfiguration(NetworkProperties);
+			else if (port is INetworkPort)
+				(port as INetworkPort).ApplyDeviceConfiguration(NetworkProperties);
 		}
 
 		#region Methods
+
+		/// <summary>
+		/// Sets and configures the port for communication with the physical display.
+		/// </summary>
+		[PublicAPI]
+		public void SetPort(ISerialPort port)
+		{
+			m_ConnectionStateManager.SetPort(port);
+		}
 
 		/// <summary>
 		/// Queues the command to be sent to the device.
@@ -362,6 +393,76 @@ namespace ICD.Connect.Displays.Devices
 
 		#endregion
 
+		#region Settings
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.Port = m_ConnectionStateManager.PortNumber;
+
+			settings.Trust = Trust;
+
+			settings.Copy(m_ComSpecProperties);
+			settings.Copy(m_NetworkProperties);
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			SetPort(null);
+
+			Trust = false;
+
+			m_ComSpecProperties.ClearComSpecProperties();
+			m_NetworkProperties.ClearNetworkProperties();
+		}
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			// Display inputs rely on available connections
+			factory.LoadOriginators<Connection>();
+
+			base.ApplySettingsFinal(settings, factory);
+
+			m_NetworkProperties.Copy(settings);
+			m_ComSpecProperties.Copy(settings);
+
+			ISerialPort port = null;
+
+			if (settings.Port != null)
+			{
+				try
+				{
+					port = factory.GetPortById((int)settings.Port) as ISerialPort;
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+				}
+			}
+
+			SetPort(port);
+			UpdateCachedOnlineStatus();
+
+			Trust = settings.Trust;
+		}
+
+		#endregion
+
 		#region Console
 
 		/// <summary>
@@ -417,65 +518,6 @@ namespace ICD.Connect.Displays.Devices
 		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
 		{
 			return base.GetConsoleNodes();
-		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
-		{
-			// Display inputs rely on available connections
-			factory.LoadOriginators<Connection>();
-
-			base.ApplySettingsFinal(settings, factory);
-
-			ISerialPort port = null;
-
-			if (settings.Port != null)
-			{
-				try
-				{
-					port = factory.GetPortById((int)settings.Port) as ISerialPort;
-				}
-				catch (KeyNotFoundException)
-				{
-					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
-				}
-			}
-
-			m_ConnectionStateManager.SetPort(port);
-			UpdateCachedOnlineStatus();
-
-			Trust = settings.Trust;
-		}
-
-		/// <summary>
-		///     Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-            m_ConnectionStateManager.SetPort(null);
-			Trust = false;
-		}
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(T settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.Port = m_ConnectionStateManager.PortNumber;
-			settings.Trust = Trust;
 		}
 
 		#endregion

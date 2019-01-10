@@ -7,7 +7,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.RelayPort;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices.ProjectorScreens
 {
@@ -256,22 +256,35 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			if (settings.Display == null)
-			{
-				Logger.AddEntry(eSeverity.Error, "No display id set for DisplayScreenRelayControl: {0}", Name);
-				return;
-			}
-
 			// Off Relay
 			IRelayPort displayOffRelay = null;
 			if (settings.DisplayOffRelay != null)
-				displayOffRelay = factory.GetOriginatorById<IRelayPort>(settings.DisplayOffRelay.Value);
+			{
+				try
+				{
+					displayOffRelay = factory.GetOriginatorById<IRelayPort>(settings.DisplayOffRelay.Value);
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOffRelay);
+				}
+				
+			}
 			SetDisplayOffRelay(displayOffRelay);
 
 			// On Relay
 			IRelayPort displayOnRelay = null;
 			if (settings.DisplayOnRelay != null)
-				displayOnRelay = factory.GetOriginatorById<IRelayPort>(settings.DisplayOnRelay.Value);
+			{
+				try
+				{
+					displayOnRelay = factory.GetOriginatorById<IRelayPort>(settings.DisplayOnRelay.Value);
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOnRelay);
+				}
+			}
 			SetDisplayOnRelay(displayOnRelay);
 
             // Additional Parameters
@@ -281,7 +294,16 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			// Display
 			IDisplay display = null;
 			if (settings.Display != null)
-				display = factory.GetOriginatorById<IDisplay>(settings.Display.Value);
+			{
+				try
+				{
+					display = factory.GetOriginatorById<IDisplay>(settings.Display.Value);
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No display with id {0}", settings.Display);
+				}
+			}
 			SetDisplay(display);
 		}
 
@@ -324,9 +346,9 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state, true for on false for off", (b) => ActivateDisplayRelays(b));
+			yield return new GenericConsoleCommand<bool>("ActivateRelays", "Activates relays for the given display power state, true for on false for off", b => ActivateDisplayRelays(b));
 			yield return new ConsoleCommand("OpenRelays", "Opens all relays", () => OpenAllRelays());
-			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", (i) => SetRelayHoldTime(i));
+			yield return new GenericConsoleCommand<int>("SetRelayHoldTime", "How long to hold relays closed, in ms", i => SetRelayHoldTime(i));
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()

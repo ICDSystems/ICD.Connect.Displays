@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.IrPort;
-using ICD.Connect.Routing.RoutingGraphs;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices.IrDisplay
 {
@@ -32,6 +30,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// Raised when the scaling mode changes.
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
+
+		private readonly IrDriverProperties m_IrDriverProperties;
 
 		/// <summary>
 		/// When true assume TX is successful even if a request times out.
@@ -60,25 +60,9 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				m_IsPowered = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
 
 				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
-			}
-		}
-
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public int InputCount
-		{
-			get
-			{
-				return ServiceProvider.GetService<IRoutingGraph>()
-				                      .Connections
-				                      .GetChildren()
-				                      .Where(c => c.Destination.Device == Id)
-				                      .Distinct(c => c.Destination.Address)
-				                      .Count();
 			}
 		}
 
@@ -96,7 +80,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_ActiveInput);
+				Log(eSeverity.Informational, "Hdmi input set to {0}", m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -119,7 +103,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				m_ScalingMode = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
+				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
 
 				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
@@ -132,6 +116,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// </summary>
 		public IrDisplayDevice()
 		{
+			m_IrDriverProperties = new IrDriverProperties();
 			m_Commands = new IrDisplayCommands();
 
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
@@ -149,11 +134,24 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			if (port == m_Port)
 				return;
 
+			ConfigurePort(port);
+
 			Unsubscribe(m_Port);
 			m_Port = port;
 			Subscribe(m_Port);
 
 			UpdateCachedOnlineStatus();
+		}
+
+		/// <summary>
+		/// Configures the given port for communication with the device.
+		/// </summary>
+		/// <param name="port"></param>
+		private void ConfigurePort(IIrPort port)
+		{
+			// IR
+			if (port != null)
+				port.ApplyDeviceConfiguration(m_IrDriverProperties);
 		}
 
 		/// <summary>
@@ -242,7 +240,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		{
 			if (m_Port == null)
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} unable to send command - port is null.", this);
+				Log(eSeverity.Error, "Unable to send command - port is null.");
 				return false;
 			}
 
@@ -264,6 +262,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			settings.Port = m_Port == null ? (int?)null : m_Port.Id;
 			settings.Commands.Update(m_Commands);
+
+			settings.Copy(m_IrDriverProperties);
 		}
 
 		/// <summary>
@@ -275,6 +275,8 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			SetIrPort(null);
 			m_Commands.Clear();
+
+			m_IrDriverProperties.ClearIrProperties();
 		}
 
 		/// <summary>
@@ -287,6 +289,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			base.ApplySettingsFinal(settings, factory);
 
 			m_Commands.Update(settings.Commands);
+			m_IrDriverProperties.Copy(settings);
 
 			IIrPort port = null;
 
