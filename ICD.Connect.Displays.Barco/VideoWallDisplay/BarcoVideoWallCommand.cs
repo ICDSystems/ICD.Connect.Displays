@@ -44,7 +44,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		public string Attribute { get; set; }
 
 		/// <summary>
-		/// Serialize this instance to a string.
+		/// Serialize this command to a string.
 		/// </summary>
 		/// <returns></returns>
 		public string Serialize()
@@ -63,8 +63,8 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		public bool Equals(BarcoVideoWallCommand other)
 		{
-			return other.WallDisplayId == WallDisplayId && other.CommandKeyword == CommandKeyword && other.Command == Command &&
-			       String.Equals(other.Device, Device, StringComparison.OrdinalIgnoreCase);
+			return other != null && (other.WallDisplayId == WallDisplayId && other.CommandKeyword == CommandKeyword && other.Command == Command &&
+			                         String.Equals(other.Device, Device, StringComparison.OrdinalIgnoreCase));
 		}
 
 		public static bool Equals(BarcoVideoWallCommand a, BarcoVideoWallCommand b)

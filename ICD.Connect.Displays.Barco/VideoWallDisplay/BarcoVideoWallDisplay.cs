@@ -56,23 +56,44 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		#region Properties
 
+		/// <summary>
+		/// Wall device ID, as set on the Barco BCM
+		/// </summary>
 		private string WallDeviceId { get; set; }
 
+		/// <summary>
+		/// Wall device to control the input on
+		/// This will typically be a single device,
+		/// with other devices cascaded off this one.
+		/// Can be set to "wall" in the rare event the entire wall needs to switch inputs
+		/// Defaults to "1,1" for the top-left display
+		/// </summary>
 		private string WallInputControlDevice { get; set; }
 
 		#endregion
 
 		#region Public Methods
+		/// <summary>
+		/// Powers on the wall
+		/// </summary>
 		public override void PowerOn()
 		{
 			SendPowerCommand(true);
 		}
 
+		/// <summary>
+		/// Powers off the wall
+		/// </summary>
 		public override void PowerOff()
 		{
 			SendPowerCommand(false);
 		}
 
+		/// <summary>
+		/// Sets the input.
+		/// Only sets the input on the dispaly specified in WallInputControlDevice
+		/// </summary>
+		/// <param name="address"></param>
 		public override void SetActiveInput(int address)
 		{
 			if (!s_InputMap.ContainsKey(address))
@@ -167,7 +188,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			}
 			if (RESPONSE_CONNECTED.Equals(responseParts[0], StringComparison.OrdinalIgnoreCase))
 			{
-				PollDevice();
+				InitialConnectPoll();
 				return;
 			}
 			if (RESPONSE_DONE.Equals(responseParts[0], StringComparison.OrdinalIgnoreCase))
@@ -184,7 +205,20 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			Log(eSeverity.Warning, "Unmatched response: {0}", args.Response);
 		}
 
-		private void PollDevice()
+
+		/// <summary>
+		/// Don't query the device immediately after commands
+		/// The wall reports inconsistent states for a few seconds after commands
+		/// Instead, we use the command success response to set states.
+		/// </summary>
+		protected override void QueryState()
+		{
+		}
+
+		/// <summary>
+		/// Called to poll the device on initial connect
+		/// </summary>
+		private void InitialConnectPoll()
 		{
 			BarcoVideoWallCommand powerGetCommand = new BarcoVideoWallCommand
 			{
@@ -207,6 +241,10 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			SendCommand(inputGetcommand);
 		}
 
+		/// <summary>
+		/// Build and send power on/off commands
+		/// </summary>
+		/// <param name="powerState"></param>
 		private void SendPowerCommand(bool powerState)
 		{
 			BarcoVideoWallCommand command = new BarcoVideoWallCommand
@@ -221,11 +259,16 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			SendCommand(command);
 		}
 
+		/// <summary>
+		/// Parse a successful response from the device
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="responseParts"></param>
 		private void ParseResponseSuccess(SerialResponseEventArgs args, string[] responseParts)
 		{
 			if (responseParts.Length < 3)
 			{
-				// Log
+				Log(eSeverity.Error, "Too short of a response to parse: {0}", args.Response);
 				return;
 			}
 
@@ -253,12 +296,16 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 					ParsePowerState(args, responseParts);
 					break;
 				case eCommand.SelInput:
-				case eCommand.ActiveInput:
 					ParseInput(args, responseParts);
 					break;
 			}
 		}
 
+		/// <summary>
+		/// Parse input selection response
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="responseParts"></param>
 		private void ParseInput(SerialResponseEventArgs args, string[] responseParts)
 		{
 			if (responseParts.Length <= 5)
@@ -286,6 +333,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		}
 
+		/// <summary>
+		/// Parse power state response
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="responseParts"></param>
 		private void ParsePowerState(SerialResponseEventArgs args, string[] responseParts)
 		{
 			if (responseParts.Length <= 5)
@@ -300,6 +352,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			IsPowered = responseParts[5].Equals(POWER_ON, StringComparison.OrdinalIgnoreCase);
 		}
 
+		/// <summary>
+		/// Parse various error conditions, and respond appropriately
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="responseParts"></param>
 		private void ParseResponseError(SerialResponseEventArgs args, string[] responseParts)
 		{
 			if (responseParts.Length < 2)
@@ -338,6 +395,10 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		
 		}
 
+		/// <summary>
+		/// Add command the the queue, with appropriate comparator
+		/// </summary>
+		/// <param name="command"></param>
 		private void SendCommand(BarcoVideoWallCommand command)
 		{
 			SendCommand(command, BarcoVideoWallCommand.Equals);
