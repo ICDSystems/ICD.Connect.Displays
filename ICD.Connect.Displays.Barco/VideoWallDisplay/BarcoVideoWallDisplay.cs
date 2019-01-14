@@ -31,6 +31,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		private const string INPUT_DVI_2 = "DVI2";
 		private const string INPUT_OPS_1 = "OPS1";
 
+		private const string RESPONSE_CONNECTED = "connected";
 		private const string RESPONSE_DONE = "done";
 		private const string RESPONSE_ERROR = "Error";
 
@@ -55,12 +56,9 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		#region Properties
 
-		public string WallDeviceId { get; set; }
+		private string WallDeviceId { get; set; }
 
-		/// <summary>
-		/// Gets the number of HDMI inputs.
-		/// </summary>
-		public override int InputCount { get { return s_InputMap.Count; } }
+		private string WallInputControlDevice { get; set; }
 
 		#endregion
 
@@ -75,11 +73,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			SendPowerCommand(false);
 		}
 
-		public override void SetHdmiInput(int address)
+		public override void SetActiveInput(int address)
 		{
 			if (!s_InputMap.ContainsKey(address))
 			{
-				Logger.AddEntry(eSeverity.Error, "No input at address {0}", address);
+				Log(eSeverity.Error, "No input at address {0}", address);
 				return;
 			}
 
@@ -87,8 +85,8 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			{
 				WallDisplayId = WallDeviceId,
 				CommandKeyword = eCommandKeyword.Set,
-				Command = eCommand.ActiveInput,
-				Device = DEVICE_WALL,
+				Command = eCommand.SelInput,
+				Device = WallInputControlDevice,
 				Attribute = s_InputMap[address]
 			};
 
@@ -136,12 +134,21 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			BarcoVideoWallCommand command = args.Data as BarcoVideoWallCommand;
 			if (command == null)
 			{
-				Logger.AddEntry(eSeverity.Error, "Unknown Command Timed Out: {1}", args.Data);
+				Log(eSeverity.Error, "Unknown Command Timed Out: {1}", args.Data);
 				return;
 			}
 
-			Logger.AddEntry(eSeverity.Debug, "Command Timeout: {0}", command.Serialize());
+			Log(eSeverity.Debug, "Command Timeout: {0}", command.Serialize());
 
+		}
+
+		/// <summary>
+		/// Called when a command is sent to the physical display.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
+		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
+		{
 		}
 
 		/// <summary>
@@ -155,7 +162,12 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 			if (String.IsNullOrEmpty(responseParts[0]))
 			{
-				Logger.AddEntry(eSeverity.Error, "Empty response: {0}", args.Response);
+				Log(eSeverity.Error, "Empty response: {0}", args.Response);
+				return;
+			}
+			if (RESPONSE_CONNECTED.Equals(responseParts[0], StringComparison.OrdinalIgnoreCase))
+			{
+				PollDevice();
 				return;
 			}
 			if (RESPONSE_DONE.Equals(responseParts[0], StringComparison.OrdinalIgnoreCase))
@@ -169,7 +181,30 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 				return;
 			}
 
-			Logger.AddEntry(eSeverity.Warning, "Unmatched response: {0}", args.Response);
+			Log(eSeverity.Warning, "Unmatched response: {0}", args.Response);
+		}
+
+		private void PollDevice()
+		{
+			BarcoVideoWallCommand powerGetCommand = new BarcoVideoWallCommand
+			{
+				WallDisplayId = WallDeviceId,
+				CommandKeyword = eCommandKeyword.Get,
+				Command = eCommand.OpState,
+				Device = DEVICE_WALL,
+			};
+
+			SendCommand(powerGetCommand);
+
+			BarcoVideoWallCommand inputGetcommand = new BarcoVideoWallCommand
+			{
+				WallDisplayId = WallDeviceId,
+				CommandKeyword =  eCommandKeyword.Get,
+				Command = eCommand.SelInput,
+				Device = WallInputControlDevice
+			};
+
+			SendCommand(inputGetcommand);
 		}
 
 		private void SendPowerCommand(bool powerState)
@@ -201,14 +236,14 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			// Parse command
 			if (String.IsNullOrEmpty(responseParts[3]))
 			{
-				Logger.AddEntry(eSeverity.Error, "Unable to get command for response: {0}", args.Response);
+				Log(eSeverity.Error, "Unable to get command for response: {0}", args.Response);
 				return;
 			}
 
 			eCommand command;
 			if (!EnumUtils.TryParse(responseParts[3], true, out command))
 			{
-				Logger.AddEntry(eSeverity.Error, "Unable to parse command: {0}", responseParts[3]);
+				Log(eSeverity.Error, "Unable to parse command: {0}", responseParts[3]);
 				return;
 			}
 
@@ -228,11 +263,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length <= 5)
 			{
-				Logger.AddEntry(eSeverity.Error, "Input response has too few parts: {0}", args.Response);
+				Log(eSeverity.Error, "Input response has too few parts: {0}", args.Response);
 				return;
 			}
 
-			if (responseParts[4].Equals(DEVICE_WALL, StringComparison.OrdinalIgnoreCase))
+			if (!responseParts[4].Equals(WallInputControlDevice, StringComparison.OrdinalIgnoreCase))
 				return;
 
 			KeyValuePair<int, string> input;
@@ -243,11 +278,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			}
 			catch (InvalidOperationException)
 			{
-				Logger.AddEntry(eSeverity.Error, "Unable to parse input: {0}", responseParts[5]);
+				Log(eSeverity.Error, "Unable to parse input: {0}", responseParts[5]);
 				return;
 			}
 
-			HdmiInput = input.Key;
+			ActiveInput = input.Key;
 
 		}
 
@@ -255,11 +290,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length <= 5)
 			{
-				Logger.AddEntry(eSeverity.Error, "Power response has too few parts: {0}", args.Response);
+				Log(eSeverity.Error, "Power response has too few parts: {0}", args.Response);
 				return;
 			}
 
-			if (responseParts[4].Equals(DEVICE_WALL, StringComparison.OrdinalIgnoreCase))
+			if (!responseParts[4].Equals(DEVICE_WALL, StringComparison.OrdinalIgnoreCase))
 				return;
 
 			IsPowered = responseParts[5].Equals(POWER_ON, StringComparison.OrdinalIgnoreCase);
@@ -269,37 +304,37 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length < 2)
 			{
-				Logger.AddEntry(eSeverity.Error, "Error response has too few parts: {0}", args.Response);
+				Log(eSeverity.Error, "Error response has too few parts: {0}", args.Response);
 				return;
 			}
 
 			if (responseParts[2].Equals("system_busy", StringComparison.OrdinalIgnoreCase))
 			{
-				Logger.AddEntry(eSeverity.Debug, "System Busy, resending command: {0}", args.Response);
+				Log(eSeverity.Debug, "System Busy, resending command: {0}", args.Response);
 				SendCommandPriority(args.Data, 1);
 				return;
 			}
 
 			if (responseParts[2].Equals("incomplete_action", StringComparison.OrdinalIgnoreCase))
 			{
-				Logger.AddEntry(eSeverity.Debug, "Incomplete Action, resending command: {0}", args.Response);
+				Log(eSeverity.Debug, "Incomplete Action, resending command: {0}", args.Response);
 				SendCommandPriority(args.Data, 1);
 				return;
 			}
 
 			if (responseParts[2].Equals("syntax_error", StringComparison.OrdinalIgnoreCase))
 			{
-				Logger.AddEntry(eSeverity.Error, "Syntax Error: {0}", args.Response);
+				Log(eSeverity.Error, "Syntax Error: {0}", args.Response);
 				return;
 			}
 
 			if (responseParts[2].Equals("not_supported", StringComparison.OrdinalIgnoreCase))
 			{
-				Logger.AddEntry(eSeverity.Error, "Command Not Supported: {0}", args.Response);
+				Log(eSeverity.Error, "Command Not Supported: {0}", args.Response);
 				return;
 			}
 
-			Logger.AddEntry(eSeverity.Error, "Unknown Error: {0}", args.Response);
+			Log(eSeverity.Error, "Unknown Error: {0}", args.Response);
 		
 		}
 
@@ -322,9 +357,10 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			base.ApplySettingsFinal(settings, factory);
 
 			WallDeviceId = settings.WallDeviceId;
+			WallInputControlDevice = settings.WallInputControlDevice;
 
 			if (String.IsNullOrEmpty(WallDeviceId))
-				Logger.AddEntry(eSeverity.Error, "Barco UniSee must have WallDeviceId defined");
+				Log(eSeverity.Error, "Barco UniSee must have WallDeviceId defined");
 		}
 
 		/// <summary>
@@ -335,6 +371,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			base.ClearSettingsFinal();
 
 			WallDeviceId = null;
+			WallInputControlDevice = null;
 		}
 
 		/// <summary>
@@ -346,6 +383,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			base.CopySettingsFinal(settings);
 
 			settings.WallDeviceId = WallDeviceId;
+			settings.WallInputControlDevice = WallInputControlDevice;
 		}
 
 		#endregion

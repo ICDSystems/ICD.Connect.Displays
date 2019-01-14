@@ -5,25 +5,16 @@ using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 {
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("BarcoVideoWallDisplay", typeof(BarcoVideoWallDisplay))]
 	public sealed class BarcoVideoWallDisplaySettings : AbstractDisplaySettings
 	{
-		private const string FACTORY_NAME = "BarcoVideoWallDisplay";
-
 		private const string WALL_DEVICE_ID_ELEMENT = "WallDeviceId";
+
+		private const string WALL_INPUT_CONTROL_DEVICE = "InputControlDevice";
 
 		public string WallDeviceId { get; set; }
 
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(BarcoVideoWallDisplay); } }
-
+		public string WallInputControlDevice { get; set; }
 
 		/// <summary>
 		/// Write settings elements to xml.
@@ -34,6 +25,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			base.WriteElements(writer);
 
 			writer.WriteElementString(WALL_DEVICE_ID_ELEMENT, IcdXmlConvert.ToString(WallDeviceId));
+			writer.WriteElementString(WALL_INPUT_CONTROL_DEVICE, IcdXmlConvert.ToString(WallInputControlDevice));
 		}
 
 		/// <summary>
@@ -45,6 +37,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			base.ParseXml(xml);
 
 			WallDeviceId = XmlUtils.TryReadChildElementContentAsString(xml, WALL_DEVICE_ID_ELEMENT);
+			WallInputControlDevice = XmlUtils.TryReadChildElementContentAsString(xml, WALL_INPUT_CONTROL_DEVICE) ?? "1,1";
 		}
 	}
 }
