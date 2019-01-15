@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.1.0] - 2019-01-15
+### Added
+ - Added Barco VideoWall display driver
+
 ## [11.0.0] - 2019-01-02
 ### Added
  - Added mute console commands to displays
