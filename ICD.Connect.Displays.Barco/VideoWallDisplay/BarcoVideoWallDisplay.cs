@@ -10,7 +10,7 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 {
@@ -37,7 +37,6 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 		private const string DEVICE_WALL = "wall";
 		#endregion
-
 
 		#region Fields
 
@@ -131,10 +130,9 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		protected override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new MultiDelimiterSerialBuffer(TERMINATOR.ToCharArray());
 			SerialQueue queue = new SerialQueue();
@@ -160,7 +158,6 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			}
 
 			Log(eSeverity.Debug, "Command Timeout: {0}", command.Serialize());
-
 		}
 
 		/// <summary>
