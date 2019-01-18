@@ -289,7 +289,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		/// </summary>
 		private void KeepAliveCallback()
 		{
-			if (ConnectionStateManager.IsConnected && SerialQueue.CommandCount == 0)
+			if (ConnectionStateManager.IsConnected && SerialQueue != null && SerialQueue.CommandCount == 0)
 				SendCommand(POWER_QUERY);
 		}
 

@@ -65,6 +65,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets and sets the serial port.
 		/// </summary>
+		[CanBeNull]
 		protected ISerialQueue SerialQueue { get; private set; }
 
 		/// <summary>
@@ -169,6 +170,12 @@ namespace ICD.Connect.Displays.Devices
 		[PublicAPI]
 		public void SendCommand(ISerialData command)
 		{
+			if (SerialQueue == null)
+			{
+				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				return;
+			}
+
 			SerialQueue.Enqueue(command);
 		}
 
@@ -180,6 +187,12 @@ namespace ICD.Connect.Displays.Devices
 		[PublicAPI]
 		public void SendCommandPriority(ISerialData command, int priority)
 		{
+			if (SerialQueue == null)
+			{
+				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				return;
+			}
+
 			SerialQueue.EnqueuePriority(command, priority);
 		}
 
@@ -193,6 +206,12 @@ namespace ICD.Connect.Displays.Devices
 		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer)
 			where TData : class, ISerialData
 		{
+			if (SerialQueue == null)
+			{
+				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				return;
+			}
+
 			SerialQueue.Enqueue(command, comparer);
 		}
 

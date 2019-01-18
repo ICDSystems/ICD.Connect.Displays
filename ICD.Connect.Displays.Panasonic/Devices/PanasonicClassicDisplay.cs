@@ -368,7 +368,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
 			IncrementRetryCount(command);
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
-				SerialQueue.EnqueuePriority(new SerialData(command));
+				SendCommandPriority(new SerialData(command), 0);
 			else
 			{
 				Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
