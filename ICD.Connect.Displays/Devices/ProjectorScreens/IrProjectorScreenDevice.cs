@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Settings;
@@ -110,7 +111,16 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 			IIrPort irPort = null;
 			if (settings.IrPort != null)
-				irPort = factory.GetOriginatorById<IIrPort>(settings.IrPort.Value);
+			{
+				try
+				{
+					irPort = factory.GetOriginatorById<IIrPort>(settings.IrPort.Value);
+				}
+				catch (KeyNotFoundException)
+				{
+					Log(eSeverity.Error, "No IrPort with id {0}", settings.IrPort);
+				}
+			}
 			SetIrPort(irPort);
 
 			if (settings.DisplayOnCommand != null)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
@@ -139,7 +140,16 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		// Display
 		IDisplay display = null;
 		if (settings.Display != null)
-			display = factory.GetOriginatorById<IDisplay>(settings.Display.Value);
+		{
+			try
+			{
+				display = factory.GetOriginatorById<IDisplay>(settings.Display.Value);
+			}
+			catch (KeyNotFoundException)
+			{
+				Log(eSeverity.Error, "No display with id {0}", settings.Display);
+			}
+		}
 		SetDisplay(display);
 	}
 
