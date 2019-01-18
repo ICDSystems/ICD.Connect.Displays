@@ -3,7 +3,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices.ProjectorScreens
 {
