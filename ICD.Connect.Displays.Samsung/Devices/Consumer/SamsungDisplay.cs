@@ -10,7 +10,6 @@ using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Consumer
@@ -72,19 +71,14 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{4, INPUT_HDMI_4}
 		};
 
-		#region Properties
-
-		#endregion
-
 		#region Methods
 
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		protected override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			SamsungDisplaySerialBuffer buffer = new SamsungDisplaySerialBuffer();
 			buffer.OnJunkData += BufferOnJunkData;
@@ -98,28 +92,17 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		}
 
 		/// <summary>
-		/// Configures a com port for communication with the physical display.
+		/// Powers the TV.
 		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public override void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
-		}
-
 		[PublicAPI]
 		public override void PowerOn()
 		{
 			SendNonFormattedCommand(POWER_ON);
 		}
 
+		/// <summary>
+		/// Shuts down the TV.
+		/// </summary>
 		[PublicAPI]
 		public override void PowerOff()
 		{

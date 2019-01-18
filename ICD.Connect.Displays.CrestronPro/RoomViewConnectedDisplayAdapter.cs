@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.CrestronConnected;
@@ -14,7 +15,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Displays.CrestronPro
 {

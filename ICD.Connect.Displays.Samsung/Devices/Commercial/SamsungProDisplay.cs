@@ -7,10 +7,9 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Settings.Core;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
@@ -84,12 +83,12 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		#region Methods
 
 		/// <summary>
-		/// Sets and configures the port for communication with the physical display.
+		/// Configures the given port for communication with the device.
 		/// </summary>
-		protected override void ConfigurePort(ISerialPort port)
+		/// <param name="port"></param>
+		public override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new SamsungProDisplayBuffer();
 			SerialQueue queue = new SerialQueue();
@@ -101,23 +100,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 			if (port != null && port.IsConnected)
 				QueryState();
-		}
-
-		/// <summary>
-		/// Configures a com port for communication with the physical display.
-		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public override void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate9600,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
 		}
 
 		public override void PowerOn()

@@ -11,7 +11,6 @@ using ICD.Connect.Displays.Sharp.Devices.Consumer;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
-using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 
@@ -108,10 +107,9 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		protected override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new MultiDelimiterSerialBuffer(SharpDisplayCommands.RETURN);
 			SerialQueue queue = new SerialQueue();
@@ -120,23 +118,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
-		}
-
-		/// <summary>
-		/// Configures a com port for communication with the physical display.
-		/// </summary>
-		/// <param name="port"></param>
-		[PublicAPI]
-		public override void ConfigureComPort(IComPort port)
-		{
-			port.SetComPortSpec(eComBaudRates.ComspecBaudRate115200,
-			                    eComDataBits.ComspecDataBits8,
-			                    eComParityType.ComspecParityNone,
-			                    eComStopBits.ComspecStopBits1,
-			                    eComProtocolType.ComspecProtocolRS232,
-			                    eComHardwareHandshakeType.ComspecHardwareHandshakeNone,
-			                    eComSoftwareHandshakeType.ComspecSoftwareHandshakeNone,
-			                    false);
 		}
 
 		public override void PowerOn()
