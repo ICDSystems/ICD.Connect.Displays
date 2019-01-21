@@ -18,10 +18,10 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		private IIrPort m_IrPort;
 
 		/// <summary>
-		/// Dictionary that holds the relays for display on/off status
-		/// Key is the power status for that relay
-		/// false = off relay
-		/// true = on relay
+		/// Dictionary that holds the commands for display on/off status
+		/// Key is the power status for that command
+		/// false = off command
+		/// true = on command
 		/// </summary>
 		private readonly Dictionary<bool, string> m_DisplayIrCommands;
 
@@ -41,7 +41,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				string command;
 				return m_DisplayIrCommands.TryGetValue(DISPLAY_ON_KEY, out command) ? command : null;
 			}
-			set { m_DisplayIrCommands[DISPLAY_ON_KEY] = value; }
+			private set { m_DisplayIrCommands[DISPLAY_ON_KEY] = value; }
 		}
 
 		public String DisplayOffCommand
@@ -51,7 +51,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				string command;
 				return m_DisplayIrCommands.TryGetValue(DISPLAY_OFF_KEY, out command) ? command : null;
 			}
-			set { m_DisplayIrCommands[DISPLAY_OFF_KEY] = value; }
+			private set { m_DisplayIrCommands[DISPLAY_OFF_KEY] = value; }
 		}
 
 		#endregion
@@ -73,8 +73,13 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			return IrPort != null && IrPort.IsOnline;
 		}
 
-		protected override void SetInitialState()
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
 		{
+			base.DisposeFinal(disposing);
+			Unsubscribe(m_IrPort);
 		}
 
 		#region Display Subscritpion/Callback
@@ -87,7 +92,10 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		private void ActivateScreen(bool powerState)
 		{
 			if (IrPort == null)
+			{
+				Log(eSeverity.Error, "Tried to send power command, but IR port is not set");
 				return;
+			}
 
 			string command;
 			if (!m_DisplayIrCommands.TryGetValue(powerState, out command))
