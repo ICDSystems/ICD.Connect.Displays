@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="DigitalSignage\LgDigitalSignageDisplay.cs" />
     <Compile Include="DigitalSignage\LgDigitalSignageDisplaySettings.cs" />
+    <Compile Include="DigitalSignage\LgDigitalSignageSerialBuffer.cs" />
     <Compile Include="DigitalSignage\LgDigitalSignageTransmission.cs" />
     <Compile Include="KrangPlugin.cs" />
     <None Include="LG Digital Signage.pdf" />

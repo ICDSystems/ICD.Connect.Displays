@@ -1,8 +1,11 @@
-﻿using ICD.Common.Utils;
+﻿using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -13,6 +16,43 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 {
 	public sealed class LgDigitalSignageDisplay : AbstractDisplayWithAudio<LgDigitalSignageDisplaySettings>
 	{
+		private const string COMMAND_POWER = "ka";
+		private const string COMMAND_INPUT = "xb";
+		private const string COMMAND_SCALE = "kc";
+		private const string COMMAND_VOLUME = "kf";
+		private const string COMMAND_MUTE = "ke";
+
+		private const string DATA_INPUT_AV = "20";
+		private const string DATA_INPUT_COMPONENT = "40";
+		private const string DATA_INPUT_RGB = "60";
+		private const string DATA_INPUT_DVI_D_PC = "70";
+		private const string DATA_INPUT_DVI_D_DTV = "80";
+		private const string DATA_INPUT_HDMI1_DTV = "90";
+		private const string DATA_INPUT_HDMI1_PC = "A0";
+		private const string DATA_INPUT_HDMI2_OPS_DTV = "91";
+		private const string DATA_INPUT_HDMI2_OPS_PC = "A1";
+		private const string DATA_INPUT_OPS_HDMI3_DVI_D_DTV = "92";
+		private const string DATA_INPUT_OPS_HDMI3_DVI_D_PC = "A2";
+		private const string DATA_INPUT_OPS_DVI_D_DTV = "95";
+		private const string DATA_INPUT_OPS_DVI_D_PC = "A5";
+		private const string DATA_INPUT_HDMI3_DVI_D_DTV = "96";
+		private const string DATA_INPUT_HDMI3_DVI_D_PC = "A6";
+		private const string DATA_INPUT_DISPLAYPORT_DTV = "C0";
+		private const string DATA_INPUT_DISPLAYPORT_PC = "D0";
+		private const string DATA_INPUT_SUPERSIGN_WEB_OS_PLAYER = "E0";
+		private const string DATA_INPUT_OTHERS = "E1";
+		private const string DATA_INPUT_MULTI_SCREEN = "E2";
+
+		private const string DATA_QUERY = "FF";
+
+		private static readonly BiDictionary<int, string> s_InputMap =
+			new BiDictionary<int, string>
+			{
+				{1, DATA_INPUT_HDMI1_PC},
+				{2, DATA_INPUT_HDMI2_OPS_PC},
+				{3, DATA_INPUT_HDMI3_DVI_D_PC},
+			};
+
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
@@ -41,7 +81,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 				port.DebugTx = eDebugMode.MixedAsciiHex;
 			}
 
-			ISerialBuffer buffer = new DelimiterSerialBuffer((char)0x0D);
+			ISerialBuffer buffer = new LgDigitalSignageSerialBuffer();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
@@ -57,14 +97,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// </summary>
 		public override void PowerOn()
 		{
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'a',
-				SetId = SetId,
-				Data = "01"
-			};
-
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_POWER, SetId, "01");
 			SendCommand(command);
 		}
 
@@ -73,14 +106,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// </summary>
 		public override void PowerOff()
 		{
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'a',
-				SetId = SetId,
-				Data = "00"
-			};
-
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_POWER, SetId, "00");
 			SendCommand(command);
 		}
 
@@ -90,7 +116,10 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="address"></param>
 		public override void SetActiveInput(int address)
 		{
-			throw new System.NotImplementedException();
+			string data = s_InputMap.GetValue(address);
+
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_INPUT, SetId, data);
+			SendCommand(command);
 		}
 
 		/// <summary>
@@ -99,14 +128,9 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="mode"></param>
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'c',
-				SetId = SetId,
-				Data = s_ScalingModeMap.GetValue(mode)
-			};
+			string data = s_ScalingModeMap.GetValue(mode);
 
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_SCALE, SetId, data);
 			SendCommand(command);
 		}
 
@@ -133,15 +157,9 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		protected override void VolumeSetRawFinal(float raw)
 		{
 			int volumeInt = (int)MathUtils.Clamp(raw, VolumeDeviceMin, VolumeDeviceMax);
+			string data = volumeInt.ToString("X2"); // 2 digit hex (00-64)
 
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'f',
-				SetId = SetId,
-				Data = volumeInt.ToString("X2") // 2 digit hex (00-64)
-			};
-
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_VOLUME, SetId, data);
 			SendCommand(command);
 		}
 
@@ -150,14 +168,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// </summary>
 		public override void MuteOn()
 		{
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'e',
-				SetId = SetId,
-				Data = "00"
-			};
-
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_MUTE, SetId, "00");
 			SendCommand(command);
 		}
 
@@ -166,14 +177,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// </summary>
 		public override void MuteOff()
 		{
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission
-			{
-				Command1 = 'k',
-				Command2 = 'e',
-				SetId = SetId,
-				Data = "01"
-			};
-
+			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_MUTE, SetId, "01");
 			SendCommand(command);
 		}
 
@@ -188,7 +192,8 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
 		{
-			//IcdConsole.PrintLine(eConsoleColor.Magenta, "SerialQueueOnSerialTransmission {0}", args.Data);
+			if (Trust)
+				ParseSuccess(args.Data as LgDigitalSignageTransmission);
 		}
 
 		/// <summary>
@@ -202,7 +207,63 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 			if (!LgDigitalSignageAcknowledgement.Deserialize(args.Response, out acknowledgement))
 				return;
 
-			//IcdConsole.PrintLine(eConsoleColor.Magenta, "SerialQueueOnSerialResponse {0} - {1}", args.Data, args.Response);
+			switch (acknowledgement.Ack)
+			{
+				case LgDigitalSignageAcknowledgement.eAck.Ok:
+					LgDigitalSignageTransmission data = args.Data as LgDigitalSignageTransmission;
+					if (data == null)
+						return;
+
+					// Hack - Replace query command with result
+					if (data.Data == DATA_QUERY)
+						data = new LgDigitalSignageTransmission(data.Command, data.SetId, acknowledgement.Data.ToUpper());
+
+					ParseSuccess(data);
+					break;
+
+				case LgDigitalSignageAcknowledgement.eAck.Ng:
+					ParseError(args.Data);
+					break;
+
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		private void ParseSuccess(LgDigitalSignageTransmission data)
+		{
+			if (data.Data == DATA_QUERY)
+				return;
+
+			switch (data.Command)
+			{
+				case COMMAND_POWER:
+					IsPowered = data.Data == "01";
+					break;
+
+				case COMMAND_INPUT:
+					int input;
+					ActiveInput = s_InputMap.TryGetKey(data.Data, out input) ? input : (int?)null;
+					break;
+
+				case COMMAND_SCALE:
+					eScalingMode mode;
+					ScalingMode = s_ScalingModeMap.TryGetKey(data.Data, out mode) ? mode : eScalingMode.Unknown;
+					break;
+
+				case COMMAND_VOLUME:
+					Volume = int.Parse(data.Data, System.Globalization.NumberStyles.HexNumber);
+					break;
+
+				case COMMAND_MUTE:
+					IsMuted = data.Data == "00";
+					break;
+			}
+		}
+
+		private void ParseError(ISerialData data)
+		{
+			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(data.Serialize()));
 		}
 
 		/// <summary>
@@ -212,7 +273,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			IcdConsole.PrintLine(eConsoleColor.Magenta, "SerialQueueOnTimeout {0}", args.Data);
+			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
 		}
 
 		#endregion
@@ -226,18 +287,16 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		{
 			base.QueryState();
 
-			/*
 			// Query the state of the device
-			SendCommand(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+			SendCommand(new LgDigitalSignageTransmission(COMMAND_POWER, SetId, DATA_QUERY));
 
 			if (!IsPowered)
 				return;
 
-			SendCommand(new SamsungProCommand(VOLUME, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(INPUT, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery());
-			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery());
-			 */
+			SendCommand(new LgDigitalSignageTransmission(COMMAND_VOLUME, SetId, DATA_QUERY));
+			SendCommand(new LgDigitalSignageTransmission(COMMAND_INPUT, SetId, DATA_QUERY));
+			SendCommand(new LgDigitalSignageTransmission(COMMAND_SCALE, SetId, DATA_QUERY));
+			SendCommand(new LgDigitalSignageTransmission(COMMAND_MUTE, SetId, DATA_QUERY));
 		}
 
 		/// <summary>

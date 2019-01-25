@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.LG.DigitalSignage
@@ -23,15 +24,48 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 	/// </summary>
 	public sealed class LgDigitalSignageTransmission : ISerialData
 	{
-		public const string QUERY = "\0xFF";
+		private readonly string m_Command;
+		private readonly int m_SetId;
+		private readonly string m_Data;
 
-		public char Command1 { get; set; }
+		public string Command { get { return m_Command; } }
 
-		public char Command2 { get; set; }
+		public char Command1
+		{
+			get
+			{
+				char item;
+				Command.TryElementAt(0, out item);
+				return item;
+			}
+		}
 
-		public int SetId { get; set; }
+		public char Command2
+		{
+			get
+			{
+				char item;
+				Command.TryElementAt(1, out item);
+				return item;
+			}
+		}
 
-		public string Data { get; set; }
+		public int SetId { get { return m_SetId; } }
+
+		public string Data { get { return m_Data; } }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="setId"></param>
+		/// <param name="data"></param>
+		public LgDigitalSignageTransmission(string command, int setId, string data)
+		{
+			m_Command = command;
+			m_SetId = setId;
+			m_Data = data;
+		}
 
 		/// <summary>
 		/// Serialize this instance to a string.
@@ -40,12 +74,11 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		public string Serialize()
 		{
 			return new StringBuilder()
-				.Append(Command1)
-				.Append(Command2)
+				.Append(m_Command)
 				.Append(' ')
-				.Append(SetId)
+				.Append(m_SetId)
 				.Append(' ')
-				.Append(Data)
+				.Append(m_Data)
 				.Append((char)0x0D)
 				.ToString();
 		}
@@ -76,7 +109,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 			Ng
 		}
 
-		private const string ACK_REGEX = @"(?'command2'\S) (?'setId'\d+) (?'ack'OK|NG)(?'data'[0-9a-fA-F]+)x";
+		public const string ACK_REGEX = @"(?'command2'\S) (?'setId'\d+) (?'ack'OK|NG)(?'data'[0-9a-fA-F]+)x";
 
 		public char Command2 { get; private set; }
 
