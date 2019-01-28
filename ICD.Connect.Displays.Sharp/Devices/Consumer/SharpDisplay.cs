@@ -250,7 +250,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		private void KeepAliveCallback()
 		{
-			if (ConnectionStateManager.IsConnected && SerialQueue.CommandCount == 0)
+			if (ConnectionStateManager.IsConnected && SerialQueue != null && SerialQueue.CommandCount == 0)
 				SendCommand(SharpDisplayCommands.POWER_QUERY);
 		}
 

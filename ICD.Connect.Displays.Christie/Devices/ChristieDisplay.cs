@@ -225,11 +225,11 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 			// HDMI
 			if (s_InputMap.Values.Contains(data))
-				SerialQueue.EnqueuePriority(new SerialData(INPUT_QUERY));
+				SendCommandPriority(new SerialData(INPUT_QUERY), 0);
 
 			// Scaling Mode
 			else if (s_ScalingModeMap.Values.Contains(data))
-				SerialQueue.EnqueuePriority(new SerialData(ASPECT_QUERY));
+				SendCommandPriority(new SerialData(ASPECT_QUERY), 0);
 
 			else
 			{
@@ -238,7 +238,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 					case POWER_ON:
 					case POWER_OFF:
 						m_RequestedPowerStatus = data == POWER_ON;
-						SerialQueue.EnqueuePriority(new SerialData(POWER_QUERY));
+						SendCommandPriority(new SerialData(POWER_QUERY), 0);
 						break;
 				}
 			}
@@ -297,7 +297,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				else
 				{
 					IncrementRetryCount(command);
-					SerialQueue.EnqueuePriority(new SerialData(command));
+					SendCommandPriority(new SerialData(command), 0);
 				}
 			}
 		}
@@ -322,7 +322,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				else
 				{
 					IncrementRetryCount(command);
-					SerialQueue.EnqueuePriority(new SerialData(command));
+					SendCommandPriority(new SerialData(command), 0);
 				}
 			}
 		}
@@ -346,7 +346,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				else
 				{
 					IncrementRetryCount(command);
-					SerialQueue.EnqueuePriority(new SerialData(command));
+					SendCommandPriority(new SerialData(command), 0);
 				}
 			}
 		}
@@ -357,7 +357,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			IncrementRetryCount(command);
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
 			{
-				SerialQueue.EnqueuePriority(new SerialData(command));
+				SendCommandPriority(new SerialData(command), 0);
 			}
 			else
 			{
