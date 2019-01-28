@@ -5,4 +5,3 @@ using System.Reflection;
 [assembly: AssemblyProduct("ICD.Connect.Displays.Nec")]
 [assembly: AssemblyCopyright("Copyright © ICD Systems 2018")]
 [assembly: AssemblyVersion("12.0.0.0")]
-
