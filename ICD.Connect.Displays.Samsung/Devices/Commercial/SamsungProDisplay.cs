@@ -187,15 +187,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			// while it's warming up. Sending the queries first by priority seems to solve this problem.
 
 			// Query the state of the device
-			SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), int.MinValue);
 
 			if (!IsPowered)
 				return;
 
-			SerialQueue.EnqueuePriority(new SamsungProCommand(VOLUME, WallId, 0).ToQuery(), int.MinValue);
-			SerialQueue.EnqueuePriority(new SamsungProCommand(INPUT, WallId, 0).ToQuery(), int.MinValue);
-			SerialQueue.EnqueuePriority(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery(), int.MinValue);
-			SerialQueue.EnqueuePriority(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(VOLUME, WallId, 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(INPUT, WallId, 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(SCREEN_MODE, WallId, 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), int.MinValue);
 		}
 
 		/// <summary>
@@ -279,7 +279,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 						case 0x1C:
 						case 0xC4:
 							// Keep sending power query until fully powered on
-							SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
+							SendCommandPriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), 0);
 							break;
 					}
 					break;
@@ -296,7 +296,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
 
 			// Keep sending power query until fully powered on
-			if (SerialQueue.TimeoutCount < 10)
+			if (SerialQueue != null && SerialQueue.TimeoutCount < 10)
 				SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, WallId, 0).ToQuery());
 		}
 

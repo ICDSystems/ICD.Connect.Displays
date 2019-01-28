@@ -287,24 +287,27 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					string muted = ExtractParameter(response, 1);
 					IsMuted = muted == "1";
 					break;
+
 				case "QAV":
 					string volume = ExtractParameter(response, 1);
 					Volume = int.Parse(volume);
 					IsMuted = false;
 					break;
+
 				case "IMS":
-					if (!IsPowered
-						&& m_ExpectedPowerState != null
-						&& m_ExpectedPowerState.Value)
+					if (!IsPowered &&
+						m_ExpectedPowerState != null &&
+						m_ExpectedPowerState.Value)
 					{
 						IsPowered = true;
 						m_ExpectedPowerState = null;
 					}
-					else if (IsPowered
-							 && m_ExpectedPowerState != null
-							 && !m_ExpectedPowerState.Value)
+					else if (IsPowered &&
+					         m_ExpectedPowerState != null &&
+					         !m_ExpectedPowerState.Value)
 					{
-						RetryCommand(args.Data.Serialize());
+						if (args.Data != null)
+							RetryCommand(args.Data.Serialize());
 					}
 					else
 					{
@@ -312,8 +315,9 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					}
 					break;
 			}
-			ResetRetryCount(args.Data.Serialize());
 
+			if (args.Data != null)
+				ResetRetryCount(args.Data.Serialize());
 		}
 
 		private static string GenerateSetVolumeCommand(int volumePercent)
@@ -349,7 +353,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
 			IncrementRetryCount(command);
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
-				SerialQueue.EnqueuePriority(new SerialData(command));
+				SendCommandPriority(new SerialData(command), 0);
 			else
 			{
 				Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
