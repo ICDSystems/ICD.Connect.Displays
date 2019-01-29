@@ -16,6 +16,8 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 {
 	public sealed class LgDigitalSignageDisplay : AbstractDisplayWithAudio<LgDigitalSignageDisplaySettings>
 	{
+		#region Constants
+
 		private const string COMMAND_POWER = "ka";
 		private const string COMMAND_INPUT = "xb";
 		private const string COMMAND_SCALE = "kc";
@@ -44,6 +46,8 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		private const string DATA_INPUT_MULTI_SCREEN = "E2";
 
 		private const string DATA_QUERY = "FF";
+
+		#endregion
 
 		private static readonly BiDictionary<int, string> s_InputMap =
 			new BiDictionary<int, string>
