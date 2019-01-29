@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [12.1.0] - 2019-01-29
 ### Added
  - Added LG DigitalSignage display driver
+
+### Changed
+ - Fixed bug that was preventing MockDisplayWithAudio from powering on
 
 ## [12.0.0] - 2019-01-10
 ### Added
