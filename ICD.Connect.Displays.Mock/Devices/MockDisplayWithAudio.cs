@@ -264,9 +264,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOn()
 		{
-			if (!IsPowered)
-				return;
-
 			IsPowered = true;
 		}
 
@@ -275,9 +272,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOff()
 		{
-			if (!IsPowered)
-				return;
-
 			IsPowered = false;
 		}
 
