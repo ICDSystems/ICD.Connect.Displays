@@ -6,12 +6,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.1.0] - 2019-01-29
+### Added
+ - Added LG DigitalSignage display driver
+
+### Changed
+ - Fixed bug that was preventing MockDisplayWithAudio from powering on
+
 ## [12.0.0] - 2019-01-10
 ### Added
  - Implementing port configuration features for display devices
 
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
+
+## [11.1.1] - 2019-01-28
+### Changed
+ - Failing gracefully when no SerialQueue is assigned to displays
+ - Fix for NullRef in PanasonicClassicDisplay
 
 ## [11.1.0] - 2019-01-15
 ### Added
