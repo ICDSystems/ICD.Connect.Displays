@@ -7,11 +7,12 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.SPlus.EventArgs;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public sealed class SimplDisplayWithAudio : AbstractSimplDisplay<SimplDisplayWithAudioSettings>, ISimplDisplayWithAudio
+	public sealed class SimplDisplayWithAudio : AbstractSimplDisplay<SimplDisplayWithAudioSettings>, ISimplDisplayWithAudio, IDisplayWithAudio
 	{
 		/// <summary>
 		/// Raised when the volume changes.
@@ -28,17 +29,20 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		#region Callbacks
 
-		public SimplDisplayWithAudioSetVolumeCallback SetVolumeCallback { get; set; }
+		public event EventHandler<SetVolumeApiEventArgs> OnSetVolume;
+		public event EventHandler<SetVolumeIncrementApiEventArgs> OnSetVolumeIncrement;
+		public event EventHandler<SetMuteApiEventArgs> OnSetMute;
+		public event EventHandler<SetMuteToggleApiEventArgs> OnSetMuteToggle;
 
-		public SimplDisplayWithAudioVolumeUpIncrementCallback VolumeUpIncrementCallback { get; set; }
+		public void SetVolumeFeedback(float volume)
+		{
+			Volume = volume;
+		}
 
-		public SimplDisplayWithAudioVolumeDownIncrementCallback VolumeDownIncrementCallback { get; set; }
-
-		public SimplDisplayWithAudioMuteOnCallback MuteOnCallback { get; set; }
-
-		public SimplDisplayWithAudioMuteOffCallback MuteOffCallback { get; set; }
-
-		public SimplDisplayWithAudioMuteToggleCallback MuteToggleCallback { get; set; }
+		public void SetMuteFeedback(bool mute)
+		{
+			IsMuted = mute;
+		}
 
 		#endregion
 
@@ -50,7 +54,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public float Volume
 		{
 			get { return m_Volume; }
-			set
+			private set
 			{
 				if (Math.Abs(value - m_Volume) < 0.01f)
 					return;
@@ -69,7 +73,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public bool IsMuted
 		{
 			get { return m_IsMuted; }
-			set
+			private set
 			{
 				if (value == m_IsMuted)
 					return;
@@ -127,13 +131,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			OnVolumeChanged = null;
 			OnMuteStateChanged = null;
 
-			SetVolumeCallback = null;
-			VolumeUpIncrementCallback = null;
-			VolumeDownIncrementCallback = null;
-			MuteOnCallback = null;
-			MuteOffCallback = null;
-			MuteToggleCallback = null;
-
 			base.DisposeFinal(disposing);
 		}
 
@@ -145,9 +142,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			SimplDisplayWithAudioSetVolumeCallback handler = SetVolumeCallback;
-			if (handler != null)
-				handler(this, raw);
+			OnSetVolume.Raise(this, new SetVolumeApiEventArgs(raw));
 
 			if (Trust)
 				Volume = raw;
@@ -158,9 +153,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
-			SimplDisplayWithAudioVolumeUpIncrementCallback handler = VolumeUpIncrementCallback;
-			if (handler != null)
-				handler(this);
+
+			OnSetVolumeIncrement.Raise(this, new SetVolumeIncrementApiEventArgs(true));
+
 		}
 
 		/// <summary>
@@ -168,9 +163,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
-			SimplDisplayWithAudioVolumeDownIncrementCallback handler = VolumeDownIncrementCallback;
-			if (handler != null)
-				handler(this);
+			OnSetVolumeIncrement.Raise(this, new SetVolumeIncrementApiEventArgs(false));
 		}
 
 		/// <summary>
@@ -178,9 +171,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void MuteOn()
 		{
-			SimplDisplayWithAudioMuteOnCallback handler = MuteOnCallback;
-			if (handler != null)
-				handler(this);
+			OnSetMute.Raise(this, new SetMuteApiEventArgs(true));
 
 			if (Trust)
 				IsMuted = true;
@@ -191,9 +182,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void MuteOff()
 		{
-			SimplDisplayWithAudioMuteOffCallback handler = MuteOffCallback;
-			if (handler != null)
-				handler(this);
+			OnSetMute.Raise(this, new SetMuteApiEventArgs(false));
 
 			if (Trust)
 				IsMuted = false;
@@ -204,9 +193,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void MuteToggle()
 		{
-			SimplDisplayWithAudioMuteToggleCallback handler = MuteToggleCallback;
-			if (handler != null)
-				handler(this);
+			OnSetMuteToggle.Raise(this, new SetMuteToggleApiEventArgs());
 
 			if (Trust)
 				IsMuted = !IsMuted;

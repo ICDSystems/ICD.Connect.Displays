@@ -1,51 +1,29 @@
-﻿using ICD.Connect.Displays.Devices;
+﻿using System;
+using ICD.Connect.API.Attributes;
+using ICD.Connect.Displays.Devices;
+using ICD.Connect.Displays.SPlus.EventArgs;
+using ICD.Connect.Displays.SPlus.Proxy;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public delegate void SimplDisplayWithAudioSetVolumeCallback(ISimplDisplayWithAudio sender, float volume);
-
-	public delegate void SimplDisplayWithAudioVolumeUpIncrementCallback(ISimplDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioVolumeDownIncrementCallback(ISimplDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteOnCallback(ISimplDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteOffCallback(ISimplDisplayWithAudio sender);
-
-	public delegate void SimplDisplayWithAudioMuteToggleCallback(ISimplDisplayWithAudio sender);
-
-	public interface ISimplDisplayWithAudio : ISimplDisplay, IDisplayWithAudio
+	public interface ISimplDisplayWithAudio : ISimplDisplay
 	{
-		SimplDisplayWithAudioSetVolumeCallback SetVolumeCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_VOLUME, SPlusDisplayApi.EVENT_SET_VOLUME_HELP)]
+		event EventHandler<SetVolumeApiEventArgs> OnSetVolume;
 
-		SimplDisplayWithAudioVolumeUpIncrementCallback VolumeUpIncrementCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_VOLUME_INCREMENT, SPlusDisplayApi.EVENT_SET_VOLUME_INCREMENT_HELP)]
+		event EventHandler<SetVolumeIncrementApiEventArgs> OnSetVolumeIncrement;
 
-		SimplDisplayWithAudioVolumeDownIncrementCallback VolumeDownIncrementCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_MUTE, SPlusDisplayApi.EVENT_SET_MUTE_HELP)]
+		event EventHandler<SetMuteApiEventArgs> OnSetMute;
 
-		SimplDisplayWithAudioMuteOnCallback MuteOnCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_MUTE_TOGGLE, SPlusDisplayApi.EVENT_SET_MUTE_TOGGLE_HELP)]
+		event EventHandler<SetMuteToggleApiEventArgs> OnSetMuteToggle;
 
-		SimplDisplayWithAudioMuteOffCallback MuteOffCallback { get; set; }
+		[ApiMethod(SPlusDisplayApi.METHOD_SET_VOLUME_FEEDBACK, SPlusDisplayApi.METHOD_SET_VOLUME_FEEDBACK_HELP)]
+		void SetVolumeFeedback(float volume);
 
-		SimplDisplayWithAudioMuteToggleCallback MuteToggleCallback { get; set; }
-
-		/// <summary>
-		/// Gets/sets the current volume.
-		/// </summary>
-		new float Volume { get; set; }
-
-		/// <summary>
-		/// Gets/sets the muted state.
-		/// </summary>
-		new bool IsMuted { get; set; }
-
-		/// <summary>
-		/// Gets/sets the min volume.
-		/// </summary>
-		new float VolumeDeviceMin { get; set; }
-
-		/// <summary>
-		/// Gets/sets the max volume.
-		/// </summary>
-		new float VolumeDeviceMax { get; set; }
+		[ApiMethod(SPlusDisplayApi.METHOD_SET_MUTE_FEEDBACK, SPlusDisplayApi.METHOD_SET_MUTE_FEEDBACK_HELP)]
+		void SetMuteFeedback(bool mute);
 	}
 }

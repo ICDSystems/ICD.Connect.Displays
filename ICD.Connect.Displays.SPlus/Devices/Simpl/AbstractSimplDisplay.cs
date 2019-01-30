@@ -8,11 +8,12 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.SPlus.EventArgs;
 using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay
+	public abstract class AbstractSimplDisplay<TSettings> : AbstractSimplDevice<TSettings>, ISimplDisplay, IDisplay
 		where TSettings : AbstractSimplDisplaySettings, new()
 	{
 		/// <summary>
@@ -36,13 +37,25 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 		#region Callbacks
 
-		public SimplDisplayPowerOnCallback PowerOnCallback { get; set; }
+		public event EventHandler<SetPowerApiEventArgs> OnSetPower;
 
-		public SimplDisplayPowerOffCallback PowerOffCallback{ get; set; }
+		public event EventHandler<SetActiveInputApiEventArgs> OnSetActiveInput;
+		public event EventHandler<SetScalingModeEventArgs> OnSetScalingMode;
+		
+		public void SetPowerFeedback(bool isPowered)
+		{
+			IsPowered = isPowered;
+		}
 
-		public SimplDisplaySetActiveInputCallback SetActiveInputCallback{ get; set; }
+		public void SetActiveInputFeedback(int? address)
+		{
+			ActiveInput = address;
+		}
 
-		public SimplDisplaySetScalingModeCallback SetScalingModeCallback{ get; set; }
+		public void SetScalingModeFeedback(eScalingMode mode)
+		{
+			ScalingMode = mode;
+		}
 
 		#endregion
 
@@ -59,7 +72,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public bool IsPowered
 		{
 			get { return m_IsPowered; }
-			set
+			private set
 			{
 				if (value == m_IsPowered)
 					return;
@@ -78,7 +91,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public int? ActiveInput
 		{
 			get { return m_ActiveInput; }
-			set
+			private set
 			{
 				if (value == m_ActiveInput)
 					return;
@@ -102,7 +115,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public eScalingMode ScalingMode
 		{
 			get { return m_ScalingMode; }
-			set
+			private set
 			{
 				if (value == m_ScalingMode)
 					return;
@@ -135,11 +148,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
-			PowerOnCallback = null;
-			PowerOffCallback = null;
-			SetActiveInputCallback = null;
-			SetScalingModeCallback = null;
-
 			base.DisposeFinal(disposing);
 		}
 
@@ -150,9 +158,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void PowerOn()
 		{
-			SimplDisplayPowerOnCallback handler = PowerOnCallback;
-			if (handler != null)
-				handler(this);
+			OnSetPower.Raise(this, new SetPowerApiEventArgs(true));
 
 			if (Trust)
 				IsPowered = true;
@@ -163,9 +169,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public void PowerOff()
 		{
-			SimplDisplayPowerOffCallback handler = PowerOffCallback;
-			if (handler != null)
-				handler(this);
+			OnSetPower.Raise(this, new SetPowerApiEventArgs(false));
 
 			if (Trust)
 				IsPowered = false;
@@ -177,9 +181,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <param name="address"></param>
 		public void SetActiveInput(int address)
 		{
-			SimplDisplaySetActiveInputCallback handler = SetActiveInputCallback;
-			if (handler != null)
-				handler(this, address);
+			OnSetActiveInput.Raise(this, new SetActiveInputApiEventArgs(address));
 
 			if (Trust)
 				ActiveInput = address;
@@ -191,9 +193,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <param name="mode"></param>
 		public void SetScalingMode(eScalingMode mode)
 		{
-			SimplDisplaySetScalingModeCallback handler = SetScalingModeCallback;
-			if (handler != null)
-				handler(this, mode);
+			OnSetScalingMode.Raise(this, new SetScalingModeEventArgs(mode));
 
 			if (Trust)
 				ScalingMode = mode;

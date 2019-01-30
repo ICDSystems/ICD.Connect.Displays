@@ -75,11 +75,27 @@
     <Compile Include="Devices\Simpl\SimplDisplaySettings.cs" />
     <Compile Include="Devices\Simpl\SimplDisplayWithAudio.cs" />
     <Compile Include="Devices\Simpl\SimplDisplayWithAudioSettings.cs" />
+    <Compile Include="EventArgs\SetActiveInputApiEventArgs.cs" />
+    <Compile Include="EventArgs\SetMuteApiEventArgs.cs" />
+    <Compile Include="EventArgs\SetMuteToggleApiEventArgs.cs" />
+    <Compile Include="EventArgs\SetPowerApiEventArgs.cs" />
+    <Compile Include="EventArgs\SetScalingModeEventArgs.cs" />
+    <Compile Include="EventArgs\SetVolumeApiEventArgs.cs" />
+    <Compile Include="EventArgs\SetVolumeIncrementApiEventArgs.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SPlusInterfaces\AbstractSPlusDisplayShim.cs" />
-    <Compile Include="SPlusInterfaces\SPlusDisplayShim.cs" />
-    <Compile Include="SPlusInterfaces\SPlusDisplayWithAudioShim.cs" />
+    <Compile Include="Proxy\AbstractProxySimplDisplay.cs" />
+    <Compile Include="Proxy\AbstractProxySimplDisplaySettings.cs" />
+    <Compile Include="Proxy\IProxySimplDisplaySettings.cs" />
+    <Compile Include="Proxy\IProxySimplDisplayWithAudioSettings.cs" />
+    <Compile Include="Proxy\ProxySimplDisplay.cs" />
+    <Compile Include="Proxy\ProxySimplDisplaySettings.cs" />
+    <Compile Include="Proxy\ProxySimplDisplayWithAudio.cs" />
+    <Compile Include="Proxy\ProxySimplDisplayWithAudioSettings.cs" />
+    <Compile Include="Proxy\SPlusDisplayApi.cs" />
+    <Compile Include="Shims\AbstractSPlusDisplayShim.cs" />
+    <Compile Include="Shims\SPlusDisplayShim.cs" />
+    <Compile Include="Shims\SPlusDisplayWithAudioShim.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

@@ -1,40 +1,32 @@
-﻿using ICD.Connect.Devices.Simpl;
+﻿using System;
+using ICD.Connect.API.Attributes;
+using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Displays.SPlus.EventArgs;
+using ICD.Connect.Displays.SPlus.Proxy;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public delegate void SimplDisplayPowerOnCallback(ISimplDisplay sender);
-
-	public delegate void SimplDisplayPowerOffCallback(ISimplDisplay sender);
-
-	public delegate void SimplDisplaySetActiveInputCallback(ISimplDisplay sender, int address);
-
-	public delegate void SimplDisplaySetScalingModeCallback(ISimplDisplay sender, eScalingMode scalingMode);
-
-	public interface ISimplDisplay : ISimplDevice, IDisplay
+	public interface ISimplDisplay : ISimplDevice
 	{
-		SimplDisplayPowerOnCallback PowerOnCallback { get; set; }
 
-		SimplDisplayPowerOffCallback PowerOffCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_POWER, SPlusDisplayApi.EVENT_SET_POWER_HELP)]
+		event EventHandler<SetPowerApiEventArgs> OnSetPower;
 
-		SimplDisplaySetActiveInputCallback SetActiveInputCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_ACTIVE_INPUT, SPlusDisplayApi.EVENT_SET_ACTIVE_INPUT_HELP)]
+		event EventHandler<SetActiveInputApiEventArgs> OnSetActiveInput;
 
-		SimplDisplaySetScalingModeCallback SetScalingModeCallback { get; set; }
+		[ApiEvent(SPlusDisplayApi.EVENT_SET_SCALING_MODE, SPlusDisplayApi.EVENT_SET_SCALING_MODE_HELP)]
+		event EventHandler<SetScalingModeEventArgs> OnSetScalingMode;
 
-		/// <summary>
-		/// Gets the powered state.
-		/// </summary>
-		new bool IsPowered { get; set; }
+		[ApiMethod(SPlusDisplayApi.METHOD_SET_POWER_FEEDBACK, SPlusDisplayApi.METHOD_SET_POWER_FEEDBACK_HELP)]
+		void SetPowerFeedback(bool isPowered);
 
-		/// <summary>
-		/// Gets the active input.
-		/// </summary>
-		new int? ActiveInput { get; set; }
+		[ApiMethod(SPlusDisplayApi.METHOD_SET_ACTIVE_INPUT_FEEDBACK, SPlusDisplayApi.METHOD_SET_ACTIVE_INPUT_FEEDBACK_HELP)]
+		void SetActiveInputFeedback(int? address);
 
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		new eScalingMode ScalingMode { get; set; }
+		[ApiMethod(SPlusDisplayApi.METHOD_SET_SCALING_MODE_FEEDBACK, SPlusDisplayApi.METHOD_SET_SCALING_MODE_FEEDBACK_HELP)]
+		void SetScalingModeFeedback(eScalingMode mode);
 	}
 }
