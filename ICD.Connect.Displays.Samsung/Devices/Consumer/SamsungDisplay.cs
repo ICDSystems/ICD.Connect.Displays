@@ -247,12 +247,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			if (!Trust)
 				return;
 
-			string command = args.Data.Serialize();
-
-			command = command.TrimEnd('\r');
-
-			// Remove the checksum
-			command = command.Substring(0, command.Length - 1);
+			string command = RemoveCheckSum(args.Data.Serialize());
 
 			switch (command)
 			{
