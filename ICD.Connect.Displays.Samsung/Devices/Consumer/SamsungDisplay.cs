@@ -321,6 +321,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			if (SerialQueue != null)
+				SerialQueue.EnqueuePriority(args.Data, 0);
 		}
 
 		/// <summary>
