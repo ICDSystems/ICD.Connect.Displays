@@ -320,8 +320,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
-			if (SerialQueue != null)
+			var command = StringUtils.ToHexLiteral(args.Data.Serialize());
+			Log(eSeverity.Error, "Command {0} timed out.", command);
+
+
+			if (SerialQueue == null)
+				return;
+
+			//Re-queue power on or input select commands that fail
+            if( command == POWER_ON 
+				|| command == INPUT_HDMI_1 
+				|| command == INPUT_HDMI_2 
+				|| command == INPUT_HDMI_3 
+				|| command == INPUT_HDMI_4)  
 				SerialQueue.EnqueuePriority(args.Data, 0);
 		}
 
