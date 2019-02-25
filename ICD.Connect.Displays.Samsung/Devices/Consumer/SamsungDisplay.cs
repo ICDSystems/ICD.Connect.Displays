@@ -24,7 +24,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		public const string SUCCESS = RETURN + "\xF1";
 		public const string FAILURE = RETURN + "\xFF";
 
-		private const string FIRST_COMMAND_SUFFIX = "\r";
+		private const char FIRST_COMMAND_SUFFIX = '\r';
 
 		private const string POWER_ON = "\x08\x22\x00\x00\x00\x02";
 		private const string POWER_OFF = "\x08\x22\x00\x00\x00\x01";
@@ -320,20 +320,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			var command = StringUtils.ToHexLiteral(args.Data.Serialize());
+			var command = RemoveCheckSum(args.Data.Serialize());
 			Log(eSeverity.Error, "Command {0} timed out.", command);
 
 
 			if (SerialQueue == null)
 				return;
 
-			//Re-queue power on or input select commands that fail
-            if( command == POWER_ON 
-				|| command == INPUT_HDMI_1 
-				|| command == INPUT_HDMI_2 
-				|| command == INPUT_HDMI_3 
-				|| command == INPUT_HDMI_4)  
-				SerialQueue.EnqueuePriority(args.Data, 0);
+			// Re-queue power on or input select commands that fail
+			// Remove first command suffix from power command
+			if (command == POWER_ON)
+				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize().Trim(FIRST_COMMAND_SUFFIX)), 0);
+			else if (s_InputMap.ContainsValue(command))
+				SerialQueue.EnqueuePriority(args.Data, 1);
 		}
 
 		/// <summary>
