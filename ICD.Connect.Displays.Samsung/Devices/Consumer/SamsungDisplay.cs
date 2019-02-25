@@ -86,7 +86,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 10 * 1000;
+			queue.Timeout = 2500; // 2.5 Second Timeout
 
 			SetSerialQueue(queue);
 		}
