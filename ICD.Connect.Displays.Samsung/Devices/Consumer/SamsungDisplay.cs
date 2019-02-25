@@ -323,7 +323,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				return;
 
 			// Re-queue power on or input select commands that fail
-			// Remove first command suffix from power command
+			// Remove first command suffix from power command - some models won't answer this if already on
 			if (command == POWER_ON)
 				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize().Trim(FIRST_COMMAND_SUFFIX)), 0);
 			else if (s_InputMap.ContainsValue(command))
