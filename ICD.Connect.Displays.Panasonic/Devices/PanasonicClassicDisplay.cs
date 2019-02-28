@@ -308,7 +308,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					break;
 
 				case "QAV":
-					string volume = ExtractParameter(response, 1);
+					string volume = ExtractParameter(response, 3);
 					Volume = int.Parse(volume);
 					IsMuted = false;
 					break;
