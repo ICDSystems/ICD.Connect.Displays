@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Misc.CrestronPro.Extensions;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.CrestronConnected;
@@ -545,19 +546,19 @@ namespace ICD.Connect.Displays.CrestronPro
 				case RoomViewConnectedDisplay.PowerOnFeedbackEventId:
 				case RoomViewConnectedDisplay.PowerOffFeedbackEventId:
 				case RoomViewConnectedDisplay.PowerStatusFeedbackEventId:
-					IsPowered = m_Display.PowerOnFeedback.BoolValue;
+					IsPowered = m_Display.PowerOnFeedback.GetBoolValueOrDefault();
 					break;
 
 				case RoomViewConnectedDisplay.VolumeUpFeedbackEventId:
 				case RoomViewConnectedDisplay.VolumeDownFeedbackEventId:
 				case RoomViewConnectedDisplay.VolumeFeedbackEventId:
 					Volume = MathUtils.MapRange(0, ushort.MaxValue, VolumeDeviceMin, VolumeDeviceMax,
-					                            m_Display.VolumeFeedback.UShortValue);
+					                            m_Display.VolumeFeedback.GetUShortValueOrDefault());
 					break;
 
 				case RoomViewConnectedDisplay.MuteOnFeedbackEventId:
 				case RoomViewConnectedDisplay.MuteOffFeedbackEventId:
-					IsMuted = m_Display.MuteOnFeedback.BoolValue;
+					IsMuted = m_Display.MuteOnFeedback.GetBoolValueOrDefault();
 					break;
 
 				case RoomViewConnectedDisplay.SourceSelectFeedbackEventId:
@@ -565,7 +566,7 @@ namespace ICD.Connect.Displays.CrestronPro
 					KeyValuePair<uint, BoolOutputSig> active;
 					bool any =
 						(m_Display.SourceSelectFeedbackSigs as IEnumerable<KeyValuePair<uint, BoolOutputSig>>)
-							.TryFirst(kvp => kvp.Value.BoolValue, out active);
+							.TryFirst(kvp => kvp.Value.GetBoolValueOrDefault(), out active);
 					ActiveInput = any ? (int?)active.Key : null;
 					break;
 			}
