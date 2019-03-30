@@ -206,12 +206,19 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (!IsPowered)
 				return;
-			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
+
+			// Set the volume
+			float min = this.GetVolumeSafetyOrDeviceMin();
+			float max = this.GetVolumeSafetyOrDeviceMax();
+
+			raw = MathUtils.Clamp(raw, min, max);
 			VolumeSetRawFinal(raw);
 
-			VolumePercent = MathUtils.MapRange(this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax(), 
-											   0.0f, 1.0f,
-			                                   raw);
+			// Update the volume percentage
+			min = this.GetVolumeSafetyOrDeviceMin();
+			max = this.GetVolumeSafetyOrDeviceMax();
+
+			VolumePercent = Math.Abs(min - max) < 0.01f ? 1.0f : MathUtils.MapRange(min, max,  0.0f, 1.0f, raw);
 		}
 
 		/// <summary>
