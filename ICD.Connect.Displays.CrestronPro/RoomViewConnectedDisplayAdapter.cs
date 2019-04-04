@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Misc.CrestronPro.Extensions;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.CrestronConnected;
 using ICD.Connect.Misc.CrestronPro;
+using ICD.Connect.Misc.CrestronPro.Extensions;
 #endif
 using ICD.Common.Properties;
 using ICD.Common.Utils.Services.Logging;
