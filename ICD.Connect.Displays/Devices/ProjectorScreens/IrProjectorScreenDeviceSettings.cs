@@ -8,7 +8,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 	[KrangSettings("IrProjectorScreen", typeof(IrProjectorScreenDevice))]
 	public sealed class IrProjectorScreenDeviceSettings : AbstractProjectorScreenDeviceSettings
 	{
-		private const string IR_PORT_ID_ELEMENT = "IrPort";
+		private const string IR_PORT_ID_ELEMENT = "Port";
 		
 		private const string DISPLAY_ON_COMMAND_ELEMENT = "DisplayOnCommand";
 		private const string DISPLAY_OFF_COMMAND_ELEMENT = "DisplayOffCommand";
