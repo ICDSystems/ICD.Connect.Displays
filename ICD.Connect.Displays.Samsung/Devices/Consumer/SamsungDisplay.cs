@@ -24,8 +24,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		public const string SUCCESS = RETURN + "\xF1";
 		public const string FAILURE = RETURN + "\xFF";
 
-		private const char FIRST_COMMAND_SUFFIX = '\r';
-
 		private const string POWER_ON = "\x08\x22\x00\x00\x00\x02";
 		private const string POWER_OFF = "\x08\x22\x00\x00\x00\x01";
 		private const string POWER_TOGGLE = "\x08\x22\x00\x00\x00\x00";
@@ -146,7 +144,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <returns></returns>
 		private static bool VolumeComparer(string commandA, string commandB)
 		{
-			return commandA.StartsWith(VOLUME) && commandB.StartsWith(VOLUME);
+			return commandA.StartsWith(VOLUME, StringComparison.Ordinal) && commandB.StartsWith(VOLUME, StringComparison.Ordinal);
 		}
 
 		public override void VolumeUpIncrement()
@@ -226,13 +224,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
-			bool power = data == POWER_ON;
-
 			data += GetCheckSum(data);
-
-			// The Samsung requires a specific suffix after the first command.
-			if (power)
-				data += FIRST_COMMAND_SUFFIX;
 
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
 		}
@@ -276,7 +268,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 					return;
 			}
 
-			if (command.StartsWith(VOLUME))
+			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
 				Volume = (byte)command[command.Length - 1];
 				return;
@@ -316,16 +308,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			var command = RemoveCheckSum(args.Data.Serialize());
-			Log(eSeverity.Error, "Command {0} timed out.", command);
+			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(command));
 
 
 			if (SerialQueue == null)
 				return;
 
 			// Re-queue power on or input select commands that fail
-			// Remove first command suffix from power command - some models won't answer this if already on
 			if (command == POWER_ON)
-				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize().Trim(FIRST_COMMAND_SUFFIX)), 0);
+				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize()), 0);
 			else if (s_InputMap.ContainsValue(command))
 				SerialQueue.EnqueuePriority(args.Data, 1);
 		}
@@ -357,7 +348,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			}
 
 			// Volume
-			if (command.StartsWith(VOLUME))
+			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
 				IsPowered = true;
 				Volume = command[5];
@@ -392,14 +383,16 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		private void ParseError(SerialResponseEventArgs args)
 		{
 			// Only get error responses when powered
-			IsPowered = true;
+			//IsPowered = true;
 
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			string command = StringUtils.ToHexLiteral(args.Data.Serialize());
+
+			Log(eSeverity.Error, "Command {0} failed.", command);
 		}
 
 		private void BufferOnJunkData(object sender, EventArgs eventArgs)
 		{
-			IsPowered = true;
+			//IsPowered = true;
 		}
 
 		#endregion
