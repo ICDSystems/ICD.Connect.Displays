@@ -18,6 +18,8 @@ namespace ICD.Connect.Displays.Sony
 		{
 			if (networkProperties == null)
 				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 20060);
 		}
 
 		/// <summary>
