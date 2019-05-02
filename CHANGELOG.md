@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - PanasonicClassicDisplay driver queries power and input states
+
 ## [11.1.2] - 2019-02-28
 ### Changed
  - Fixed Panasonic Classic volume feedback parsing

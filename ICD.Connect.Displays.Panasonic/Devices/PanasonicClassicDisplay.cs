@@ -46,6 +46,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		private const string INPUT_PC = "\x02IMS:PC1\x03";
 		private const string INPUT_VIDEO = "\x02IMS:VD1\x03";
 		private const string INPUT_USB = "\x02IMS:UD1\x03";
+		private const string QUERY_INPUT = "\x02QMI\x03";
 
 		#endregion
 
@@ -117,9 +118,12 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			base.QueryState();
 
+			SendNonFormattedCommand(QUERY_POWER);
+
 			if (!IsPowered)
 				return;
 
+			SendNonFormattedCommand(QUERY_INPUT);
 			SendNonFormattedCommand(QUERY_VOLUME);
 			SendNonFormattedCommand(QUERY_MUTE);
 		}
