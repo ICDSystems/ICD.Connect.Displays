@@ -69,6 +69,7 @@
     <Compile Include="Devices\PanasonicDisplay.cs" />
     <Compile Include="Devices\PanasonicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Panasonic_Classic_214105_C146_R1_7584EF1_SerialCommandList_user_Ver_1_01_en.pdf" />
     <None Include="Panasonic_Classic_IP_Control_CommandRef.pdf" />
     <None Include="Panasonic_Classic_IP_Control_QuickRef.pdf" />
     <None Include="Properties\ControlSystem.cfg" />
