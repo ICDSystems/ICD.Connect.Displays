@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.1.2] - 2019-02-28
+### Changed
+ - Fixed Panasonic Classic volume feedback parsing
+
 ## [11.1.1] - 2019-01-28
 ### Changed
  - Failing gracefully when no SerialQueue is assigned to displays

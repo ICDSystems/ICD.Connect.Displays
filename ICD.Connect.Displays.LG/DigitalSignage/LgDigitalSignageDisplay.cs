@@ -79,12 +79,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		{
 			base.ConfigurePort(port);
 
-			if (port != null)
-			{
-				port.DebugRx = eDebugMode.MixedAsciiHex;
-				port.DebugTx = eDebugMode.MixedAsciiHex;
-			}
-
 			ISerialBuffer buffer = new LgDigitalSignageSerialBuffer();
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
