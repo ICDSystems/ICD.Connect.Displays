@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added telemetry features to displays
 
+## [11.1.3] - 2019-05-16
+### Changed
+ - PanasonicClassicDisplay driver queries power and input states
+ - PanasonicClassicDisplay driver parses volume feedback
+
 ## [11.1.2] - 2019-02-28
 ### Changed
  - Fixed Panasonic Classic volume feedback parsing
