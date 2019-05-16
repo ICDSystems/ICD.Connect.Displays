@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -40,12 +41,13 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		private const string QUERY_VOLUME = "\x02QAV\x03";
 
 		private const string INPUT_TOGGLE = "\x02IMS\x03";
-		private const string INPUT_HDMI1 = "\x02IMS:HM1\x03";
-		private const string INPUT_HDMI2 = "\x02IMS:HM2\x03";
-		private const string INPUT_DVI = "\x02IMS:DV1\x03";
-		private const string INPUT_PC = "\x02IMS:PC1\x03";
-		private const string INPUT_VIDEO = "\x02IMS:VD1\x03";
-		private const string INPUT_USB = "\x02IMS:UD1\x03";
+		private const string INPUT_SET_TEMPLATE = "\x02IMS:{0}\x03";
+		private const string INPUT_HDMI1 = "HM1";
+		private const string INPUT_HDMI2 = "HM2";
+		private const string INPUT_DVI = "DV1";
+		private const string INPUT_PC = "PC1";
+		private const string INPUT_VIDEO = "VD1";
+		private const string INPUT_USB = "UD1";
 		private const string QUERY_INPUT = "\x02QMI\x03";
 
 		#endregion
@@ -195,7 +197,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (!IsPowered && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
 				return;
-			SendNonFormattedCommand(s_InputMap[address]);
+			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
 			m_TargetInput = address;
 		}
 
@@ -223,8 +225,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		private void QueryPower()
 		{
-			var input = ActiveInput == null || ActiveInput.Value == 0 ? 1 : ActiveInput.Value;
-			var command = s_InputMap[input];
+			var command = string.Format(QUERY_POWER);
 			SendNonFormattedCommandPriority(command, 2);
 		}
 
@@ -306,6 +307,11 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			switch (command)
 			{
+				case "QPW":
+					string powered = ExtractParameter(response, 1);
+					IsPowered = powered == "1";
+					break;
+
 				case "QAM":
 					string muted = ExtractParameter(response, 1);
 					IsMuted = muted == "1";
@@ -315,6 +321,19 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					string volume = ExtractParameter(response, 3);
 					Volume = int.Parse(volume);
 					IsMuted = false;
+					break;
+
+				case "QMI":
+					string inputParam = ExtractParameter(response, 3);
+
+					int input;
+					bool valid = s_InputMap.TryGetKey(inputParam, out input);
+
+					if (valid)
+						ActiveInput = input;
+					else
+						ActiveInput = null;
+
 					break;
 
 				case "IMS":
