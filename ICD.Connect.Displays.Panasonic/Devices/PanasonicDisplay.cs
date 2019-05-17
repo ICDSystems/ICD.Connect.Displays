@@ -312,38 +312,36 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         {
 	        string response = args.Response;
             string command = ExtractCommand(response);
-
-			int newVol;
-            if (StringUtils.TryParse(command, out newVol))
-            {
-				Volume = newVol;
-                IsMuted = false;
-            }
-            else
-            {
-                switch (command)
-                {
-                    case "PON":
-                        IsPowered = true;
-                        break;
-                    case "POF":
-                        IsPowered = false;
-                        break;
-                    case "AMT":
-                        string param = ExtractParameter(response, 1);
-                        IsMuted = param == "1";
-                        break;
-                    case "IIS":
-                        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
-                        break;
-                    case "VSE":
-                        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
-                        break;
-					default:
-						Log(eSeverity.Error, "Failed to parse {0}", args.Response);
-		                break;
-                }
-            }
+	        switch (command)
+	        {
+		        case "PON":
+			        IsPowered = true;
+			        break;
+		        case "POF":
+			        IsPowered = false;
+			        break;
+		        case "AMT":
+			        string param = ExtractParameter(response, 1);
+			        IsMuted = param == "1";
+			        break;
+		        case "IIS":
+			        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
+			        break;
+		        case "VSE":
+			        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
+			        break;
+		        case "QAV":
+			        float newVol;
+			        var parameter = ExtractParameter(response, 3);
+			        if (StringUtils.TryParse(parameter, out newVol))
+				        Volume = newVol;
+			        else
+				        throw new InvalidOperationException(string.Format("Unable to parse {0} as volume float", parameter));
+			        break;
+		        default:
+			        Log(eSeverity.Error, "Failed to parse {0}", args.Response);
+			        break;
+	        }
         }
 
         /// <summary>

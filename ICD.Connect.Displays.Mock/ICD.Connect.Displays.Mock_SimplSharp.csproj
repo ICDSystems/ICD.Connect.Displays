@@ -98,6 +98,10 @@
       <Project>{B0C0CA1C-FA55-4BEA-8A8B-EDB2141C523E}</Project>
       <Name>ICD.Connect.Routing_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Telemetry\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
+      <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
+      <Name>ICD.Connect.Telemetry_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
       <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
       <Name>ICD.Connect.Displays</Name>
