@@ -69,6 +69,7 @@
     <Compile Include="Devices\PanasonicDisplay.cs" />
     <Compile Include="Devices\PanasonicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Panasonic_Classic_214105_C146_R1_7584EF1_SerialCommandList_user_Ver_1_01_en.pdf" />
     <None Include="Panasonic_Classic_IP_Control_CommandRef.pdf" />
     <None Include="Panasonic_Classic_IP_Control_QuickRef.pdf" />
     <None Include="Properties\ControlSystem.cfg" />
@@ -89,6 +90,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.Network\ICD.Connect.Protocol.Network_SimplSharp.csproj">
       <Project>{5ED52F05-EA6C-4FC5-8AA0-9B9727F6AECD}</Project>
       <Name>ICD.Connect.Protocol.Network_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Telemetry\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
+      <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
+      <Name>ICD.Connect.Telemetry_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
       <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>

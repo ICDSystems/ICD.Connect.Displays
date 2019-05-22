@@ -67,6 +67,8 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			}
 		}
 
+		public float VolumePercent{get { return Volume; }}
+
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
