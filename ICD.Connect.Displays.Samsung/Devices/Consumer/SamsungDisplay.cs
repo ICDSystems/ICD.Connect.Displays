@@ -375,6 +375,13 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			else if (s_InputMap.ContainsValue(command))
 			{
 				m_InputRetries++;
+
+				// If input commands hit a specified limit, enqueue a power on command at higher priority to make sure the display is actually powered on)
+				if (m_InputRetries > MAX_RETRIES / 2)
+				{
+					SendNonFormattedCommand(POWER_ON, CommandComparer, PRIORITY_POWER_RETRY);
+				}
+
 				if (m_InputRetries > MAX_RETRIES)
 				{
 					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
