@@ -19,6 +19,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 	/// </summary>
 	public sealed class SamsungDisplay : AbstractDisplayWithAudio<SamsungDisplaySettings>
 	{
+		private const int MAX_RETRIES = 50;
+
 		private const string RETURN = "\x03\x0C";
 
 		public const string SUCCESS = RETURN + "\xF1";
@@ -82,6 +84,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{3, INPUT_HDMI_3},
 			{4, INPUT_HDMI_4}
 		};
+
+		private int m_PowerRetries;
+		private int m_InputRetries;
 
 		#region Methods
 
@@ -357,9 +362,27 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 			// Re-queue power on or input select commands that fail
 			if (command == POWER_ON)
+			{
+				m_PowerRetries++;
+				if (m_PowerRetries > MAX_RETRIES)
+				{
+					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
+					m_PowerRetries = 0;
+					return;
+				}
 				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize()), PRIORITY_POWER_RETRY);
+			}
 			else if (s_InputMap.ContainsValue(command))
+			{
+				m_InputRetries++;
+				if (m_InputRetries > MAX_RETRIES)
+				{
+					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
+					m_PowerRetries = 0;
+					return;
+				}
 				SerialQueue.EnqueuePriority(args.Data, PRIORITY_INPUT_RETRY);
+			}
 		}
 
 		/// <summary>
@@ -377,6 +400,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				ActiveInput = s_InputMap.ContainsValue(command)
 					            ? s_InputMap.GetKey(command)
 					            : (int?)null;
+
+				m_InputRetries = 0;
+
 				return;
 			}
 
@@ -401,9 +427,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{
 				case POWER_ON:
 					IsPowered = true;
+					m_PowerRetries = 0;
 					return;
 				case POWER_OFF:
 					IsPowered = false;
+					m_PowerRetries = 0;
 					return;
 				case MUTE_ON:
 					IsPowered = true;
@@ -422,9 +450,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			// Only get error responses when powered
-			//IsPowered = true;
-
 			string command = StringUtils.ToHexLiteral(args.Data.Serialize());
 
 			Log(eSeverity.Error, "Command {0} failed.", command);
