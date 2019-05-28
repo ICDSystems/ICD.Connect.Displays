@@ -111,6 +111,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		[PublicAPI]
 		public override void PowerOff()
 		{
+			if(SerialQueue == null)
+				return;
+			Log(eSeverity.Debug, "Display Power Off while {0} commands were enqueued. Commands dropped.", SerialQueue.CommandCount);
+			SerialQueue.Clear();
+
 			SendNonFormattedCommand(POWER_OFF, PRIORITY_POWER_INITIAL);
 		}
 
