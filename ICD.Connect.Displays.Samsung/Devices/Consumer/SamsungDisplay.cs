@@ -46,6 +46,13 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		private const string ASPECT_4_X3 = "\x08\x22\x0B\x0A\x01\x04";
 		private const string ASPECT_SCREEN_FIT = "\x08\x22\x0B\x0A\x01\x05";
 
+		private const int PRIORITY_POWER_RETRY = 1;
+		private const int PRIORITY_POWER_INITIAL = 2;
+		private const int PRIORITY_INPUT_RETRY = 3;
+		private const int PRIORITY_INPUT_INITIAL = 4;
+		private const int PRIORITY_DEFAULT = int.MaxValue;
+
+
 		/// <summary>
 		/// Maps scaling mode to command.
 		/// </summary>
@@ -95,7 +102,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		[PublicAPI]
 		public override void PowerOn()
 		{
-			SendNonFormattedCommand(POWER_ON);
+			SendNonFormattedCommand(POWER_ON, PRIORITY_POWER_INITIAL);
 		}
 
 		/// <summary>
@@ -104,13 +111,13 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		[PublicAPI]
 		public override void PowerOff()
 		{
-			SendNonFormattedCommand(POWER_OFF);
+			SendNonFormattedCommand(POWER_OFF, PRIORITY_POWER_INITIAL);
 		}
 
 		[PublicAPI]
 		public void PowerToggle()
 		{
-			SendNonFormattedCommand(POWER_TOGGLE);
+			SendNonFormattedCommand(POWER_TOGGLE, PRIORITY_POWER_INITIAL);
 		}
 
 		public override void MuteOn()
@@ -165,7 +172,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void SetActiveInput(int address)
 		{
-			SendNonFormattedCommand(s_InputMap.GetValue(address));
+			SendNonFormattedCommand(s_InputMap.GetValue(address), PRIORITY_INPUT_INITIAL);
 		}
 
 		/// <summary>
@@ -211,9 +218,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// Calculates the checksum and queues the data to be sent to the physical display.
 		/// </summary>
 		/// <param name="data"></param>
+		/// <param name="priority"></param>
+		private void SendNonFormattedCommand(string data, int priority)
+		{
+			SendNonFormattedCommand(data, (a, b) => false, priority);
+		}
+
+		/// <summary>
+		/// Calculates the checksum and queues the data to be sent to the physical display.
+		/// </summary>
+		/// <param name="data"></param>
 		private void SendNonFormattedCommand(string data)
 		{
-			SendNonFormattedCommand(data, (a, b) => false);
+			SendNonFormattedCommand(data, PRIORITY_DEFAULT);
 		}
 
 		/// <summary>
@@ -224,9 +241,21 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
+			SendNonFormattedCommand(data, comparer,PRIORITY_DEFAULT);
+		}
+
+		/// <summary>
+		/// Calculates the checksum and queues the data to be sent to the physical display.
+		/// Replaces an earlier command if found via the comparer.
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="comparer"></param>
+		/// <param name="priority"></param>
+		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer, int priority)
+		{
 			data += GetCheckSum(data);
 
-			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
+			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()), priority);
 		}
 
 		/// <summary>
@@ -316,9 +345,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 			// Re-queue power on or input select commands that fail
 			if (command == POWER_ON)
-				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize()), 0);
+				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize()), PRIORITY_POWER_RETRY);
 			else if (s_InputMap.ContainsValue(command))
-				SerialQueue.EnqueuePriority(args.Data, 1);
+				SerialQueue.EnqueuePriority(args.Data, PRIORITY_INPUT_RETRY);
 		}
 
 		/// <summary>
