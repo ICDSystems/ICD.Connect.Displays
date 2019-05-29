@@ -475,16 +475,16 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <returns></returns>
 		private static bool CommandComparer(string commandA, string commandB)
 		{
-			if (commandA.StartsWith(POWER_PREFIX) && commandB.StartsWith(POWER_PREFIX))
+			if (commandA.StartsWith(POWER_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(POWER_PREFIX, StringComparison.Ordinal))
 				return true;
 
-			if (commandA.StartsWith(MUTE_PREFIX) && commandB.StartsWith(MUTE_PREFIX))
+			if (commandA.StartsWith(MUTE_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(MUTE_PREFIX, StringComparison.Ordinal))
 				return true;
 
-			if (commandA.StartsWith(INPUT_PREFIX) && commandB.StartsWith(INPUT_PREFIX))
+			if (commandA.StartsWith(INPUT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(INPUT_PREFIX, StringComparison.Ordinal))
 				return true;
 
-			if (commandA.StartsWith(ASPECT_PREFIX) && commandB.StartsWith(ASPECT_PREFIX))
+			if (commandA.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal))
 				return true;
 
 			return false;
