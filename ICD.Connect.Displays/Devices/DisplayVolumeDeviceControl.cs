@@ -7,6 +7,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Console.Mute;
 using ICD.Connect.Audio.Controls.Mute;
 using ICD.Connect.Audio.Controls.Volume;
+using ICD.Connect.Audio.EventArguments;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 
@@ -19,7 +20,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Raised when the mute state changes.
 		/// </summary>
-		public event EventHandler<BoolEventArgs> OnMuteStateChanged;
+		public event EventHandler<MuteDeviceMuteStateChangedApiEventArgs> OnMuteStateChanged;
 
 		#endregion
 
@@ -160,7 +161,7 @@ namespace ICD.Connect.Displays.Devices
 
 		private void ParentOnMuteStateChanged(object sender, DisplayMuteApiEventArgs args)
 		{
-			OnMuteStateChanged.Raise(this, new BoolEventArgs(args.Data));
+			OnMuteStateChanged.Raise(this, new MuteDeviceMuteStateChangedApiEventArgs(args.Data));
 		}
 
 		#endregion
