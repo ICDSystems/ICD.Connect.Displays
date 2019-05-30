@@ -193,7 +193,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, raw);
 		}
 
 		/// <summary>
@@ -201,7 +201,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_VOLUME_UP_INCREMENT);
 		}
 
 		/// <summary>
@@ -209,7 +209,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_VOLUME_DOWN_INCREMENT);
 		}
 
 		/// <summary>
@@ -217,7 +217,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void MuteOn()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_MUTE_ON);
 		}
 
 		/// <summary>
@@ -225,7 +225,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void MuteOff()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_MUTE_OFF);
 		}
 
 		/// <summary>
@@ -233,7 +233,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public void MuteToggle()
 		{
-			throw new NotImplementedException();
+			CallMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE);
 		}
 
 		#endregion
