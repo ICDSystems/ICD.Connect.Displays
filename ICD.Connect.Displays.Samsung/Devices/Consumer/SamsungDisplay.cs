@@ -384,8 +384,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 				if (m_InputRetries > MAX_RETRIES)
 				{
-					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
-					m_PowerRetries = 0;
+					Log(eSeverity.Error, "Input Command for Samsung Display Reached Max Retries, aborting.");
+					m_InputRetries = 0;
 					return;
 				}
 				SerialQueue.EnqueuePriority(args.Data, PRIORITY_INPUT_RETRY);
