@@ -4,8 +4,8 @@ namespace ICD.Connect.Displays.DisplayLift
     {
         int? DisplayExtendRelay  { get; set; }
         int? DisplayRetractRelay { get; set; }
-        bool? LatchRelay { get; set; }
-        int? ExtendRelayHoldTime { get; set; }
-        int? RetractRelayHoldTime { get; set; }
+        bool LatchRelay { get; set; }
+        int ExtendTime { get; set; }
+        int RetractTime { get; set; }
     }
 }
