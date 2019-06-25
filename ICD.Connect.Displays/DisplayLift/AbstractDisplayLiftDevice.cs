@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
@@ -16,15 +17,18 @@ namespace ICD.Connect.Displays.DisplayLift
         where T : IDisplayLiftDeviceSettings, new()
     {
         public event EventHandler<LiftStateChangedEventArgs> OnLiftStateChanged;
-        
-        private IDisplay m_Display;
-        private int m_BootDelay;
-        private int m_CoolingDelay;
-        private eLiftState m_LiftState;
-        
+        public event EventHandler<IntEventArgs>              OnBootDelayChanged;
+        public event EventHandler<IntEventArgs>              OnCoolingDelayChanged;
+
         private readonly IcdTimer m_BootDelayTimer;
         private readonly IcdTimer m_CooldownDelayTimer;
-        
+
+        private IDisplay m_Display;
+
+        private eLiftState m_LiftState;
+        private int        m_BootDelay;
+        private int        m_CoolingDelay;
+
         public eLiftState LiftState
         {
             get { return m_LiftState; }
@@ -34,7 +38,7 @@ namespace ICD.Connect.Displays.DisplayLift
                     return;
 
                 m_LiftState = value;
-                
+
                 OnLiftStateChanged.Raise(this, new LiftStateChangedEventArgs(m_LiftState));
 
                 switch (m_LiftState)
@@ -42,21 +46,22 @@ namespace ICD.Connect.Displays.DisplayLift
                     case eLiftState.BootDelay:
                         m_BootDelayTimer.Restart(m_BootDelayTimer.Remaining);
                         break;
-                    
+
                     case eLiftState.CooldownDelay:
                         m_CooldownDelayTimer.Restart(m_CooldownDelayTimer.Remaining);
                         break;
                 }
             }
         }
-        
+
         public int BootDelay
         {
             get { return m_BootDelay; }
             set
             {
-                m_BootDelay = value; 
+                m_BootDelay = value;
                 ResetTimers();
+                OnBootDelayChanged.Raise(this, new IntEventArgs(m_BootDelay));
             }
         }
 
@@ -67,6 +72,7 @@ namespace ICD.Connect.Displays.DisplayLift
             {
                 m_BootDelay = value;
                 ResetTimers();
+                OnCoolingDelayChanged.Raise(this, new IntEventArgs(m_CoolingDelay));
             }
         }
 
@@ -91,7 +97,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
         public void ExtendLift()
         {
-            switch (LiftState) {
+            switch (LiftState)
+            {
                 case eLiftState.Extended:
                 case eLiftState.Extending:
                 case eLiftState.BootDelay:
@@ -102,11 +109,12 @@ namespace ICD.Connect.Displays.DisplayLift
                 case eLiftState.Unknown:
                     Extend();
                     return;
-                
+
                 case eLiftState.CooldownDelay:
                     m_CooldownDelayTimer.Stop();
                     m_BootDelayTimer.Restart(m_BootDelayTimer.Remaining);
                     return;
+
                 default:
                     throw new NotSupportedException("Unknown Lift State. Cannot Extend Lift.");
             }
@@ -114,7 +122,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
         public void RetractLift()
         {
-            switch (LiftState) {
+            switch (LiftState)
+            {
                 case eLiftState.Retracted:
                 case eLiftState.Retracting:
                 case eLiftState.CooldownDelay:
@@ -125,7 +134,7 @@ namespace ICD.Connect.Displays.DisplayLift
                     PowerOffDisplay();
                     LiftState = eLiftState.CooldownDelay;
                     break;
-                    
+
                 case eLiftState.Extending:
                 case eLiftState.BootDelay:
                     Retract();
@@ -135,14 +144,14 @@ namespace ICD.Connect.Displays.DisplayLift
                     throw new NotSupportedException("Unknown Lift State. Cannot Retract Lift.");
             }
         }
-        
+
         private void BootDelayTimerOnElapsed(object sender, EventArgs e)
         {
             ResetTimers();
             PowerOnDisplay();
             LiftState = eLiftState.Extended;
         }
-        
+
         private void CooldownDelayTimerOnElapsed(object sender, EventArgs e)
         {
             Retract();
@@ -155,7 +164,7 @@ namespace ICD.Connect.Displays.DisplayLift
             m_CooldownDelayTimer.Restart(m_CoolingDelay);
             m_CooldownDelayTimer.Stop();
         }
-        
+
         private void PowerOnDisplay()
         {
             //TODO: Actually power on the display
@@ -188,6 +197,7 @@ namespace ICD.Connect.Displays.DisplayLift
                     Log(eSeverity.Error, "No Display with id {0}", settings.Display);
                 }
             }
+
             m_Display = display;
 
             m_BootDelay = settings.BootDelay ?? 0;

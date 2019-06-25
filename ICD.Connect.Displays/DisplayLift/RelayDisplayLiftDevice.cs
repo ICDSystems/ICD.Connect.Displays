@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
@@ -7,18 +9,25 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings.Core;
+using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Displays.DisplayLift
 {
+    [ExternalTelemetry("Relay Display Lift Device Telemetry", typeof(RelayDisplayLiftExternalTelemetryProvider))]
     public sealed class RelayDisplayLiftDevice : AbstractDisplayLiftDevice<RelayDisplayLiftDeviceSettings>
     {
-        private bool m_LatchRelay;
-        private IRelayPort m_ExtendRelay;
-        private IRelayPort m_RetractRelay;
-        private int m_ExtendTime;
-        private int m_RetractTime;
+        public event EventHandler<BoolEventArgs> OnLatchModeChanged;
+        public event EventHandler<IntEventArgs>  OnExtendTimeChanged;
+        public event EventHandler<IntEventArgs>  OnRetractTimeChanged;
+
         private readonly IcdTimer m_ExtendTimer;
         private readonly IcdTimer m_RetractTimer;
+
+        private bool       m_LatchRelay;
+        private int        m_ExtendTime;
+        private int        m_RetractTime;
+        private IRelayPort m_ExtendRelay;
+        private IRelayPort m_RetractRelay;
 
         public RelayDisplayLiftDevice()
         {
@@ -41,26 +50,47 @@ namespace ICD.Connect.Displays.DisplayLift
         public int ExtendTime
         {
             get { return m_ExtendTime; }
-            set { m_ExtendTime = value; }
+            set
+            {
+                if (m_ExtendTime == value)
+                    return;
+
+                m_ExtendTime = value;
+                OnExtendTimeChanged.Raise(this, new IntEventArgs(m_ExtendTime));
+            }
         }
 
         public int RetractTime
         {
             get { return m_RetractTime; }
-            set { m_RetractTime = value; }
+            set
+            {
+                if (m_RetractTime == value)
+                    return;
+
+                m_RetractTime = value;
+                OnRetractTimeChanged.Raise(this, new IntEventArgs(m_RetractTime));
+            }
         }
 
         public bool LatchRelay
         {
             get { return m_LatchRelay; }
-            set { m_LatchRelay = value; }
+            set
+            {
+                if (m_LatchRelay == value)
+                    return;
+
+                m_LatchRelay = value;
+                OnLatchModeChanged.Raise(this, new BoolEventArgs(m_LatchRelay));
+            }
         }
 
         protected override bool GetIsOnlineStatus()
         {
             return true;
         }
-        
+
         protected override void Extend()
         {
             LiftState = eLiftState.Extending;
@@ -72,7 +102,7 @@ namespace ICD.Connect.Displays.DisplayLift
             {
                 ExtendUnlatched();
             }
-            
+
             m_ExtendTimer.Restart(m_ExtendTime);
         }
 
@@ -87,7 +117,7 @@ namespace ICD.Connect.Displays.DisplayLift
             {
                 RetractUnlatched();
             }
-            
+
             m_RetractTimer.Restart(m_RetractTime);
         }
 
@@ -113,10 +143,10 @@ namespace ICD.Connect.Displays.DisplayLift
                 Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
                 return;
             }
-            
-            if(m_RetractRelay.Closed)
+
+            if (m_RetractRelay.Closed)
                 m_RetractRelay.Open();
-            
+
             m_ExtendRelay.Close();
         }
 
@@ -142,36 +172,37 @@ namespace ICD.Connect.Displays.DisplayLift
                 Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
                 return;
             }
-            
-            if(m_ExtendRelay.Closed)
+
+            if (m_ExtendRelay.Closed)
                 m_ExtendRelay.Open();
-            
+
             m_RetractRelay.Close();
         }
-        
+
         #region Timer Callbacks
-        
+
         private void ExtendTimerOnElapsed(object sender, EventArgs e)
         {
             if (m_ExtendRelay == null)
                 return;
-            
-            if(!m_LatchRelay)
+
+            if (!m_LatchRelay)
                 m_ExtendRelay.Open();
 
             LiftState = eLiftState.BootDelay;
         }
+
         private void RetractTimerOnElapsed(object sender, EventArgs e)
         {
             if (m_RetractRelay == null)
                 return;
-            
-            if(!m_LatchRelay)
+
+            if (!m_LatchRelay)
                 m_RetractRelay.Open();
 
             LiftState = eLiftState.Retracted;
         }
-        
+
         #endregion
 
         #region Settings
@@ -181,7 +212,7 @@ namespace ICD.Connect.Displays.DisplayLift
             base.ApplySettingsFinal(settings, factory);
 
             m_LatchRelay = settings.LatchRelay;
-           
+
             IRelayPort extendRelay = null;
             if (settings.DisplayExtendRelay != null)
             {
@@ -194,8 +225,9 @@ namespace ICD.Connect.Displays.DisplayLift
                     Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayExtendRelay);
                 }
             }
+
             m_ExtendRelay = extendRelay;
-            
+
             IRelayPort retractRelay = null;
             if (settings.DisplayRetractRelay != null)
             {
@@ -208,6 +240,7 @@ namespace ICD.Connect.Displays.DisplayLift
                     Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayRetractRelay);
                 }
             }
+
             m_RetractRelay = retractRelay;
 
             if (!m_LatchRelay && (m_ExtendRelay == null || m_RetractRelay == null))
@@ -227,7 +260,7 @@ namespace ICD.Connect.Displays.DisplayLift
         }
 
         #endregion
-        
+
         #region Console
 
         public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
@@ -244,7 +277,7 @@ namespace ICD.Connect.Displays.DisplayLift
             foreach (IConsoleCommand cmd in RelayDisplayLiftConsole.GetConsoleCommands(this))
                 yield return cmd;
         }
-        
+
         #endregion
     }
 }
