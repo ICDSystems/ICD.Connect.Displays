@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Extensions;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings.Core;
@@ -26,9 +28,37 @@ namespace ICD.Connect.Displays.DisplayLift
             m_RetractTimer.OnElapsed += RetractTimerOnElapsed;
         }
 
+        public IRelayPort ExtendRelay
+        {
+            get { return m_ExtendRelay; }
+        }
+
+        public IRelayPort RetractRelay
+        {
+            get { return m_RetractRelay; }
+        }
+
+        public int ExtendTime
+        {
+            get { return m_ExtendTime; }
+            set { m_ExtendTime = value; }
+        }
+
+        public int RetractTime
+        {
+            get { return m_RetractTime; }
+            set { m_RetractTime = value; }
+        }
+
+        public bool LatchRelay
+        {
+            get { return m_LatchRelay; }
+            set { m_LatchRelay = value; }
+        }
+
         protected override bool GetIsOnlineStatus()
         {
-            throw new System.NotImplementedException();
+            return true;
         }
         
         protected override void Extend()
@@ -196,6 +226,25 @@ namespace ICD.Connect.Displays.DisplayLift
             settings.LatchRelay = m_LatchRelay;
         }
 
+        #endregion
+        
+        #region Console
+
+        public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+        {
+            base.BuildConsoleStatus(addRow);
+            RelayDisplayLiftConsole.BuildConsoleStatus(this, addRow);
+        }
+
+        public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+        {
+            foreach (IConsoleCommand cmd in base.GetConsoleCommands())
+                yield return cmd;
+
+            foreach (IConsoleCommand cmd in RelayDisplayLiftConsole.GetConsoleCommands(this))
+                yield return cmd;
+        }
+        
         #endregion
     }
 }

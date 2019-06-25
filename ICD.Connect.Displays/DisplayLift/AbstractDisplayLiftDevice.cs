@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Extensions;
 using ICD.Connect.Displays.Devices;
@@ -47,6 +48,36 @@ namespace ICD.Connect.Displays.DisplayLift
                         break;
                 }
             }
+        }
+        
+        public int BootDelay
+        {
+            get { return m_BootDelay; }
+            set
+            {
+                m_BootDelay = value; 
+                ResetTimers();
+            }
+        }
+
+        public int CoolingDelay
+        {
+            get { return m_CoolingDelay; }
+            set
+            {
+                m_BootDelay = value;
+                ResetTimers();
+            }
+        }
+
+        public long BootDelayRemaining
+        {
+            get { return m_BootDelayTimer.Remaining; }
+        }
+
+        public long CoolingDelayRemaining
+        {
+            get { return m_CooldownDelayTimer.Remaining; }
         }
 
         protected AbstractDisplayLiftDevice()
@@ -180,21 +211,32 @@ namespace ICD.Connect.Displays.DisplayLift
         }
 
         #endregion
-    }
 
-    public enum eLiftState
-    {
-        Unknown,
-        Extended,
-        Extending,
-        BootDelay,
-        Retracted,
-        Retracting,
-        CooldownDelay
-    }
+        #region Console
 
-    public sealed class LiftStateChangedEventArgs : GenericEventArgs<eLiftState>
-    {
-        public LiftStateChangedEventArgs(eLiftState data) : base(data) { }
+        public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+        {
+            foreach (IConsoleCommand command in base.GetConsoleCommands())
+                yield return command;
+
+            foreach (IConsoleCommand command in AbstractDisplayLiftConsole.GetConsoleCommands(this))
+                yield return command;
+        }
+
+        public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+        {
+            foreach (IConsoleNodeBase node in base.GetConsoleNodes())
+                yield return node;
+
+            foreach (IConsoleNodeBase node in AbstractDisplayLiftConsole.GetConsoleNodes(this))
+                yield return node;
+        }
+
+        public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+        {
+            AbstractDisplayLiftConsole.BuildConsoleStatus(this, addRow);
+        }
+
+        #endregion
     }
 }
