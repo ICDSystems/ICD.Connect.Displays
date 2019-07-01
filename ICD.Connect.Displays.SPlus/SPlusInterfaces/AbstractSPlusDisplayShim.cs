@@ -2,6 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.SPlusShims;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
@@ -146,8 +147,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		public void PowerOn()
 		{
 			TOriginator originator = Originator;
-			if (originator != null)
-				originator.PowerOn();
+			if (originator == null)
+				return;
+
+			IPowerDeviceControl powerControl = originator.Controls.GetControl<IPowerDeviceControl>();
+			if(powerControl == null)
+				return;
+			
+			powerControl.PowerOn();
 		}
 
 		/// <summary>
@@ -157,8 +164,14 @@ namespace ICD.Connect.Displays.SPlus.SPlusInterfaces
 		public void PowerOff()
 		{
 			TOriginator originator = Originator;
-			if (originator != null)
-				originator.PowerOff();
+			if (originator == null)
+				return;
+
+			IPowerDeviceControl powerControl = originator.Controls.GetControl<IPowerDeviceControl>();
+			if(powerControl == null)
+				return;
+			
+			powerControl.PowerOff();
 		}
 
 		/// <summary>
