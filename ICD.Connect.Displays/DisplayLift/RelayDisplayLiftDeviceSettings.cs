@@ -1,10 +1,12 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Ports.RelayPort;
+using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.DisplayLift
 {
+    [KrangSettings("RelayDisplayLift", typeof(RelayDisplayLiftDevice))]
     public sealed class RelayDisplayLiftDeviceSettings : AbstractDisplayLiftDeviceSettings, IRelayDisplayLiftDeviceSettings
     {
         private const string DISPLAY_EXTEND_RELAY_ELEMENT = "DisplayExtendRelay";

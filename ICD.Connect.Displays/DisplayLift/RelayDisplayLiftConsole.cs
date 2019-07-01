@@ -19,8 +19,8 @@ namespace ICD.Connect.Displays.DisplayLift
          {
              addRow("Extend Relay Id", device.ExtendRelay.Id);
              addRow("Retract Relay Id", device.RetractRelay.Id);
-             addRow("Extend Time", device.ExtendTime);
-             addRow("Retract Time", device.RetractTime);
+             addRow("Extend Time", device.ExtendTime + "ms");
+             addRow("Retract Time", device.RetractTime + "ms");
              addRow("Latch Mode", device.LatchRelay ? "Latch Mode" : "Unlatched Mode" );
          }
 
