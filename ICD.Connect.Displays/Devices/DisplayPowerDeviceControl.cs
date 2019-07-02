@@ -5,13 +5,6 @@ namespace ICD.Connect.Displays.Devices
 {
     public sealed class DisplayPowerDeviceControl : AbstractPowerDeviceControl<IDisplay>
     {
-        public delegate void PrePowerOnDelegate();
-
-        public delegate void PostPowerOffDelegate();
-
-        public PrePowerOnDelegate   PrePowerOn   { get; set; }
-        public PostPowerOffDelegate PostPowerOff { get; set; }
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -37,31 +30,17 @@ namespace ICD.Connect.Displays.Devices
         /// <summary>
         /// Powers on the device.
         /// </summary>
-        public override void PowerOn()
+        protected override void PowerOnFinal()
         {
-            if (PrePowerOn != null)
-                PrePowerOn.Invoke();
-            else
-                Parent.PowerOn();
-        }
-
-        public void PowerOn(bool bypassPrePowerOn)
-        {
-            if(bypassPrePowerOn)
-                Parent.PowerOn();
-            else
-                PowerOn();
+            Parent.PowerOn();
         }
 
         /// <summary>
         /// Powers off the device.
         /// </summary>
-        public override void PowerOff()
+        protected override void PowerOffFinal()
         {
             Parent.PowerOff();
-
-            if (PostPowerOff != null)
-                PostPowerOff.Invoke();
         }
 
         #region Parent Callbacks
