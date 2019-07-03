@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -30,8 +31,13 @@ namespace ICD.Connect.Displays.DisplayLift
         private eLiftState m_LiftState;
         private int        m_BootDelay;
         private int        m_CoolingDelay;
-        
-        public PowerOnCallback PowerOn { get; private set; }
+        private Action m_PostExtend;
+
+        [CanBeNull]
+        public IDisplay Display
+        {
+            get { return m_Display; }
+        }
 
         public eLiftState LiftState
         {
@@ -101,8 +107,11 @@ namespace ICD.Connect.Displays.DisplayLift
             ResetTimers();
         }
 
-        public void ExtendLift()
+        public void ExtendLift(Action postExtend)
         {
+            // Keep the callback for when we have finished extending and boot delay has elapsed
+            m_PostExtend = postExtend;
+            
             Log(eSeverity.Debug, "Extend Lift");
             switch (LiftState)
             {
@@ -127,8 +136,12 @@ namespace ICD.Connect.Displays.DisplayLift
             }
         }
 
-        public void RetractLift()
+        public void RetractLift(Action preRetract)
         {
+            // We want to power off before retracting
+            if (preRetract != null)
+                preRetract();
+            
             Log(eSeverity.Debug, "Retract Lift");
             switch (LiftState)
             {
@@ -145,6 +158,7 @@ namespace ICD.Connect.Displays.DisplayLift
                 case eLiftState.Extending:
                 case eLiftState.BootDelay:
                     Retract();
+                    m_BootDelayTimer.Stop();
                     return;
 
                 default:
@@ -157,7 +171,9 @@ namespace ICD.Connect.Displays.DisplayLift
             Log(eSeverity.Debug, "Boot Delay Elapsed");
             ResetTimers();
             LiftState = eLiftState.Extended;
-			PowerOn.Invoke();
+            
+            if (m_PostExtend != null)
+			    m_PostExtend.Invoke();
         }
 
         private void CooldownDelayTimerOnElapsed(object sender, EventArgs e)
@@ -197,19 +213,27 @@ namespace ICD.Connect.Displays.DisplayLift
                 }
             }
 
-            m_Display = display;
-            Subscribe(m_Display);
+            SetDisplay(display);
 
             BootDelay = settings.BootDelay ?? 0;
             CoolingDelay = settings.CoolingDelay ?? 0;
+        }
+
+        public void SetDisplay(IDisplay display)
+        {
+            if (display == m_Display)
+                return;
+            
+            Unsubscribe(m_Display);
+            m_Display = display;
+            Subscribe(m_Display);
         }
 
         protected override void ClearSettingsFinal()
         {
             base.ClearSettingsFinal();
 
-            Unsubscribe(m_Display);
-            m_Display = null;
+           SetDisplay(null);
         }
 
         protected override void CopySettingsFinal(T settings)
@@ -231,9 +255,7 @@ namespace ICD.Connect.Displays.DisplayLift
                 return;
 
             powerControl.PrePowerOn = ExtendLift;
-            powerControl.PostPowerOff = RetractLift;
-
-            PowerOn = ()=> powerControl.PowerOn(true);
+            powerControl.PrePowerOff = RetractLift;
         }
 
         private void Unsubscribe(IDisplay display)
@@ -246,7 +268,7 @@ namespace ICD.Connect.Displays.DisplayLift
                 return;
 
             powerControl.PrePowerOn = null;
-            powerControl.PostPowerOff = null;
+            powerControl.PrePowerOff = null;
         }
 
         #endregion

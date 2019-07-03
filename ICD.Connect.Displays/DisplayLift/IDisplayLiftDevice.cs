@@ -1,6 +1,8 @@
 using System;
+using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Devices;
+using ICD.Connect.Displays.Devices;
 using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Displays.DisplayLift
@@ -12,6 +14,9 @@ namespace ICD.Connect.Displays.DisplayLift
         event EventHandler<IntEventArgs>              OnBootDelayChanged;
         event EventHandler<IntEventArgs>              OnCoolingDelayChanged;
 
+        [CanBeNull]
+        IDisplay Display { get; }
+
         eLiftState LiftState { get; }
 
         int BootDelay { get; set; }
@@ -22,8 +27,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
         long CoolingDelayRemaining { get; }
 
-        void ExtendLift();
+        void ExtendLift(Action postExtend);
 
-        void RetractLift();
+        void RetractLift(Action preRetract);
     }
 }

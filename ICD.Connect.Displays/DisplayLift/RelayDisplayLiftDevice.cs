@@ -93,6 +93,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
         protected override void Extend()
         {
+            m_RetractTimer.Stop();
+            
             LiftState = eLiftState.Extending;
             if (m_LatchRelay)
             {
@@ -102,12 +104,14 @@ namespace ICD.Connect.Displays.DisplayLift
             {
                 ExtendUnlatched();
             }
-
+            
             m_ExtendTimer.Restart(m_ExtendTime);
         }
 
         protected override void Retract()
         {
+            m_ExtendTimer.Stop();
+            
             LiftState = eLiftState.Retracting;
             if (m_LatchRelay)
             {
@@ -117,7 +121,7 @@ namespace ICD.Connect.Displays.DisplayLift
             {
                 RetractUnlatched();
             }
-
+            
             m_RetractTimer.Restart(m_RetractTime);
         }
 
