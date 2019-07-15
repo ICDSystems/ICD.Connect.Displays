@@ -85,7 +85,7 @@
     <Compile Include="Devices\IrDisplay\IrDisplayCommands.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplayDevice.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplaySettings.cs" />
-    <Compile Include="DisplayLift\AbstractDisplayLiftConsole.cs" />
+    <Compile Include="DisplayLift\DisplayLiftDeviceConsole.cs" />
     <Compile Include="DisplayLift\AbstractDisplayLiftDevice.cs" />
     <Compile Include="DisplayLift\AbstractDisplayLiftDeviceSettings.cs" />
     <Compile Include="DisplayLift\DisplayLiftExternalTelemetryProvider.cs" />

@@ -7,28 +7,28 @@ using ICD.Connect.Telemetry.Attributes;
 
 namespace ICD.Connect.Displays.DisplayLift
 {
-    [ExternalTelemetry("Display Lift Telemetry", typeof(DisplayLiftExternalTelemetryProvider))]
-    public interface IDisplayLiftDevice : IDevice
-    {
-        event EventHandler<LiftStateChangedEventArgs> OnLiftStateChanged;
-        event EventHandler<IntEventArgs>              OnBootDelayChanged;
-        event EventHandler<IntEventArgs>              OnCoolingDelayChanged;
+	[ExternalTelemetry("Display Lift Telemetry", typeof(DisplayLiftExternalTelemetryProvider))]
+	public interface IDisplayLiftDevice : IDevice
+	{
+		event EventHandler<LiftStateChangedEventArgs> OnLiftStateChanged;
+		event EventHandler<IntEventArgs> OnBootDelayChanged;
+		event EventHandler<IntEventArgs> OnCoolingDelayChanged;
 
-        [CanBeNull]
-        IDisplay Display { get; }
+		[CanBeNull]
+		IDisplay Display { get; }
 
-        eLiftState LiftState { get; }
+		eLiftState LiftState { get; }
 
-        int BootDelay { get; set; }
+		int BootDelay { get; set; }
 
-        int CoolingDelay { get; set; }
+		int CoolingDelay { get; set; }
 
-        long BootDelayRemaining { get; }
+		long BootDelayRemaining { get; }
 
-        long CoolingDelayRemaining { get; }
+		long CoolingDelayRemaining { get; }
 
-        void ExtendLift(Action postExtend);
+		void ExtendLift(Action postExtend);
 
-        void RetractLift(Action preRetract);
-    }
+		void RetractLift(Action preRetract);
+	}
 }
