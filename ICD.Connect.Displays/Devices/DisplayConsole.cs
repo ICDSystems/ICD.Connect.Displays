@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices
@@ -46,10 +47,34 @@ namespace ICD.Connect.Displays.Devices
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-			yield return new ConsoleCommand("PowerOn", "Turns on the display", () => instance.PowerOn());
-			yield return new ConsoleCommand("PowerOff", "Turns off the display", () => instance.PowerOff());
+			yield return new ConsoleCommand("PowerOn", "Turns on the display", () => ConsolePowerOn(instance));
+			yield return new ConsoleCommand("PowerOff", "Turns off the display", () => ConsolePowerOff(instance));
 			yield return new GenericConsoleCommand<int>("SetActiveInput", "SetActiveInput <ADDRESS>", i => instance.SetActiveInput(i));
 			yield return new EnumConsoleCommand<eScalingMode>("SetScalingMode", a => instance.SetScalingMode(a));
+		}
+
+		private static void ConsolePowerOn(IDisplay instance)
+		{
+			if(instance == null)
+				return;
+
+			IPowerDeviceControl powerControl = instance.Controls.GetControl<IPowerDeviceControl>();
+			if(powerControl == null)
+				return;
+			
+			powerControl.PowerOn();
+		}
+		
+		private static void ConsolePowerOff(IDisplay instance)
+		{
+			if(instance == null)
+				return;
+
+			IPowerDeviceControl powerControl = instance.Controls.GetControl<IPowerDeviceControl>();
+			if(powerControl == null)
+				return;
+			
+			powerControl.PowerOff();
 		}
 	}
 }
