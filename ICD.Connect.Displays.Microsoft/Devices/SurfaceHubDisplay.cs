@@ -24,7 +24,10 @@ namespace ICD.Connect.Displays.Microsoft.Devices
         private const string MUTE_ON = "AudioMute+\n";
         private const string MUTE_OFF = "AudioMute-\n";
 
+        private const string INPUT_ONBOARD_PC = "Source=0\n";
+        private const string INPUT_DISPLAYPORT = "Source=1\n";
         private const string INPUT_HDMI = "Source=2\n";
+        private const string INPUT_VGA = "Source=3\n";
 
         private const string ERROR_UNKNOWN_OPERATOR = "Error: Unknown operator";
         private const string ERROR_UNKNOWN_COMMAND = "Error: Unknown command";
@@ -41,7 +44,10 @@ namespace ICD.Connect.Displays.Microsoft.Devices
         /// </summary>
         private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
-			{1, INPUT_HDMI},
+			{0, INPUT_ONBOARD_PC},
+			{1, INPUT_DISPLAYPORT},
+			{2, INPUT_HDMI},
+			{3, INPUT_VGA }
 		};
 
 	    /// <summary>

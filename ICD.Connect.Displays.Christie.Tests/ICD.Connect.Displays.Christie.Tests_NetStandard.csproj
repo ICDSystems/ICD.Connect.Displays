@@ -17,7 +17,6 @@
   <PropertyGroup>
     <OutputPath>binNetCoreApp\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE;STANDARD</DefineConstants>
-    <AssemblyName>ICD.Connect.Displays.Christie.Tests_NetStandard</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
