@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.3.0] - 2019-07-16
+### Added
+ - Added all input addresses for the Microsoft SurfaceHub display
+ - Added Display Lift abstractions, interfaces, telemetry and console
+ - Added RelayDisplayLiftDevice
+
 ## [11.2.0] - 2019-05-16
 ### Added
  - Added telemetry features to displays
