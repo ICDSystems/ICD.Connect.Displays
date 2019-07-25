@@ -19,34 +19,48 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 	/// </summary>
 	public sealed class SamsungDisplay : AbstractDisplayWithAudio<SamsungDisplaySettings>
 	{
+		private const int MAX_RETRIES = 50;
+
 		private const string RETURN = "\x03\x0C";
 
 		public const string SUCCESS = RETURN + "\xF1";
 		public const string FAILURE = RETURN + "\xFF";
 
-		private const string FIRST_COMMAND_SUFFIX = "\r";
+		private const string COMMAND_PREFIX = "\x08\x22";
 
-		private const string POWER_ON = "\x08\x22\x00\x00\x00\x02";
-		private const string POWER_OFF = "\x08\x22\x00\x00\x00\x01";
-		private const string POWER_TOGGLE = "\x08\x22\x00\x00\x00\x00";
+		private const string POWER_PREFIX = COMMAND_PREFIX + "\x00\x00\x00";
+		private const string POWER_ON     = POWER_PREFIX + "\x02";
+		private const string POWER_OFF    = POWER_PREFIX + "\x01";
+		private const string POWER_TOGGLE = POWER_PREFIX + "\x00";
 
-		private const string MUTE_TOGGLE = "\x08\x22\x02\x00\x00\x00";
-		private const string MUTE_ON = "\x08\x22\x02\x00\x00\x01";
-		private const string MUTE_OFF = "\x08\x22\x02\x00\x00\x02";
+		private const string MUTE_PREFIX = COMMAND_PREFIX + "\x02\x00\x00";
+		private const string MUTE_TOGGLE = MUTE_PREFIX + "\x00";
+		private const string MUTE_ON     = MUTE_PREFIX + "\x01";
+		private const string MUTE_OFF    = MUTE_PREFIX + "\x02";
 
-		private const string VOLUME = "\x08\x22\x01\x00\x00";
-		private const string VOLUME_UP = "\x08\x22\x01\x00\x01\x00";
-		private const string VOLUME_DOWN = "\x08\x22\x01\x00\x02\x00";
+		private const string VOLUME_PREFIX = COMMAND_PREFIX + "\x01\x00";
+		private const string VOLUME        = VOLUME_PREFIX + "\x00";
+		private const string VOLUME_UP     = VOLUME_PREFIX + "\x01\x00";
+		private const string VOLUME_DOWN   = VOLUME_PREFIX + "\x02\x00";
 
-		private const string INPUT_HDMI_1 = "\x08\x22\x0A\x00\x05\x00";
-		private const string INPUT_HDMI_2 = "\x08\x22\x0A\x00\x05\x01";
-		private const string INPUT_HDMI_3 = "\x08\x22\x0A\x00\x05\x02";
-		private const string INPUT_HDMI_4 = "\x08\x22\x0A\x00\x05\x03";
+		private const string INPUT_PREFIX = COMMAND_PREFIX + "\x0A\x00\x05";
+		private const string INPUT_HDMI_1 = INPUT_PREFIX + "\x00";
+		private const string INPUT_HDMI_2 = INPUT_PREFIX + "\x01";
+		private const string INPUT_HDMI_3 = INPUT_PREFIX + "\x02";
+		private const string INPUT_HDMI_4 = INPUT_PREFIX + "\x03";
 
-		private const string ASPECT_16_X9 = "\x08\x22\x0B\x0A\x01\x00";
-		private const string ASPECT_ZOOM_1 = "\x08\x22\x0B\x0A\x01\x01";
-		private const string ASPECT_4_X3 = "\x08\x22\x0B\x0A\x01\x04";
-		private const string ASPECT_SCREEN_FIT = "\x08\x22\x0B\x0A\x01\x05";
+		private const string ASPECT_PREFIX     = COMMAND_PREFIX + "\x0B\x0A\x01";
+		private const string ASPECT_16_X9      = ASPECT_PREFIX + "\x00";
+		private const string ASPECT_ZOOM_1     = ASPECT_PREFIX + "\x01";
+		private const string ASPECT_4_X3       = ASPECT_PREFIX + "\x04";
+		private const string ASPECT_SCREEN_FIT = ASPECT_PREFIX + "\x05";
+
+		private const int PRIORITY_POWER_RETRY = 1;
+		private const int PRIORITY_POWER_INITIAL = 2;
+		private const int PRIORITY_INPUT_RETRY = 3;
+		private const int PRIORITY_INPUT_INITIAL = 4;
+		private const int PRIORITY_DEFAULT = int.MaxValue;
+
 
 		/// <summary>
 		/// Maps scaling mode to command.
@@ -71,6 +85,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{4, INPUT_HDMI_4}
 		};
 
+		private int m_PowerRetries;
+		private int m_InputRetries;
+
 		#region Methods
 
 		/// <summary>
@@ -86,7 +103,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			RateLimitedQueue queue = new RateLimitedQueue(600);
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
-			queue.Timeout = 10 * 1000;
+			queue.Timeout = 2500; // 2.5 Second Timeout
 
 			SetSerialQueue(queue);
 		}
@@ -97,7 +114,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		[PublicAPI]
 		public override void PowerOn()
 		{
-			SendNonFormattedCommand(POWER_ON);
+			SendNonFormattedCommand(POWER_ON, CommandComparer, PRIORITY_POWER_INITIAL);
 		}
 
 		/// <summary>
@@ -106,28 +123,33 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		[PublicAPI]
 		public override void PowerOff()
 		{
-			SendNonFormattedCommand(POWER_OFF);
+			if(SerialQueue == null)
+				return;
+			Log(eSeverity.Debug, "Display Power Off while {0} commands were enqueued. Commands dropped.", SerialQueue.CommandCount);
+			SerialQueue.Clear();
+
+			SendNonFormattedCommand(POWER_OFF, CommandComparer, PRIORITY_POWER_INITIAL);
 		}
 
 		[PublicAPI]
 		public void PowerToggle()
 		{
-			SendNonFormattedCommand(POWER_TOGGLE);
+			SendNonFormattedCommand(POWER_TOGGLE, CommandComparer, PRIORITY_POWER_INITIAL);
 		}
 
 		public override void MuteOn()
 		{
-			SendNonFormattedCommand(MUTE_ON);
+			SendNonFormattedCommand(MUTE_ON, CommandComparer);
 		}
 
 		public override void MuteOff()
 		{
-			SendNonFormattedCommand(MUTE_OFF);
+			SendNonFormattedCommand(MUTE_OFF, CommandComparer);
 		}
 
 		public override void MuteToggle()
 		{
-			SendNonFormattedCommand(MUTE_TOGGLE);
+			SendNonFormattedCommand(MUTE_TOGGLE, CommandComparer);
 		}
 
 		protected override void VolumeSetRawFinal(float raw)
@@ -146,7 +168,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <returns></returns>
 		private static bool VolumeComparer(string commandA, string commandB)
 		{
-			return commandA.StartsWith(VOLUME) && commandB.StartsWith(VOLUME);
+			return commandA.StartsWith(VOLUME, StringComparison.Ordinal) && commandB.StartsWith(VOLUME, StringComparison.Ordinal);
 		}
 
 		public override void VolumeUpIncrement()
@@ -167,7 +189,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void SetActiveInput(int address)
 		{
-			SendNonFormattedCommand(s_InputMap.GetValue(address));
+			SendNonFormattedCommand(s_InputMap.GetValue(address), CommandComparer, PRIORITY_INPUT_INITIAL);
 		}
 
 		/// <summary>
@@ -176,7 +198,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="mode"/>
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
+			SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode), CommandComparer);
 		}
 
 		/// <summary>
@@ -213,9 +235,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// Calculates the checksum and queues the data to be sent to the physical display.
 		/// </summary>
 		/// <param name="data"></param>
+		/// <param name="priority"></param>
+		private void SendNonFormattedCommand(string data, int priority)
+		{
+			SendNonFormattedCommand(data, (a, b) => false, priority);
+		}
+
+		/// <summary>
+		/// Calculates the checksum and queues the data to be sent to the physical display.
+		/// </summary>
+		/// <param name="data"></param>
 		private void SendNonFormattedCommand(string data)
 		{
-			SendNonFormattedCommand(data, (a, b) => false);
+			SendNonFormattedCommand(data, PRIORITY_DEFAULT);
 		}
 
 		/// <summary>
@@ -226,15 +258,21 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
-			bool power = data == POWER_ON;
+			SendNonFormattedCommand(data, comparer,PRIORITY_DEFAULT);
+		}
 
+		/// <summary>
+		/// Calculates the checksum and queues the data to be sent to the physical display.
+		/// Replaces an earlier command if found via the comparer.
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="comparer"></param>
+		/// <param name="priority"></param>
+		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer, int priority)
+		{
 			data += GetCheckSum(data);
 
-			// The Samsung requires a specific suffix after the first command.
-			if (power)
-				data += FIRST_COMMAND_SUFFIX;
-
-			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
+			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()), priority);
 		}
 
 		/// <summary>
@@ -247,12 +285,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			if (!Trust)
 				return;
 
-			string command = args.Data.Serialize();
-
-			command = command.TrimEnd('\r');
-
-			// Remove the checksum
-			command = command.Substring(0, command.Length - 1);
+			string command = RemoveCheckSum(args.Data.Serialize());
 
 			switch (command)
 			{
@@ -281,7 +314,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 					return;
 			}
 
-			if (command.StartsWith(VOLUME))
+			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
 				Volume = (byte)command[command.Length - 1];
 				return;
@@ -320,7 +353,43 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			var command = RemoveCheckSum(args.Data.Serialize());
+			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(command));
+
+
+			if (SerialQueue == null)
+				return;
+
+			// Re-queue power on or input select commands that fail
+			if (command == POWER_ON)
+			{
+				m_PowerRetries++;
+				if (m_PowerRetries > MAX_RETRIES)
+				{
+					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
+					m_PowerRetries = 0;
+					return;
+				}
+				SerialQueue.EnqueuePriority(new SerialData(args.Data.Serialize()), PRIORITY_POWER_RETRY);
+			}
+			else if (s_InputMap.ContainsValue(command))
+			{
+				m_InputRetries++;
+
+				// If input commands hit a specified limit, enqueue a power on command at higher priority to make sure the display is actually powered on)
+				if (m_InputRetries > MAX_RETRIES / 2)
+				{
+					SendNonFormattedCommand(POWER_ON, CommandComparer, PRIORITY_POWER_RETRY);
+				}
+
+				if (m_InputRetries > MAX_RETRIES)
+				{
+					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
+					m_PowerRetries = 0;
+					return;
+				}
+				SerialQueue.EnqueuePriority(args.Data, PRIORITY_INPUT_RETRY);
+			}
 		}
 
 		/// <summary>
@@ -338,6 +407,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				ActiveInput = s_InputMap.ContainsValue(command)
 					            ? s_InputMap.GetKey(command)
 					            : (int?)null;
+
+				m_InputRetries = 0;
+
 				return;
 			}
 
@@ -350,7 +422,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			}
 
 			// Volume
-			if (command.StartsWith(VOLUME))
+			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
 				IsPowered = true;
 				Volume = command[5];
@@ -362,11 +434,12 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{
 				case POWER_ON:
 					IsPowered = true;
+					m_PowerRetries = 0;
 					return;
 				case POWER_OFF:
 					IsPowered = false;
+					m_PowerRetries = 0;
 					return;
-
 				case MUTE_ON:
 					IsPowered = true;
 					IsMuted = true;
@@ -384,15 +457,37 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			// Only get error responses when powered
-			IsPowered = true;
+			string command = StringUtils.ToHexLiteral(args.Data.Serialize());
 
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			Log(eSeverity.Error, "Command {0} failed.", command);
 		}
 
 		private void BufferOnJunkData(object sender, EventArgs eventArgs)
 		{
-			IsPowered = true;
+			//IsPowered = true;
+		}
+
+		/// <summary>
+		/// Prevents multiple volume commands being queued.
+		/// </summary>
+		/// <param name="commandA"></param>
+		/// <param name="commandB"></param>
+		/// <returns></returns>
+		private static bool CommandComparer(string commandA, string commandB)
+		{
+			if (commandA.StartsWith(POWER_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(POWER_PREFIX, StringComparison.Ordinal))
+				return true;
+
+			if (commandA.StartsWith(MUTE_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(MUTE_PREFIX, StringComparison.Ordinal))
+				return true;
+
+			if (commandA.StartsWith(INPUT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(INPUT_PREFIX, StringComparison.Ordinal))
+				return true;
+
+			if (commandA.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal))
+				return true;
+
+			return false;
 		}
 
 		#endregion
