@@ -241,6 +241,10 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 			else if (data.Contains("PWR!"))
 				PowerQueryResponse(args.Response);
 
+			else if (data.Contains("SIN!"))
+				InputQueryResponse(args.Response);
+
+			//Not sure if this is actually correct or not?
 			else if (data.Contains("CHA!"))
 				InputQueryResponse(args.Response);
 		}
