@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.1.1] - 2019-08-15
+### Changed
+ - Fixes for Samsung consumer display
+
 ## [12.1.0] - 2019-01-29
 ### Added
  - Added LG DigitalSignage display driver
