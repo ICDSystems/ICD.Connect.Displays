@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.3.1] - 2019-08-15
+### Changed
+ - Fixed a bug where the Christie J-Series driver was not correctly parsing active input
+
 ## [11.3.0] - 2019-07-16
 ### Added
  - Added all input addresses for the Microsoft SurfaceHub display
