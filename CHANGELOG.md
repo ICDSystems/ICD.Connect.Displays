@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - SamsungDisplay removed first command suffix (doesn't seem to be needed)
  - SamsungDisplay fixed string comparison problems on Mono platform preventing power off feedback from working
 
+## [12.1.1] - 2019-08-15
+### Changed
+ - Fixes for Samsung consumer display
+
 ## [12.1.0] - 2019-01-29
 ### Added
  - Added LG DigitalSignage display driver
@@ -23,6 +27,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
+
+## [11.3.1] - 2019-08-15
+### Changed
+ - Fixed a bug where the Christie J-Series driver was not correctly parsing active input
 
 ## [11.3.0] - 2019-07-16
 ### Added
