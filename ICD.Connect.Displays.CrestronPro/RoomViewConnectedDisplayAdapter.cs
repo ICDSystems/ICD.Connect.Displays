@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
@@ -261,30 +262,13 @@ namespace ICD.Connect.Displays.CrestronPro
 			Unsubscribe(m_Display);
 
 			if (m_Display != null)
-			{
-				if (m_Display.Registered)
-					m_Display.UnRegister();
-
-				try
-				{
-					m_Display.Dispose();
-				}
-				catch
-				{
-				}
-			}
+				GenericBaseUtils.TearDown(m_Display);
 
 			m_Display = display;
 
-			if (m_Display != null && !m_Display.Registered)
-			{
-				if (Name != null)
-					m_Display.Description = Name;
-
-				eDeviceRegistrationUnRegistrationResponse result = m_Display.Register();
-				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
-					Log(eSeverity.Error, "Unable to register {0} - {1}", m_Display.GetType().Name, result);
-			}
+			eDeviceRegistrationUnRegistrationResponse result;
+			if (m_Display != null && !GenericBaseUtils.SetUp(m_Display, this, out result))
+				Log(eSeverity.Error, "Unable to register {0} - {1}", m_Display.GetType().Name, result);
 
 			Subscribe(m_Display);
 			UpdateCachedOnlineStatus();
