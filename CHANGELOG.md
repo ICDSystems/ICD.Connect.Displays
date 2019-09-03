@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.4.0] - 2019-09-03
+### Changed
+ - Added additional input options to Christie J-Series
+
 ## [11.3.1] - 2019-08-15
 ### Changed
  - Fixed a bug where the Christie J-Series driver was not correctly parsing active input
