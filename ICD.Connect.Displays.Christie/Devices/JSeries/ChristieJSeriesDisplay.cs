@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
@@ -24,8 +25,28 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 		private const char QUERY = '?';
 
-		// No kidding
-		private const int INPUT_HDMI_1 = 4;
+		/// <summary>
+		/// Map for Krang addresses to Christie Input Numbers
+		/// Christie uses weird addressing for some reason, not sure what's up with that.
+		/// NOTE:
+		/// Not all projector's HDMI 1 input will correspond with address 1!  Need to verify individually.
+		/// Address 1 is linked to "4" for backwards compatabiltiy
+		/// </summary>
+		private static readonly BiDictionary<int, string> s_InputAddressMap = new BiDictionary<int, string>
+		{
+			{1, "4"},
+			{2, "3"},
+			{3, "2"},
+			{4, "1"},
+			{5, "11"},
+			{6, "12"},
+			{7, "21"},
+			{8, "22"},
+			{9, "31"},
+			{10, "32"},
+			{11, "41"},
+			{12, "42"}
+		};
 
 		public enum ePowerState
 		{
@@ -144,10 +165,10 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 		public override void SetActiveInput(int address)
 		{
-			if (address != 1)
+			if (!s_InputAddressMap.ContainsKey(address))
 				throw new ArgumentOutOfRangeException("address");
 
-			SendCommand(string.Format(INPUT, INPUT_HDMI_1));
+			SendCommand(string.Format(INPUT, s_InputAddressMap.GetValue(address)));
 
 			if (!Trust)
 				SendCommand(string.Format(INPUT, QUERY));
@@ -221,7 +242,13 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			if (command.Contains("SIN"))
 			{
-				ActiveInput = 1;
+				int address;
+
+				string inputCommand = command.Substring(4, command.Length - 5);
+
+				if (s_InputAddressMap.TryGetKey(inputCommand, out address))
+					ActiveInput = address;
+
 				return;
 			}
 		}
@@ -276,11 +303,14 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 				return;
 
 			int responseInput;
-			if (!StringUtils.TryParse(result, out responseInput))
-				return;
 
-			// HDMI 1 is 4 :/
-			ActiveInput = responseInput == 4 ? 1 : (int?)null;
+			if (!s_InputAddressMap.TryGetKey(result, out responseInput))
+			{
+				ActiveInput = null;
+				return;
+			}
+
+			ActiveInput = responseInput;
 		}
 
 		private void PowerQueryResponse(string response)
