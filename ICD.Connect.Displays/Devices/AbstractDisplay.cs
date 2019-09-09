@@ -8,6 +8,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
@@ -35,7 +36,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -52,7 +53,7 @@ namespace ICD.Connect.Displays.Devices
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
@@ -87,22 +88,23 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public virtual bool IsPowered
+		public virtual ePowerState PowerState
 		{
-			get { return m_IsPowered; }
+			get { return m_PowerState; }
 			protected set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				if (m_IsPowered)
+				//todo: Fix this section?
+				if (m_PowerState == ePowerState.PowerOn)
 					QueryState();
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
 		}
 
@@ -293,7 +295,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnIsPoweredChanged = null;
+			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 

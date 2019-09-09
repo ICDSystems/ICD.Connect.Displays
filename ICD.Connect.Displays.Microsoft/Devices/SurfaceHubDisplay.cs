@@ -2,6 +2,7 @@
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -94,7 +95,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// </summary>
 	    public override void VolumeUpIncrement()
 	    {
-		    if (!IsPowered)
+		    if (!VolumeControlAvaliable)
 			    return;
 		    SendNonFormattedCommand(VOLUME_UP);
 	    }
@@ -104,7 +105,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// </summary>
 	    public override void VolumeDownIncrement()
 	    {
-		    if (!IsPowered)
+		    if (!VolumeControlAvaliable)
 			    return;
 		    SendNonFormattedCommand(VOLUME_DOWN);
 	    }
@@ -115,7 +116,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// <param name="raw"></param>
 	    protected override void VolumeSetRawFinal(float raw)
 	    {
-		    if (!IsPowered)
+		    if (!VolumeControlAvaliable)
 			    return;
 		    SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw));
 	    }
@@ -191,11 +192,11 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 		    switch (command)
 		    {
 			    case POWER_ON:
-				    IsPowered = true;
+				    PowerState = ePowerState.PowerOn;
 				    return;
 
 				case POWER_OFF:
-				    IsPowered = false;
+				    PowerState = ePowerState.PowerOff;
 				    return;
 
 				case MUTE_ON:
@@ -250,10 +251,10 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 		    switch (response)
 		    {
 			    case POWER_ON_RESPONSE:
-				    IsPowered = true;
+				    PowerState = ePowerState.PowerOn;
 				    break;
 			    case POWER_OFF_RESPONSE:
-				    IsPowered = false;
+				    PowerState = ePowerState.PowerOff;
 				    break;
 			    case INPUT_CHANGE_RESPONSE:
 				    ActiveInput = 1;

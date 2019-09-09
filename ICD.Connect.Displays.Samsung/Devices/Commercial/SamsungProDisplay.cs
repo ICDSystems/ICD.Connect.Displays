@@ -3,6 +3,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -158,7 +159,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		public override void VolumeUpIncrement()
 		{
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
@@ -166,7 +167,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		public override void VolumeDownIncrement()
 		{
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
@@ -189,7 +190,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			// Query the state of the device
 			SendCommandPriority(new SamsungProCommand(POWER, WallId, 0).ToQuery(), int.MinValue);
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommandPriority(new SamsungProCommand(VOLUME, WallId, 0).ToQuery(), int.MinValue);
@@ -215,7 +216,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			switch (command.Command)
 			{
 				case POWER:
-					IsPowered = command.Data == 1;
+					PowerState = command.Data == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
 					return;
 
 				case VOLUME:
@@ -311,9 +312,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 				case POWER:
 					byte powerValue = response.Values[0];
 					if (powerValue == 1)
-						IsPowered = true;
+						PowerState = ePowerState.PowerOn;
 					else if (powerValue == 0)
-						IsPowered = false;
+						PowerState = ePowerState.PowerOff;
 					return;
 
 				case VOLUME:

@@ -5,6 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -19,7 +20,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -31,7 +32,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
@@ -44,7 +45,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		
 		public void SetPowerFeedback(bool isPowered)
 		{
-			IsPowered = isPowered;
+			PowerState = isPowered ? ePowerState.PowerOn : ePowerState.PowerOff;
 		}
 
 		public void SetActiveInputFeedback(int? address)
@@ -69,19 +70,19 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered
+		public virtual ePowerState PowerState
 		{
-			get { return m_IsPowered; }
-			private set
+			get { return m_PowerState; }
+			protected set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
 		}
 
@@ -144,7 +145,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnIsPoweredChanged = null;
+			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 
@@ -161,7 +162,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			OnSetPower.Raise(this, new SetPowerApiEventArgs(true));
 
 			if (Trust)
-				IsPowered = true;
+				PowerState = ePowerState.PowerOn;
 		}
 
 		/// <summary>
@@ -172,7 +173,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			OnSetPower.Raise(this, new SetPowerApiEventArgs(false));
 
 			if (Trust)
-				IsPowered = false;
+				PowerState = ePowerState.PowerOff;
 		}
 
 		/// <summary>

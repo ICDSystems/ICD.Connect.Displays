@@ -2,6 +2,7 @@
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -102,7 +103,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             base.QueryState();
             SendNonFormattedCommand(POWER_GET);
 
-            if (!IsPowered)
+            if (PowerState != ePowerState.PowerOn)
                 return;
 
             SendNonFormattedCommand(INPUT_GET);
@@ -138,7 +139,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// </summary>
         public override void VolumeUpIncrement()
         {
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
             SendNonFormattedCommand(VOLUME_UP, VolumeComparer);
         }
@@ -148,7 +149,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// </summary>
         public override void VolumeDownIncrement()
         {
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
             SendNonFormattedCommand(VOLUME_DOWN, VolumeComparer);
         }
@@ -159,7 +160,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// <param name="raw"></param>
         protected override void VolumeSetRawFinal(float raw)
         {
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
             SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw), VolumeComparer);
         }
@@ -208,11 +209,11 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 		    switch (command)
 		    {
 			    case POWER_ON:
-				    IsPowered = true;
+				    PowerState = ePowerState.PowerOn;
 				    return;
 
 				case POWER_OFF:
-				    IsPowered = false;
+				    PowerState = ePowerState.PowerOff;
 					return;
 
 				case MUTE_ON:
@@ -347,10 +348,10 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             switch (response.Substring(POWER_RESPONSE.Length).ToLower())
             {
                 case "on":
-                    IsPowered = true;
+                    PowerState = ePowerState.PowerOn;
                     break;
                 case "off":
-                    IsPowered = false;
+                    PowerState = ePowerState.PowerOff;
                     break;
                 default:
                     LogUnexpectedResponse(response);

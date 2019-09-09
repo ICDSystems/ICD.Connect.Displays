@@ -47,7 +47,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		protected abstract void DisplayOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args);
+		protected abstract void DisplayOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args);
 
 		#endregion
 
@@ -127,7 +127,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			if (display == null)
 				return;
 
-			display.OnIsPoweredChanged += DisplayOnIsPoweredChanged;
+			display.OnPowerStateChanged += DisplayOnPowerStateChanged;
 		}
 
 		private void Unsubscribe(IDisplay display)
@@ -135,7 +135,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			if (display == null)
 				return;
 
-			display.OnIsPoweredChanged -= DisplayOnIsPoweredChanged;
+			display.OnPowerStateChanged -= DisplayOnPowerStateChanged;
 
 		}
 

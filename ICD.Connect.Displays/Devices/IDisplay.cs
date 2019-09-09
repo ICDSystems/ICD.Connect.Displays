@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Telemetry.Attributes;
@@ -18,9 +19,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		[ApiEvent(DisplayApi.EVENT_IS_POWERED, DisplayApi.HELP_EVENT_IS_POWERED)]
+		[ApiEvent(DisplayApi.EVENT_POWER_STATE, DisplayApi.HELP_EVENT_POWER_STATE)]
 		[EventTelemetry(DeviceTelemetryNames.POWER_STATE_CHANGED)]
-		event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the active input changes.
@@ -49,9 +50,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		[ApiProperty(DisplayApi.PROPERTY_IS_POWERED, DisplayApi.HELP_PROPERTY_IS_POWERED)]
+		[ApiProperty(DisplayApi.PROPERTY_POWER_STATE, DisplayApi.HELP_PROPERTY_POWER_STATE)]
 		[DynamicPropertyTelemetry(DeviceTelemetryNames.POWER_STATE, DeviceTelemetryNames.POWER_STATE_CHANGED)]
-		bool IsPowered { get; }
+		ePowerState PowerState { get; }
 
 		/// <summary>
 		/// Gets the active input.

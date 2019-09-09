@@ -6,6 +6,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -46,7 +47,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 			{12, "42"}
 		};
 
-		public enum ePowerState
+		public enum eChristiePowerState
 		{
 			PowerOff = 0,
 			PowerOn = 1,
@@ -61,25 +62,25 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		private const long POWER_HEARTBEAT_INTERVAL = 2 * 1000;
 
 		private readonly SafeTimer m_PowerHeartbeatTimer;
-		private ePowerState m_PowerState;
+		private eChristiePowerState m_ChristiePowerState;
 
 		#region Properties
 
-		public ePowerState PowerState
+		public eChristiePowerState ChristiePowerState
 		{
-			get { return m_PowerState; }
+			get { return m_ChristiePowerState; }
 			set
 			{
-				if (value == m_PowerState)
+				if (value == m_ChristiePowerState)
 					return;
 
-				m_PowerState = value;
+				m_ChristiePowerState = value;
 
-				Log(eSeverity.Informational, "PowerState set to {0}", m_PowerState);
+				Log(eSeverity.Informational, "PowerState set to {0}", m_ChristiePowerState);
 
-				IsPowered = m_PowerState == ePowerState.PowerOn;
+				PowerState = ChristiePowerStateToPowerState(m_ChristiePowerState);
 
-				if (m_PowerState == ePowerState.PowerOn || m_PowerState == ePowerState.PowerOff)
+				if (m_ChristiePowerState == eChristiePowerState.PowerOn || m_ChristiePowerState == eChristiePowerState.PowerOff)
 					StopPowerHeartbeat();
 				else
 					ResetPowerHeartbeat();
@@ -130,7 +131,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 		public override void PowerOn()
 		{
-			SendCommand(string.Format(POWER, (int)ePowerState.PowerOn));
+			SendCommand(string.Format(POWER, (int)eChristiePowerState.PowerOn));
 
 			if (!Trust)
 				SendCommand(string.Format(POWER, QUERY));
@@ -138,7 +139,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 		public override void PowerOff()
 		{
-			SendCommand(string.Format(POWER, (int)ePowerState.PowerOff));
+			SendCommand(string.Format(POWER, (int)eChristiePowerState.PowerOff));
 
 			if (!Trust)
 				SendCommand(string.Format(POWER, QUERY));
@@ -217,7 +218,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			if (command.Contains("PWR"))
 			{
-				IsPowered = command.Contains("1");
+				PowerState = command.Contains("1") ? ePowerState.PowerOn : ePowerState.PowerOff;
 				return;
 			}
 
@@ -304,7 +305,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 			if (!StringUtils.TryParse(result, out responsePower))
 				return;
 
-			PowerState = (ePowerState)responsePower;
+			ChristiePowerState = (eChristiePowerState)responsePower;
 		}
 
 		/// <summary>
@@ -335,10 +336,31 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			SendCommand(string.Format(POWER, QUERY));
 
-			if (!IsPowered)
+			if (base.PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(string.Format(INPUT, QUERY));
+		}
+
+		private static ePowerState ChristiePowerStateToPowerState(eChristiePowerState christiePowerState)
+		{
+			switch (christiePowerState)
+			{
+				case eChristiePowerState.PowerOn:
+					return ePowerState.PowerOn;
+				case eChristiePowerState.Warmup:
+					return ePowerState.Warming;
+				case eChristiePowerState.Cooldown:
+					return ePowerState.Cooling;
+				case eChristiePowerState.PowerOff:
+				case eChristiePowerState.AutoShutdown1:
+				case eChristiePowerState.AutoShutdown2:
+				case eChristiePowerState.AutoShutdown3:
+				case eChristiePowerState.EmergencyShutdown:
+					return ePowerState.PowerOff;
+				default:
+					throw new ArgumentOutOfRangeException("christiePowerState");
+			}
 		}
 
 		#endregion
@@ -353,7 +375,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Power State", PowerState);
+			addRow("Power State", ChristiePowerState);
 		}
 
 		#endregion

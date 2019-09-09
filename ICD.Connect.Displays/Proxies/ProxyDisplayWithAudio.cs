@@ -25,8 +25,11 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+
 		private float m_Volume;
 		private bool m_IsMuted;
+		private bool m_VolumeControlAvaliable;
 
 		#region Properties
 
@@ -95,6 +98,23 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public float? VolumeDefault { get; set; }
 
+		/// <summary>
+		/// Indicates if volume control is currently avaliable or not
+		/// </summary>
+		public bool VolumeControlAvaliable
+		{
+			get { return m_VolumeControlAvaliable; }
+			private set
+			{
+				if (m_VolumeControlAvaliable == value)
+					return;
+
+				m_VolumeControlAvaliable = value;
+
+				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -120,6 +140,7 @@ namespace ICD.Connect.Displays.Proxies
 			ApiCommandBuilder.UpdateCommand(command)
 			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_VOLUME)
 			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_IS_MUTED)
+			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_VOLUME_CONTROL_AVALIABLE)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT)
@@ -127,6 +148,7 @@ namespace ICD.Connect.Displays.Proxies
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN)
+			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVALIABLE)
 							 .Complete();
 		}
 
@@ -146,6 +168,9 @@ namespace ICD.Connect.Displays.Proxies
 					break;
 				case DisplayWithAudioApi.EVENT_IS_MUTED:
 					IsMuted = result.GetValue<bool>();
+					break;
+				case DisplayWithAudioApi.EVENT_VOLUME_CONTROL_AVALIABLE:
+					VolumeControlAvaliable = result.GetValue<bool>();
 					break;
 			}
 		}
@@ -181,6 +206,9 @@ namespace ICD.Connect.Displays.Proxies
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN:
 					VolumeSafetyMin = result.GetValue<float?>();
+					break;
+				case DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVALIABLE:
+					VolumeControlAvaliable = result.GetValue<bool>();
 					break;
 			}
 		}

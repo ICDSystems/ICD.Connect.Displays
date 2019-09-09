@@ -51,7 +51,7 @@ namespace ICD.Connect.Displays.Devices
         /// <param name="parent"></param>
         private void Subscribe(IDisplay parent)
         {
-            parent.OnIsPoweredChanged += ParentOnIsPoweredChanged;
+            parent.OnPowerStateChanged += ParentOnPowerStateChanged;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace ICD.Connect.Displays.Devices
         /// <param name="parent"></param>
         private void Unsubscribe(IDisplay parent)
         {
-            parent.OnIsPoweredChanged -= ParentOnIsPoweredChanged;
+            parent.OnPowerStateChanged -= ParentOnPowerStateChanged;
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace ICD.Connect.Displays.Devices
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
-        private void ParentOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs eventArgs)
+        private void ParentOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs eventArgs)
         {
-            IsPowered = Parent.IsPowered;
+            PowerState = Parent.PowerState;
         }
 
         #endregion

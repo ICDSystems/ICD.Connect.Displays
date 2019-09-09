@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -139,15 +140,15 @@ namespace ICD.Connect.Displays.Nec.Devices
 
 		public override void VolumeUpIncrement()
 		{
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
@@ -177,8 +178,8 @@ namespace ICD.Connect.Displays.Nec.Devices
 		/// <param name="raw"></param>
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
 		}
 
@@ -192,7 +193,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 			// Query the state of the device
 			SendCommand(NecDisplayCommand.Command(MonitorId, s_PowerQuery));
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE));
@@ -276,7 +277,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 					return;
 				}
 
-				IsPowered = message[message.Length - 1] == 0x31;
+				PowerState = message[message.Length - 1] == 0x31 ? ePowerState.PowerOn : ePowerState.PowerOff;
 				return;
 			}
 
@@ -290,7 +291,8 @@ namespace ICD.Connect.Displays.Nec.Devices
 			if (!message.Skip(2).Take(6).SequenceEqual(s_PowerControl))
 				return;
 
-			IsPowered = message[message.Length - 1] == 0x31;
+			PowerState = message[message.Length - 1] == 0x31 ? ePowerState.PowerOn : ePowerState.PowerOff;
+
 		}
 
 		/// <summary>

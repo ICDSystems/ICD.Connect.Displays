@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils.Services;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Routing;
 using ICD.Connect.Routing.Connections;
@@ -133,7 +134,7 @@ namespace ICD.Connect.Displays.Devices
 		private void Subscribe(IDisplay parent)
 		{
 			parent.OnActiveInputChanged += ParentOnActiveInputChanged;
-			parent.OnIsPoweredChanged += ParentOnIsPoweredChanged;
+			parent.OnPowerStateChanged += ParentOnPowerStateChanged;
 		}
 
 		/// <summary>
@@ -143,7 +144,7 @@ namespace ICD.Connect.Displays.Devices
 		private void Unsubscribe(IDisplay parent)
 		{
 			parent.OnActiveInputChanged -= ParentOnActiveInputChanged;
-			parent.OnIsPoweredChanged -= ParentOnIsPoweredChanged;
+			parent.OnPowerStateChanged -= ParentOnPowerStateChanged;
 		}
 
 		/// <summary>
@@ -151,7 +152,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
-		private void ParentOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
+		private void ParentOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
 			UpdateInputState();
 		}
@@ -168,7 +169,7 @@ namespace ICD.Connect.Displays.Devices
 
 		private void UpdateInputState()
 		{
-			int? activeInput = Parent.IsPowered ? Parent.ActiveInput : null;
+			int? activeInput = Parent.PowerState != ePowerState.PowerOff ? Parent.ActiveInput : null;
 			SetCachedActiveInput(activeInput, eConnectionType.Audio | eConnectionType.Video);
 		}
 

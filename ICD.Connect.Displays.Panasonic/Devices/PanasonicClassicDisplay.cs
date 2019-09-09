@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -103,7 +104,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			SendNonFormattedCommand(QUERY_POWER);
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendNonFormattedCommand(QUERY_INPUT);
@@ -130,7 +131,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void MuteOn()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 			SendNonFormattedCommand(MUTE_ON);
 			SendNonFormattedCommand(QUERY_MUTE);
@@ -139,7 +140,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void MuteOff()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 			SendNonFormattedCommand(MUTE_OFF);
 			SendNonFormattedCommand(QUERY_MUTE);
@@ -148,7 +149,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void VolumeUpIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume + 1));
 			SendNonFormattedCommand(QUERY_VOLUME);
@@ -157,7 +158,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void VolumeDownIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume - 1));
 			SendNonFormattedCommand(QUERY_VOLUME);
@@ -166,7 +167,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 			string setVolCommand = GenerateSetVolumeCommand((int)raw);
 			SendNonFormattedCommand(setVolCommand);
@@ -176,7 +177,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void SetActiveInput(int address)
 		{
-			if (!IsPowered && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
+			if ((PowerState != ePowerState.PowerOn) && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
 				return;
 			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
 			m_TargetInput = address;
@@ -290,7 +291,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			{
 				case "QPW":
 					string powered = ExtractParameter(response, 1);
-					IsPowered = powered == "1";
+					PowerState = powered == "1" ? ePowerState.PowerOn : ePowerState.PowerOff;
 					break;
 
 				case "QAM":
@@ -318,14 +319,14 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					break;
 
 				case "IMS":
-					if (!IsPowered &&
+					if ((PowerState != ePowerState.PowerOn)&&
 						m_ExpectedPowerState != null &&
 						m_ExpectedPowerState.Value)
 					{
-						IsPowered = true;
+						PowerState = ePowerState.PowerOn;
 						m_ExpectedPowerState = null;
 					}
-					else if (IsPowered &&
+					else if ((PowerState == ePowerState.PowerOn)&&
 					         m_ExpectedPowerState != null &&
 					         !m_ExpectedPowerState.Value)
 					{
@@ -357,12 +358,12 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			if (IsPowered
+			if ((PowerState == ePowerState.PowerOn)
 				&& ExtractCommand(args.Data.Serialize()) == "IMS"
 				&& m_ExpectedPowerState != null
 				&& !m_ExpectedPowerState.Value)
 			{
-				IsPowered = false;
+				PowerState = ePowerState.PowerOff;
 				m_ExpectedPowerState = null;
 				ResetRetryCount(args.Data.Serialize());
 				return;

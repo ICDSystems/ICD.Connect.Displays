@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -345,7 +346,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			if (!responseParts[4].Equals(DEVICE_WALL, StringComparison.OrdinalIgnoreCase))
 				return;
 
-			IsPowered = responseParts[5].Equals(POWER_ON, StringComparison.OrdinalIgnoreCase);
+			PowerState = responseParts[5].Equals(POWER_ON, StringComparison.OrdinalIgnoreCase) ? ePowerState.PowerOn : ePowerState.PowerOff;
 		}
 
 		/// <summary>

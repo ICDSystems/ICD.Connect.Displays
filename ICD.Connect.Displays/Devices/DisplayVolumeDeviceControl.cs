@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -134,26 +133,43 @@ namespace ICD.Connect.Displays.Devices
 			Parent.VolumeDownIncrement();
 		}
 
+		protected override bool GetControlAvaliable()
+		{
+			return Parent.VolumeControlAvaliable;
+		}
+
 		#endregion
 
 		#region Parent Callbacks
 
-		private void Subscribe(IDisplayWithAudio parent)
+		protected override void Subscribe(IDisplayWithAudio parent)
 		{
+			if (parent == null)
+				return;
+
+			base.Subscribe(parent);
+
 			parent.OnVolumeChanged += ParentOnVolumeChanged;
 			parent.OnMuteStateChanged += ParentOnMuteStateChanged;
+			parent.OnVolumeControlAvaliableChanged += ParentOnVolumeControlAvaliableChanged;
 		}
 
-		private void Unsubscribe(IDisplayWithAudio parent)
+		protected override void Unsubscribe(IDisplayWithAudio parent)
 		{
+			if (parent == null)
+				return;
+
+			base.Unsubscribe(parent);
+
 			parent.OnVolumeChanged -= ParentOnVolumeChanged;
 			parent.OnMuteStateChanged -= ParentOnMuteStateChanged;
+			parent.OnVolumeControlAvaliableChanged -= ParentOnVolumeControlAvaliableChanged;
 		}
 
 		private void ParentOnVolumeChanged(object sender, DisplayVolumeApiEventArgs args)
 		{
 			IPowerDeviceControl senderAsPowerControl = sender as IPowerDeviceControl;
-			if (senderAsPowerControl != null && !senderAsPowerControl.IsPowered)
+			if (senderAsPowerControl != null && senderAsPowerControl.PowerState == ePowerState.PowerOff)
 				return;
 
 			VolumeFeedback(args.Data);
@@ -162,6 +178,11 @@ namespace ICD.Connect.Displays.Devices
 		private void ParentOnMuteStateChanged(object sender, DisplayMuteApiEventArgs args)
 		{
 			OnMuteStateChanged.Raise(this, new MuteDeviceMuteStateChangedApiEventArgs(args.Data));
+		}
+
+		private void ParentOnVolumeControlAvaliableChanged(object sender, DisplayVolumeControlAvaliableApiEventArgs e)
+		{
+			UpdateCachedControlAvaliable();
 		}
 
 		#endregion

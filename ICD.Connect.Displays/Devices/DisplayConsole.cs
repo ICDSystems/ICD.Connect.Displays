@@ -32,7 +32,7 @@ namespace ICD.Connect.Displays.Devices
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-			addRow("Powered", instance.IsPowered);
+			addRow("Powered", instance.PowerState);
 			addRow("Active Input", instance.ActiveInput);
 			addRow("Scaling Mode", instance.ScalingMode);
 		}

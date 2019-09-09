@@ -8,6 +8,7 @@ using ICD.Connect.API;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Info;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Proxies.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -20,7 +21,7 @@ namespace ICD.Connect.Displays.Proxies
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -33,7 +34,7 @@ namespace ICD.Connect.Displays.Proxies
 		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
 
 		private bool m_Trust;
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
@@ -47,20 +48,20 @@ namespace ICD.Connect.Displays.Proxies
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered
+		public virtual ePowerState PowerState
 		{
-			get { return m_IsPowered; }
+			get { return m_PowerState; }
 			[UsedImplicitly]
-			private set
+			protected set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_IsPowered);
+				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_PowerState);
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
 		}
 
@@ -159,11 +160,11 @@ namespace ICD.Connect.Displays.Proxies
 			base.Initialize(command);
 
 			ApiCommandBuilder.UpdateCommand(command)
-			                 .SubscribeEvent(DisplayApi.EVENT_IS_POWERED)
+			                 .SubscribeEvent(DisplayApi.EVENT_POWER_STATE)
 			                 .SubscribeEvent(DisplayApi.EVENT_ACTIVE_INPUT)
 			                 .SubscribeEvent(DisplayApi.EVENT_SCALING_MODE)
 							 .GetProperty(DisplayApi.PROPERTY_TRUST)
-			                 .GetProperty(DisplayApi.PROPERTY_IS_POWERED)
+			                 .GetProperty(DisplayApi.PROPERTY_POWER_STATE)
 			                 .GetProperty(DisplayApi.PROPERTY_ACTIVE_INPUT)
 			                 .GetProperty(DisplayApi.PROPERTY_SCALING_MODE)
 			                 .Complete();
@@ -180,8 +181,8 @@ namespace ICD.Connect.Displays.Proxies
 
 			switch (name)
 			{
-				case DisplayApi.EVENT_IS_POWERED:
-					IsPowered = result.GetValue<bool>();
+				case DisplayApi.EVENT_POWER_STATE:
+					PowerState = result.GetValue<ePowerState>();
 					break;
 
 				case DisplayApi.HELP_EVENT_ACTIVE_INPUT:
@@ -213,8 +214,8 @@ namespace ICD.Connect.Displays.Proxies
 					m_Trust = result.GetValue<bool>();
 					break;
 
-				case DisplayApi.PROPERTY_IS_POWERED:
-					IsPowered = result.GetValue<bool>();
+				case DisplayApi.PROPERTY_POWER_STATE:
+					PowerState = result.GetValue<ePowerState>();
 					break;
 
 				case DisplayApi.PROPERTY_ACTIVE_INPUT:

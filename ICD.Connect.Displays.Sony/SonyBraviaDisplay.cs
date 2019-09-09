@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
@@ -155,7 +156,7 @@ namespace ICD.Connect.Displays.Sony
 			// Query the state of the device
 			SendCommand(SonyBraviaCommand.Enquiry(POWER_FUNCTION));
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(SonyBraviaCommand.Enquiry(VOLUME_FUNCTION));
@@ -209,7 +210,7 @@ namespace ICD.Connect.Displays.Sony
 			switch (response.Function)
 			{
 				case POWER_FUNCTION:
-					IsPowered = int.Parse(response.Parameter) == 1;
+					PowerState = int.Parse(response.Parameter) == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
 					break;
 
 				case VOLUME_FUNCTION:

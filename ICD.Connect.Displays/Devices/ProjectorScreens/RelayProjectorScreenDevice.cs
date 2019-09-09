@@ -3,6 +3,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings;
@@ -114,7 +115,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		{
 			// If relays are latched and display is not null, latch relays
 			if (RelayLatch && Display != null)
-				ActivateDisplayRelays(Display.IsPowered);
+				ActivateDisplayRelays(Display.PowerState);
 		}
 
 		private void SetDisplayOffRelay(IRelayPort relay)
@@ -148,18 +149,25 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 		#region Display Subscritpion/Callback
 
-		protected override void DisplayOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
+		protected override void DisplayOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
 			ActivateDisplayRelays(args.Data);
 		}
 
-		private void ActivateDisplayRelays(bool displayPower)
+		private void ActivateDisplayRelays(bool powerState)
+		{
+			ActivateDisplayRelays(powerState ? ePowerState.PowerOn : ePowerState.PowerOff);
+		}
+
+		private void ActivateDisplayRelays(ePowerState powerState)
 		{
 			// Cancel reset timer, if in progress
 			m_ResetTimer.Stop();
 
 			IRelayPort activeRelay;
 			IRelayPort complimentRelay;
+
+			bool displayPower = powerState == ePowerState.PowerOn || powerState == ePowerState.Warming;
 
 			// Open Compliment Relay
 			if (m_DisplayRelays.TryGetValue(!displayPower, out complimentRelay))

@@ -25,6 +25,12 @@ namespace ICD.Connect.Displays.Devices
 		[EventTelemetry(DisplayTelemetryNames.MUTE_STATE_CHANGED)]
 		event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		/// <summary>
+		/// Raised when the volume control avaliability changes
+		/// </summary>
+		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME_CONTROL_AVALIABLE, DisplayWithAudioApi.HELP_EVENT_VOLUME_CONTROL_AVALIABLE)]
+		event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+
 		#region Properties
 
 		/// <summary>
@@ -77,6 +83,12 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEFAULT)]
 		float? VolumeDefault { get; set; }
+
+		/// <summary>
+		/// Indicates if volume control is currently avaliable or not
+		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVALIABLE, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_CONTROL_AVALIABLE)]
+		bool VolumeControlAvaliable { get; }
 
 		#endregion
 

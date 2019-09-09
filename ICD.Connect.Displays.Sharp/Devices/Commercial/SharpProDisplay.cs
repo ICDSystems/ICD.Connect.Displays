@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -200,7 +201,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 			string command = GetCommand(VOLUME, ((ushort)raw).ToString());
 
@@ -227,14 +228,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		public override void VolumeUpIncrement()
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
@@ -300,7 +301,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			// Update ourselves.
 			SendCommand(POWER_QUERY);
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(INPUT_HDMI_QUERY);
@@ -363,7 +364,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			switch (args.Data.Serialize())
 			{
 				case POWER_QUERY:
-					IsPowered = responseValue == 1;
+					PowerState = responseValue == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
 					break;
 
 				case VOLUME_QUERY:

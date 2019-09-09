@@ -3,6 +3,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -236,7 +237,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 			switch (data.Command)
 			{
 				case COMMAND_POWER:
-					IsPowered = data.Data == "01";
+					PowerState = data.Data == "01" ? ePowerState.PowerOn : ePowerState.PowerOff;
 					break;
 
 				case COMMAND_INPUT:
@@ -288,7 +289,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 			// Query the state of the device
 			SendCommand(new LgDigitalSignageTransmission(COMMAND_POWER, SetId, DATA_QUERY));
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(new LgDigitalSignageTransmission(COMMAND_VOLUME, SetId, DATA_QUERY));

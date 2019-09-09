@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Extensions;
@@ -19,7 +20,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -41,7 +42,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		private readonly IrDisplayCommands m_Commands;
 
 		private IIrPort m_Port;
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
@@ -50,19 +51,19 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered
+		public ePowerState PowerState
 		{
-			get { return m_IsPowered; }
+			get { return m_PowerState; }
 			private set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
 		}
 
@@ -160,7 +161,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		public void PowerOn()
 		{
 			if (PressAndRelease(m_Commands.CommandPowerOn))
-				IsPowered = true;
+				PowerState = ePowerState.PowerOn;
 		}
 
 		/// <summary>
@@ -169,7 +170,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		public void PowerOff()
 		{
 			if (PressAndRelease(m_Commands.CommandPowerOff))
-				IsPowered = false;
+				PowerState = ePowerState.PowerOff;
 		}
 
 		/// <summary>

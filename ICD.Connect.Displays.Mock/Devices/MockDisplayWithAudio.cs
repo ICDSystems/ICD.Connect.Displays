@@ -6,6 +6,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 
@@ -19,7 +20,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -36,12 +37,14 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+
 		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
 		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
@@ -51,6 +54,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
+		private bool m_VolumeControlAvaliable;
 
 		#region Properties
 
@@ -62,22 +66,21 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered
+		public ePowerState PowerState
 		{
-			get { return m_IsPowered; }
+			get { return m_PowerState; }
 			private set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 
-				if (IsPowered && VolumeDefault != null)
-					SetVolume((float)VolumeDefault);
+				UpdateCachedVolumeControlAvalaibleState();
 			}
 		}
 
@@ -223,7 +226,28 @@ namespace ICD.Connect.Displays.Mock.Devices
 					value = MathUtils.Clamp((float)value, this.GetVolumeSafetyOrDeviceMin(),
 					                        this.GetVolumeSafetyOrDeviceMax());
 				}
+
 				m_VolumeDefault = value;
+			}
+		}
+
+		/// <summary>
+		/// Indicates if volume control is currently avaliable or not
+		/// </summary>
+		public bool VolumeControlAvaliable
+		{
+			get { return m_VolumeControlAvaliable; }
+			set
+			{
+				if (value == m_VolumeControlAvaliable)
+					return;
+
+				m_VolumeControlAvaliable = value;
+
+				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+
+				if (VolumeControlAvaliable && VolumeDefault != null)
+					SetVolume((float)VolumeDefault);
 			}
 		}
 
@@ -244,7 +268,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnIsPoweredChanged = null;
+			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 			OnMuteStateChanged = null;
@@ -269,7 +293,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOn()
 		{
-			IsPowered = true;
+			PowerState = ePowerState.PowerOn;
 		}
 
 		/// <summary>
@@ -277,7 +301,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOff()
 		{
-			IsPowered = false;
+			PowerState = ePowerState.PowerOff;
 		}
 
 		/// <summary>
@@ -286,7 +310,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="address"></param>
 		public void SetActiveInput(int address)
 		{
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			ActiveInput = address;
@@ -298,7 +322,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="mode"></param>
 		public void SetScalingMode(eScalingMode mode)
 		{
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			ScalingMode = mode;
@@ -309,7 +333,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOn()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			IsMuted = true;
@@ -320,7 +344,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOff()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			IsMuted = false;
@@ -331,7 +355,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteToggle()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			if (IsMuted)
@@ -346,7 +370,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			// Set the volume
@@ -368,7 +392,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SetVolume(Volume + 1);
@@ -379,13 +403,23 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SetVolume(Volume - 1);
 		}
 
-		#endregion
+		private bool GetVolumeControlAvaliable()
+		{
+			return PowerState == ePowerState.PowerOn;
+		}
+
+		private void UpdateCachedVolumeControlAvalaibleState()
+		{
+			VolumeControlAvaliable = GetVolumeControlAvaliable();
+		}
+
+	#endregion
 
 		#region Console
 

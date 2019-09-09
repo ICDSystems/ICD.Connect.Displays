@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -154,7 +155,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SendNonFormattedCommand(VOLUME + (char)(byte)raw, VolumeComparer);
@@ -173,7 +174,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void VolumeUpIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SendNonFormattedCommand(VOLUME_UP);
@@ -181,7 +182,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void VolumeDownIncrement()
 		{
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SendNonFormattedCommand(VOLUME_DOWN);
@@ -290,15 +291,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			switch (command)
 			{
 				case POWER_ON:
-					IsPowered = true;
+					PowerState = ePowerState.PowerOn;
 					return;
 
 				case POWER_OFF:
-					IsPowered = false;
+					PowerState = ePowerState.PowerOff;
 					return;
 
 				case POWER_TOGGLE:
-					IsPowered = !IsPowered;
+					PowerState = PowerState == ePowerState.PowerOn ? ePowerState.PowerOff : ePowerState.PowerOn;
 					return;
 
 				case MUTE_ON:
@@ -403,7 +404,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// HDMI
 			if (s_InputMap.Values.Contains(command))
 			{
-				IsPowered = true;
+				PowerState = ePowerState.PowerOn;
 				ActiveInput = s_InputMap.ContainsValue(command)
 					            ? s_InputMap.GetKey(command)
 					            : (int?)null;
@@ -416,7 +417,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// Scaling Mode
 			if (s_ScalingModeMap.Values.Contains(command))
 			{
-				IsPowered = true;
+				PowerState = ePowerState.PowerOn;
 				ScalingMode = s_ScalingModeMap.GetKey(command);
 				return;
 			}
@@ -424,7 +425,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			// Volume
 			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
-				IsPowered = true;
+				PowerState = ePowerState.PowerOn;
 				Volume = command[5];
 				IsMuted = false;
 				return;
@@ -433,19 +434,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			switch (command)
 			{
 				case POWER_ON:
-					IsPowered = true;
+					PowerState = ePowerState.PowerOn;
 					m_PowerRetries = 0;
 					return;
 				case POWER_OFF:
-					IsPowered = false;
+					PowerState = ePowerState.PowerOff;
 					m_PowerRetries = 0;
 					return;
 				case MUTE_ON:
-					IsPowered = true;
+					PowerState = ePowerState.PowerOn;
 					IsMuted = true;
 					return;
 				case MUTE_OFF:
-					IsPowered = true;
+					PowerState = ePowerState.PowerOn;
 					IsMuted = false;
 					return;
 			}

@@ -5,6 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings;
@@ -19,6 +20,8 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+
 		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
@@ -30,6 +33,7 @@ namespace ICD.Connect.Displays.Devices
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
+		private bool m_VolumeControlAvaliable;
 
 		#region Properties
 
@@ -137,20 +141,37 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
-		/// Gets the powered state.
+		/// Indicates if volume control is currently avaliable or not
 		/// </summary>
-		public override bool IsPowered
-		{
-			get { return base.IsPowered; }
-			protected set
+		public bool VolumeControlAvaliable { get { return m_VolumeControlAvaliable; }
+			private set
 			{
-				if (value == IsPowered)
+				if (m_VolumeControlAvaliable == value)
 					return;
 
-				base.IsPowered = value;
+				m_VolumeControlAvaliable = value;
 
-				if (IsPowered && VolumeDefault != null)
+				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+
+				if (VolumeControlAvaliable && VolumeDefault != null)
 					SetVolume((float)VolumeDefault);
+			}
+		}
+
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		public override ePowerState PowerState
+		{
+			get { return base.PowerState; }
+			protected set
+			{
+				if (value == PowerState)
+					return;
+
+				base.PowerState = value;
+
+				UpdateCachedVolumeControlAvaliableState();
 			}
 		}
 
@@ -204,7 +225,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn || PowerState != ePowerState.Warming)
 				return;
 
 			// Set the volume
@@ -240,6 +261,16 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="raw"></param>
 		protected abstract void VolumeSetRawFinal(float raw);
+
+		protected virtual bool GetVolumeControlAvaliable()
+		{
+			return PowerState == ePowerState.PowerOn;
+		}
+
+		protected virtual void UpdateCachedVolumeControlAvaliableState()
+		{
+			VolumeControlAvaliable = GetVolumeControlAvaliable();
+		}
 
 		#endregion
 

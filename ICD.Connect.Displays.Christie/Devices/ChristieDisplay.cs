@@ -3,6 +3,7 @@ using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -52,10 +53,10 @@ namespace ICD.Connect.Displays.Christie.Devices
 			{2, INPUT_HDMI_2}
 		};
 
-		private static readonly BiDictionary<bool, string> s_PowerMap = new BiDictionary<bool, string>
+		private static readonly BiDictionary<ePowerState, string> s_PowerMap = new BiDictionary<ePowerState, string>
 		{
-			{true, POWER_ON},
-			{false, POWER_OFF}
+			{ePowerState.PowerOn, POWER_ON},
+			{ePowerState.PowerOff, POWER_OFF}
 		};
 
 		#endregion
@@ -63,7 +64,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 
-		private bool? m_RequestedPowerStatus;
+		private ePowerState? m_RequestedPowerStatus;
 		private int? m_RequestedInput;
 		private eScalingMode? m_RequestedAspect;
 
@@ -129,7 +130,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 			if (s_PowerMap.ContainsValue(command))
 			{
-				IsPowered = s_PowerMap.GetKey(command);
+				PowerState = s_PowerMap.GetKey(command);
 				return;
 			}
 
@@ -217,7 +218,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				{
 					case POWER_ON:
 					case POWER_OFF:
-						m_RequestedPowerStatus = data == POWER_ON;
+						m_RequestedPowerStatus = data == POWER_ON ? ePowerState.PowerOn : ePowerState.PowerOff;
 						SendCommandPriority(new SerialData(POWER_QUERY), 0);
 						break;
 				}
@@ -309,10 +310,10 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 		private void PowerQueryResponse(string response)
 		{
-			bool responsePower = s_PowerMap.Where(p => p.Value[11] == response[1]).Select(p => p.Key).FirstOrDefault();
+			ePowerState responsePower = s_PowerMap.Where(p => p.Value[11] == response[1]).Select(p => p.Key).FirstOrDefault();
 			if (m_RequestedPowerStatus == null)
 			{
-				IsPowered = responsePower;
+				PowerState = responsePower;
 				ResetRetryCount(POWER_QUERY);
 			}
 			else
@@ -320,7 +321,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 				string command = s_PowerMap.GetValue(m_RequestedPowerStatus.Value);
 				if (m_RequestedPowerStatus == responsePower || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
-					IsPowered = responsePower;
+					PowerState = responsePower;
 					ResetRetryCount(command);
 				}
 				else
@@ -395,7 +396,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 		{
 			SendCommand(POWER_QUERY);
 
-			if (!IsPowered)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(INPUT_QUERY);

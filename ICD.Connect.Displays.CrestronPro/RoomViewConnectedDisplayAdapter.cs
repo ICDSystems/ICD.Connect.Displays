@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
@@ -25,7 +26,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Raised when the power state changes.
 		/// </summary>
-		public event EventHandler<DisplayPowerStateApiEventArgs> OnIsPoweredChanged;
+		public event EventHandler<DisplayPowerStateApiEventArgs> OnPowerStateChanged;
 
 		/// <summary>
 		/// Raised when the selected HDMI input changes.
@@ -47,17 +48,20 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+
 #if SIMPLSHARP
 		private RoomViewConnectedDisplay m_Display;
 #endif
 
-		private bool m_IsPowered;
+		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
 		private float m_Volume;
 		private bool m_IsMuted;
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
+		private bool m_VolumeControlAvaliable;
 
 		#region Properties
 
@@ -69,22 +73,21 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Gets the powered state.
 		/// </summary>
-		public bool IsPowered
+		public ePowerState PowerState
 		{
-			get { return m_IsPowered; }
+			get { return m_PowerState; }
 			private set
 			{
-				if (value == m_IsPowered)
+				if (value == m_PowerState)
 					return;
 
-				m_IsPowered = value;
+				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_IsPowered);
+				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				if (m_IsPowered && m_VolumeDefault != null)
-					SetVolume((float)m_VolumeDefault);
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 
-				OnIsPoweredChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_IsPowered));
+				UpdateCachedVolumeControlAvaliableState();
 			}
 		}
 
@@ -220,6 +223,20 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public float VolumeDeviceMax { get { return 100; } }
 
+		/// <summary>
+		/// Indicates if volume control is currently avaliable or not
+		/// </summary>
+		public bool VolumeControlAvaliable { get { return m_VolumeControlAvaliable; }
+			private set
+			{
+				if (value == m_VolumeControlAvaliable)
+					return;
+
+				m_VolumeControlAvaliable = value;
+
+				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+			} }
+
 		#endregion
 
 		/// <summary>
@@ -237,7 +254,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
-			OnIsPoweredChanged = null;
+			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
 			OnScalingModeChanged = null;
 			OnVolumeChanged = null;
@@ -436,9 +453,60 @@ namespace ICD.Connect.Displays.CrestronPro
 #endif
 		}
 
-#endregion
+		private void UpdateCachedVolumeControlAvaliableState()
+		{
+			VolumeControlAvaliable = GetVolumeControlAvaliable();
+		}
 
-#region Settings
+		private bool GetVolumeControlAvaliable()
+		{
+#if SIMPLSHARP
+			return m_Display != null && m_Display.PowerOnFeedback.BoolValue;
+#else
+			return false;
+#endif
+		}
+
+		private void UpdateCachedPowerState()
+		{
+#if SIMPLSHARP
+			if (m_Display == null)
+			{
+				PowerState = ePowerState.Unknown;
+				return;
+			}
+
+			if (m_Display.WarmingUpFeedback.BoolValue)
+			{
+				PowerState = ePowerState.Warming;
+				return;
+			}
+
+			if (m_Display.CoolingDownFeedback.BoolValue)
+			{
+				PowerState = ePowerState.Cooling;
+				return;
+			}
+
+			if (m_Display.PowerOnFeedback.BoolValue)
+			{
+				PowerState = ePowerState.PowerOn;
+				return;
+			}
+
+			if (m_Display.PowerOffFeedback.BoolValue)
+			{
+				PowerState = ePowerState.PowerOff;
+				return;
+			}
+
+#endif
+			PowerState = ePowerState.Unknown;
+		}
+
+		#endregion
+
+		#region Settings
 
 		/// <summary>
 		/// Override to clear the instance settings.
@@ -530,7 +598,7 @@ namespace ICD.Connect.Displays.CrestronPro
 				case RoomViewConnectedDisplay.PowerOnFeedbackEventId:
 				case RoomViewConnectedDisplay.PowerOffFeedbackEventId:
 				case RoomViewConnectedDisplay.PowerStatusFeedbackEventId:
-					IsPowered = m_Display.PowerOnFeedback.GetBoolValueOrDefault();
+					UpdateCachedPowerState();
 					break;
 
 				case RoomViewConnectedDisplay.VolumeUpFeedbackEventId:

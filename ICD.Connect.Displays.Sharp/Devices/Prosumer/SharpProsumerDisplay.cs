@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Sharp.Devices.Consumer;
@@ -71,14 +72,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		#region Properties
 
-		public override bool IsPowered
+		public override ePowerState PowerState
 		{
-			get { return base.IsPowered; }
+			get { return base.PowerState; }
 			protected set
 			{
-				if (value == false)
+				if (value == ePowerState.PowerOff)
 					m_RequestedInput = null;
-				base.IsPowered = value;
+				base.PowerState = value;
 			}
 		}
 
@@ -161,7 +162,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 
 			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, ((ushort)raw).ToString());
@@ -173,7 +174,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		public override void VolumeUpIncrement()
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 
 			SendCommand(SharpDisplayCommands.VOLUME_UP, CommandComparer);
@@ -183,7 +184,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		public override void VolumeDownIncrement()
 		{
-            if (!IsPowered)
+            if (!VolumeControlAvaliable)
                 return;
 
 			SendCommand(SharpDisplayCommands.VOLUME_DOWN, CommandComparer);
@@ -276,7 +277,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			// Update ourselves.
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 
-			if (!IsPowered)
+			if (!VolumeControlAvaliable)
 				return;
 
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
@@ -349,7 +350,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			switch (args.Data.Serialize())
 			{
 				case SharpDisplayCommands.POWER_QUERY:
-					IsPowered = responseValue == 1;
+					PowerState = responseValue == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
 					break;
 
 				case SharpDisplayCommands.VOLUME_QUERY:
@@ -405,13 +406,13 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 						{
 							// If input set errored and we are still requesting an input,
 							// Retry input query (so it will eventually hit retry limit
-							if (m_RequestedInput != null && IsPowered)
+							if (m_RequestedInput != null && PowerState == ePowerState.PowerOn)
 							{
 								RetryCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 								return;
 							}
 							// If the input isn't being requested any more, or the display is powered off, ignore the error
-							if (m_RequestedInput == null || !IsPowered)
+							if (m_RequestedInput == null || PowerState != ePowerState.PowerOn)
 								return;
 						}
 						break;

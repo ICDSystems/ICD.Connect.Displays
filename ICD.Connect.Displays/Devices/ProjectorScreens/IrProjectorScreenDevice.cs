@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Settings;
@@ -84,12 +85,12 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 		#region Display Subscritpion/Callback
 
-		protected override void DisplayOnIsPoweredChanged(object sender, DisplayPowerStateApiEventArgs args)
+		protected override void DisplayOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
 			ActivateScreen(args.Data);
 		}
 
-		private void ActivateScreen(bool powerState)
+		private void ActivateScreen(ePowerState powerState)
 		{
 			if (IrPort == null)
 			{
@@ -97,8 +98,10 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				return;
 			}
 
+			bool displayOn = powerState == ePowerState.PowerOn || powerState == ePowerState.Warming;
+
 			string command;
-			if (!m_DisplayIrCommands.TryGetValue(powerState, out command))
+			if (!m_DisplayIrCommands.TryGetValue(displayOn, out command))
 				return;
 
 			IrPort.PressAndRelease(command);

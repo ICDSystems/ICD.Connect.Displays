@@ -4,6 +4,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
@@ -120,7 +121,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	    {
 		    base.QueryState();
 			SendNonFormattedCommand(QUERY_POWER);
-		    if (!IsPowered)
+		    if (PowerState != ePowerState.PowerOn)
 			    return;
 
 			SendNonFormattedCommand(QUERY_VOLUME);
@@ -158,24 +159,24 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
         public override void VolumeUpIncrement()
         {
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
             SendNonFormattedCommand(VOLUME_UP);
             SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         public override void VolumeDownIncrement()
         {
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
             SendNonFormattedCommand(VOLUME_DOWN);
             SendNonFormattedCommand(QUERY_VOLUME);
         }
 
         protected override void VolumeSetRawFinal(float raw)
         {
-            if (!IsPowered)
-                return;
+			if (!VolumeControlAvaliable)
+				return;
             string setVolCommand = GenerateSetVolumeCommand((int)raw);
             SendNonFormattedCommand(setVolCommand);
         }
@@ -315,10 +316,10 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	        switch (command)
 	        {
 		        case "PON":
-			        IsPowered = true;
+			        PowerState = ePowerState.PowerOn;
 			        break;
 		        case "POF":
-			        IsPowered = false;
+			        PowerState = ePowerState.PowerOff;
 			        break;
 		        case "AMT":
 			        string param = ExtractParameter(response, 1);
