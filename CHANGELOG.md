@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+ - Updated IPowerDeviceControls to use PowerState
  - IrProjectorScreenDevice changed "IrPort" element to "Port" for consistency
  - SamsungDisplay removed first command suffix (doesn't seem to be needed)
  - SamsungDisplay fixed string comparison problems on Mono platform preventing power off feedback from working
