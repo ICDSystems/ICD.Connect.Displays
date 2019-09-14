@@ -128,7 +128,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public float? VolumeDefault { get; set; }
 
 		/// <summary>
-		/// Indicates if volume control is currently avaliable or not
+		/// Indicates if volume control is currently available or not
 		/// </summary>
 		public bool VolumeControlAvaliable
 		{

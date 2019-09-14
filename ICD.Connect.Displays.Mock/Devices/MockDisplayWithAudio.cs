@@ -232,7 +232,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		}
 
 		/// <summary>
-		/// Indicates if volume control is currently avaliable or not
+		/// Indicates if volume control is currently available or not
 		/// </summary>
 		public bool VolumeControlAvaliable
 		{

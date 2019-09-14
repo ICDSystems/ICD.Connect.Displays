@@ -85,7 +85,7 @@ namespace ICD.Connect.Displays.Devices
 		float? VolumeDefault { get; set; }
 
 		/// <summary>
-		/// Indicates if volume control is currently avaliable or not
+		/// Indicates if volume control is currently available or not
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVALIABLE, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_CONTROL_AVALIABLE)]
 		bool VolumeControlAvaliable { get; }
