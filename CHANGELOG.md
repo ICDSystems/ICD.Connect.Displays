@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed a bug where volume control was not working due to power state
+
 ## [12.2.0] - 2019-09-16
 ### Changed
  - Updated IPowerDeviceControls to use PowerState

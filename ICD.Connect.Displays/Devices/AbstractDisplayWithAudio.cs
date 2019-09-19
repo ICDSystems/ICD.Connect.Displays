@@ -143,7 +143,9 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvaliable { get { return m_VolumeControlAvaliable; }
+		public bool VolumeControlAvaliable
+		{
+			get { return m_VolumeControlAvaliable; }
 			private set
 			{
 				if (m_VolumeControlAvaliable == value)
@@ -225,7 +227,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			if (PowerState != ePowerState.PowerOn || PowerState != ePowerState.Warming)
+			if (PowerState != ePowerState.PowerOn && PowerState != ePowerState.Warming)
 				return;
 
 			// Set the volume
