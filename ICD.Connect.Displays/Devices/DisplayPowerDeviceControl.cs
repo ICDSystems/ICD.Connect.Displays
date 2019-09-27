@@ -70,9 +70,9 @@ namespace ICD.Connect.Displays.Devices
         /// <param name="eventArgs"></param>
         private void ParentOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs eventArgs)
         {
-            PowerState = Parent.PowerState;
+            SetPowerState(eventArgs.Data.PowerState, eventArgs.Data.ExpectedDuration);
         }
 
-        #endregion
+	    #endregion
     }
 }

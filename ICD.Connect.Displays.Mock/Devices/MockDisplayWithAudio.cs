@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Mock.Devices
 {
@@ -48,6 +50,12 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
+		private int m_WarmingTime;
+		private int m_CoolingTime;
+
+		private readonly SafeTimer m_WarmingTimer;
+		private readonly SafeTimer m_CoolingTimer;
+
 		private bool m_IsMuted;
 		private float m_Volume;
 
@@ -78,7 +86,19 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
+				int expectedDuration = 0;
+
+				switch (value)
+				{
+					case ePowerState.Warming:
+						expectedDuration = m_WarmingTime;
+						break;
+					case ePowerState.Cooling:
+						expectedDuration = m_CoolingTime;
+						break;
+				}
+
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState,expectedDuration));
 
 				UpdateCachedVolumeControlAvalaibleState();
 			}
@@ -258,6 +278,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public MockDisplayWithAudio()
 		{
+			m_WarmingTimer = SafeTimer.Stopped(WarmingComplete);
+			m_CoolingTimer = SafeTimer.Stopped(CoolingComplete);
+
 			Controls.Add(new DisplayRouteDestinationControl(this, 0));
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
@@ -293,7 +316,15 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOn()
 		{
-			PowerState = ePowerState.PowerOn;
+			m_CoolingTimer.Stop();
+
+			if (m_WarmingTime > 0)
+			{
+				PowerState = ePowerState.Warming;
+				m_WarmingTimer.Reset(m_WarmingTime);
+			}
+			else
+				PowerState = ePowerState.PowerOn;
 		}
 
 		/// <summary>
@@ -301,7 +332,15 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOff()
 		{
-			PowerState = ePowerState.PowerOff;
+			m_WarmingTimer.Stop();
+
+			if (m_CoolingTime > 0)
+			{
+				PowerState = ePowerState.Cooling;
+				m_CoolingTimer.Reset(m_CoolingTime);
+			}
+			else
+				PowerState = ePowerState.PowerOff;
 		}
 
 		/// <summary>
@@ -419,7 +458,60 @@ namespace ICD.Connect.Displays.Mock.Devices
 			VolumeControlAvaliable = GetVolumeControlAvaliable();
 		}
 
-	#endregion
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(MockDisplayWithAudioSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			m_WarmingTime = settings.WarmingTime;
+			m_CoolingTime = settings.CoolingTime;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			m_WarmingTimer.Stop();
+			m_CoolingTimer.Stop();
+
+			m_WarmingTime = 0;
+			m_CoolingTime = 0;
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(MockDisplayWithAudioSettings settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.WarmingTime = m_WarmingTime;
+			settings.CoolingTime = m_CoolingTime;
+		}
+
+		private void WarmingComplete()
+		{
+			PowerState = ePowerState.PowerOn;
+		}
+
+		private void CoolingComplete()
+		{
+			PowerState = ePowerState.PowerOff;
+		}
+
+		#endregion
 
 		#region Console
 
@@ -449,6 +541,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 			DisplayConsole.BuildConsoleStatus(this, addRow);
 			DisplayWithAudioConsole.BuildConsoleStatus(this, addRow);
+			addRow("WarmingTime (ms)", m_WarmingTime);
+			addRow("CoolingTime (ms)", m_CoolingTime);
 		}
 
 		/// <summary>

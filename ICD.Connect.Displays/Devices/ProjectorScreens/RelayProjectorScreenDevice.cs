@@ -151,7 +151,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 		protected override void DisplayOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
-			ActivateDisplayRelays(args.Data);
+			ActivateDisplayRelays(args.PowerState);
 		}
 
 		private void ActivateDisplayRelays(bool powerState)

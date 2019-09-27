@@ -87,7 +87,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 		protected override void DisplayOnPowerStateChanged(object sender, DisplayPowerStateApiEventArgs args)
 		{
-			ActivateScreen(args.Data);
+			ActivateScreen(args.PowerState);
 		}
 
 		private void ActivateScreen(ePowerState powerState)
