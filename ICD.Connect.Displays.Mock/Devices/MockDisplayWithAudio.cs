@@ -50,8 +50,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private int? m_ActiveInput;
 		private eScalingMode m_ScalingMode;
 
-		private int m_WarmingTime;
-		private int m_CoolingTime;
+		private long m_WarmingTime;
+		private long m_CoolingTime;
 
 		private readonly SafeTimer m_WarmingTimer;
 		private readonly SafeTimer m_CoolingTimer;
@@ -86,7 +86,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				int expectedDuration = 0;
+				long expectedDuration = 0;
 
 				switch (value)
 				{
@@ -98,7 +98,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 						break;
 				}
 
-				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState,expectedDuration));
+				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState, expectedDuration));
 
 				UpdateCachedVolumeControlAvalaibleState();
 			}

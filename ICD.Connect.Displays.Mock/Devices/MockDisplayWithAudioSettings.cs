@@ -18,13 +18,13 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// Warming time for the device, in milliseconds
 		/// Defaults to 0
 		/// </summary>
-		public int WarmingTime { get; set; }
+		public long WarmingTime { get; set; }
 
 		/// <summary>
 		/// Cooling time for the device, in milliseconds
 		/// Defaults to 0
 		/// </summary>
-		public int CoolingTime { get; set; }
+		public long CoolingTime { get; set; }
 
 		/// <summary>
 		/// Writes property elements to xml.
@@ -46,8 +46,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		{
 			base.ParseXml(xml);
 
-			WarmingTime = XmlUtils.TryReadChildElementContentAsInt(xml, WARMING_TIME_ELEMENT) ?? 0;
-			CoolingTime = XmlUtils.TryReadChildElementContentAsInt(xml, COOLING_TIME_ELEMENT) ?? 0;
+			WarmingTime = XmlUtils.TryReadChildElementContentAsLong(xml, WARMING_TIME_ELEMENT) ?? 0;
+			CoolingTime = XmlUtils.TryReadChildElementContentAsLong(xml, COOLING_TIME_ELEMENT) ?? 0;
 		}
 	}
 }

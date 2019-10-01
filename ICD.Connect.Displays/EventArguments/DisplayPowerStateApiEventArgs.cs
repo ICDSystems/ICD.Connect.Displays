@@ -7,16 +7,16 @@ namespace ICD.Connect.Displays.EventArguments
 {
 	public sealed class DisplayPowerStateApiEventArgs : AbstractGenericApiEventArgs<PowerDeviceControlPowerStateEventData>
 	{
+		public ePowerState PowerState { get { return Data.PowerState; } }
 
-		public ePowerState PowerState{get { return Data.PowerState; }}
-
-		public int ExpectedDuration {get { return Data.ExpectedDuration; }}
+		public long ExpectedDuration { get { return Data.ExpectedDuration; } }
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="data"></param>
-		public DisplayPowerStateApiEventArgs(ePowerState data) : this(data, 0)
+		public DisplayPowerStateApiEventArgs(ePowerState data)
+			: this(data, 0)
 		{
 		}
 
@@ -25,7 +25,7 @@ namespace ICD.Connect.Displays.EventArguments
 		/// </summary>
 		/// <param name="powerState"></param>
 		/// <param name="expectedDuration"></param>
-		public DisplayPowerStateApiEventArgs(ePowerState powerState, int expectedDuration)
+		public DisplayPowerStateApiEventArgs(ePowerState powerState, long expectedDuration)
 			: base(DisplayApi.EVENT_POWER_STATE, new PowerDeviceControlPowerStateEventData(powerState, expectedDuration))
 		{
 		}
