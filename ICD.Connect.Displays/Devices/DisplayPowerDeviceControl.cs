@@ -13,18 +13,6 @@ namespace ICD.Connect.Displays.Devices
         public DisplayPowerDeviceControl(IDisplay parent, int id)
             : base(parent, id)
         {
-            Subscribe(parent);
-        }
-
-        /// <summary>
-        /// Override to release resources.
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected override void DisposeFinal(bool disposing)
-        {
-            Unsubscribe(Parent);
-
-            base.DisposeFinal(disposing);
         }
 
         /// <summary>
@@ -49,7 +37,7 @@ namespace ICD.Connect.Displays.Devices
         /// Subscribe to the parent events.
         /// </summary>
         /// <param name="parent"></param>
-        private void Subscribe(IDisplay parent)
+        protected override void Subscribe(IDisplay parent)
         {
             parent.OnPowerStateChanged += ParentOnPowerStateChanged;
         }
@@ -58,7 +46,7 @@ namespace ICD.Connect.Displays.Devices
         /// Unsubscribe from the parent events.
         /// </summary>
         /// <param name="parent"></param>
-        private void Unsubscribe(IDisplay parent)
+        protected override void Unsubscribe(IDisplay parent)
         {
             parent.OnPowerStateChanged -= ParentOnPowerStateChanged;
         }
