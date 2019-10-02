@@ -140,14 +140,14 @@ namespace ICD.Connect.Displays.Nec.Devices
 
 		public override void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
@@ -178,7 +178,7 @@ namespace ICD.Connect.Displays.Nec.Devices
 		/// <param name="raw"></param>
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
 		}

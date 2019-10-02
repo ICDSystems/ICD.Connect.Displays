@@ -48,7 +48,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
-		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
 #if SIMPLSHARP
 		private RoomViewConnectedDisplay m_Display;
@@ -61,7 +61,7 @@ namespace ICD.Connect.Displays.CrestronPro
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
-		private bool m_VolumeControlAvaliable;
+		private bool m_VolumeControlAvailable;
 
 		#region Properties
 
@@ -87,7 +87,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 
-				UpdateCachedVolumeControlAvaliableState();
+				UpdateCachedVolumeControlAvailableState();
 			}
 		}
 
@@ -226,15 +226,15 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvaliable { get { return m_VolumeControlAvaliable; }
+		public bool VolumeControlAvailable { get { return m_VolumeControlAvailable; }
 			private set
 			{
-				if (value == m_VolumeControlAvaliable)
+				if (value == m_VolumeControlAvailable)
 					return;
 
-				m_VolumeControlAvaliable = value;
+				m_VolumeControlAvailable = value;
 
-				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
 			} }
 
 		#endregion
@@ -453,12 +453,12 @@ namespace ICD.Connect.Displays.CrestronPro
 #endif
 		}
 
-		private void UpdateCachedVolumeControlAvaliableState()
+		private void UpdateCachedVolumeControlAvailableState()
 		{
-			VolumeControlAvaliable = GetVolumeControlAvaliable();
+			VolumeControlAvailable = GetVolumeControlAvailable();
 		}
 
-		private bool GetVolumeControlAvaliable()
+		private bool GetVolumeControlAvailable()
 		{
 #if SIMPLSHARP
 			return m_Display != null && m_Display.PowerOnFeedback.BoolValue;

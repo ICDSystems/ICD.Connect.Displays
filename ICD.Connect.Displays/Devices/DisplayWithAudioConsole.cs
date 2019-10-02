@@ -34,7 +34,7 @@ namespace ICD.Connect.Displays.Devices
 			float volume = instance.GetVolumeAsPercentage() * 100;
 			string percentage = string.Format("{0}%", (int)volume);
 
-			addRow("Volume Control Available", instance.VolumeControlAvaliable);
+			addRow("Volume Control Available", instance.VolumeControlAvailable);
 			addRow("Muted", instance.IsMuted);
 			addRow("Volume", instance.Volume);
 			addRow("Volume Percentage", percentage);

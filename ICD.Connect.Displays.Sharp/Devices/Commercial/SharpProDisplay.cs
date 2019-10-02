@@ -201,7 +201,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 			string command = GetCommand(VOLUME, ((ushort)raw).ToString());
 
@@ -228,14 +228,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		public override void VolumeUpIncrement()
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 			SetVolume((ushort)(Volume + VOLUME_INCREMENT));
 		}
 
 		public override void VolumeDownIncrement()
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}

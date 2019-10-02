@@ -39,7 +39,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
-		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
 		/// <summary>
 		/// Raised when the volume changes.
@@ -62,7 +62,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
-		private bool m_VolumeControlAvaliable;
+		private bool m_VolumeControlAvailable;
 
 		#region Properties
 
@@ -254,19 +254,19 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvaliable
+		public bool VolumeControlAvailable
 		{
-			get { return m_VolumeControlAvaliable; }
+			get { return m_VolumeControlAvailable; }
 			set
 			{
-				if (value == m_VolumeControlAvaliable)
+				if (value == m_VolumeControlAvailable)
 					return;
 
-				m_VolumeControlAvaliable = value;
+				m_VolumeControlAvailable = value;
 
-				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
 
-				if (VolumeControlAvaliable && VolumeDefault != null)
+				if (VolumeControlAvailable && VolumeDefault != null)
 					SetVolume((float)VolumeDefault);
 			}
 		}
@@ -380,7 +380,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOn()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			IsMuted = true;
@@ -391,7 +391,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOff()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			IsMuted = false;
@@ -402,7 +402,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteToggle()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			if (IsMuted)
@@ -417,7 +417,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			// Set the volume
@@ -439,7 +439,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SetVolume(Volume + 1);
@@ -450,20 +450,20 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SetVolume(Volume - 1);
 		}
 
-		private bool GetVolumeControlAvaliable()
+		private bool GetVolumeControlAvailable()
 		{
 			return PowerState == ePowerState.PowerOn;
 		}
 
 		private void UpdateCachedVolumeControlAvalaibleState()
 		{
-			VolumeControlAvaliable = GetVolumeControlAvaliable();
+			VolumeControlAvailable = GetVolumeControlAvailable();
 		}
 
 		#endregion

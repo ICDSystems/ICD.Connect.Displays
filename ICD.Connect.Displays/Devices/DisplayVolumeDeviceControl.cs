@@ -133,9 +133,9 @@ namespace ICD.Connect.Displays.Devices
 			Parent.VolumeDownIncrement();
 		}
 
-		protected override bool GetControlAvaliable()
+		protected override bool GetControlAvailable()
 		{
-			return Parent.VolumeControlAvaliable;
+			return Parent.VolumeControlAvailable;
 		}
 
 		#endregion
@@ -151,7 +151,7 @@ namespace ICD.Connect.Displays.Devices
 
 			parent.OnVolumeChanged += ParentOnVolumeChanged;
 			parent.OnMuteStateChanged += ParentOnMuteStateChanged;
-			parent.OnVolumeControlAvaliableChanged += ParentOnVolumeControlAvaliableChanged;
+			parent.OnVolumeControlAvailableChanged += ParentOnVolumeControlAvailableChanged;
 		}
 
 		protected override void Unsubscribe(IDisplayWithAudio parent)
@@ -163,7 +163,7 @@ namespace ICD.Connect.Displays.Devices
 
 			parent.OnVolumeChanged -= ParentOnVolumeChanged;
 			parent.OnMuteStateChanged -= ParentOnMuteStateChanged;
-			parent.OnVolumeControlAvaliableChanged -= ParentOnVolumeControlAvaliableChanged;
+			parent.OnVolumeControlAvailableChanged -= ParentOnVolumeControlAvailableChanged;
 		}
 
 		private void ParentOnVolumeChanged(object sender, DisplayVolumeApiEventArgs args)
@@ -180,9 +180,9 @@ namespace ICD.Connect.Displays.Devices
 			OnMuteStateChanged.Raise(this, new MuteDeviceMuteStateChangedApiEventArgs(args.Data));
 		}
 
-		private void ParentOnVolumeControlAvaliableChanged(object sender, DisplayVolumeControlAvaliableApiEventArgs e)
+		private void ParentOnVolumeControlAvailableChanged(object sender, DisplayVolumeControlAvailableApiEventArgs e)
 		{
-			UpdateCachedControlAvaliable();
+			UpdateCachedControlAvailable();
 		}
 
 		#endregion

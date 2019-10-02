@@ -95,7 +95,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// </summary>
 	    public override void VolumeUpIncrement()
 	    {
-		    if (!VolumeControlAvaliable)
+		    if (!VolumeControlAvailable)
 			    return;
 		    SendNonFormattedCommand(VOLUME_UP);
 	    }
@@ -105,7 +105,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// </summary>
 	    public override void VolumeDownIncrement()
 	    {
-		    if (!VolumeControlAvaliable)
+		    if (!VolumeControlAvailable)
 			    return;
 		    SendNonFormattedCommand(VOLUME_DOWN);
 	    }
@@ -116,7 +116,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    /// <param name="raw"></param>
 	    protected override void VolumeSetRawFinal(float raw)
 	    {
-		    if (!VolumeControlAvaliable)
+		    if (!VolumeControlAvailable)
 			    return;
 		    SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw));
 	    }

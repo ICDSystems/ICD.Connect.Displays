@@ -131,7 +131,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void MuteOn()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SendNonFormattedCommand(MUTE_ON);
 			SendNonFormattedCommand(QUERY_MUTE);
@@ -140,7 +140,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void MuteOff()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SendNonFormattedCommand(MUTE_OFF);
 			SendNonFormattedCommand(QUERY_MUTE);
@@ -149,7 +149,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume + 1));
 			SendNonFormattedCommand(QUERY_VOLUME);
@@ -158,7 +158,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume - 1));
 			SendNonFormattedCommand(QUERY_VOLUME);
@@ -167,7 +167,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 			string setVolCommand = GenerateSetVolumeCommand((int)raw);
 			SendNonFormattedCommand(setVolCommand);

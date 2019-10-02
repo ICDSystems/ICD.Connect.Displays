@@ -155,7 +155,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SendNonFormattedCommand(VOLUME + (char)(byte)raw, VolumeComparer);
@@ -174,7 +174,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SendNonFormattedCommand(VOLUME_UP);
@@ -182,7 +182,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 		public override void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SendNonFormattedCommand(VOLUME_DOWN);

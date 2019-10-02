@@ -20,7 +20,7 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
-		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
 		/// <summary>
 		/// Raised when the volume changes.
@@ -33,7 +33,7 @@ namespace ICD.Connect.Displays.Devices
 		private float? m_VolumeSafetyMin;
 		private float? m_VolumeSafetyMax;
 		private float? m_VolumeDefault;
-		private bool m_VolumeControlAvaliable;
+		private bool m_VolumeControlAvailable;
 
 		#region Properties
 
@@ -143,19 +143,19 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvaliable
+		public bool VolumeControlAvailable
 		{
-			get { return m_VolumeControlAvaliable; }
+			get { return m_VolumeControlAvailable; }
 			private set
 			{
-				if (m_VolumeControlAvaliable == value)
+				if (m_VolumeControlAvailable == value)
 					return;
 
-				m_VolumeControlAvaliable = value;
+				m_VolumeControlAvailable = value;
 
-				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
 
-				if (VolumeControlAvaliable && VolumeDefault != null)
+				if (VolumeControlAvailable && VolumeDefault != null)
 					SetVolume((float)VolumeDefault);
 			}
 		}
@@ -173,7 +173,7 @@ namespace ICD.Connect.Displays.Devices
 
 				base.PowerState = value;
 
-				UpdateCachedVolumeControlAvaliableState();
+				UpdateCachedVolumeControlAvailableState();
 			}
 		}
 
@@ -264,14 +264,14 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="raw"></param>
 		protected abstract void VolumeSetRawFinal(float raw);
 
-		protected virtual bool GetVolumeControlAvaliable()
+		protected virtual bool GetVolumeControlAvailable()
 		{
 			return PowerState == ePowerState.PowerOn;
 		}
 
-		protected virtual void UpdateCachedVolumeControlAvaliableState()
+		protected virtual void UpdateCachedVolumeControlAvailableState()
 		{
-			VolumeControlAvaliable = GetVolumeControlAvaliable();
+			VolumeControlAvailable = GetVolumeControlAvailable();
 		}
 
 		#endregion

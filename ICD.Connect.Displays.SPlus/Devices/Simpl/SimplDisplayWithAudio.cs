@@ -25,11 +25,11 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
-		public event EventHandler<DisplayVolumeControlAvaliableApiEventArgs> OnVolumeControlAvaliableChanged;
+		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
 		private float m_Volume;
 		private bool m_IsMuted;
-		private bool m_VolumeControlAvaliable;
+		private bool m_VolumeControlAvailable;
 
 		#region Callbacks
 
@@ -58,7 +58,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			protected set
 			{
 				base.PowerState = value;
-				UpdateCachedVolumeControlAvaliableState();
+				UpdateCachedVolumeControlAvailableState();
 			}
 		}
 
@@ -130,19 +130,19 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvaliable
+		public bool VolumeControlAvailable
 		{
-			get { return m_VolumeControlAvaliable; }
+			get { return m_VolumeControlAvailable; }
 			private set
 			{
-				if (m_VolumeControlAvaliable == value)
+				if (m_VolumeControlAvailable == value)
 					return;
 
-				m_VolumeControlAvaliable = value;
+				m_VolumeControlAvailable = value;
 
-				OnVolumeControlAvaliableChanged.Raise(this, new DisplayVolumeControlAvaliableApiEventArgs(VolumeControlAvaliable));
+				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
 
-				if (VolumeControlAvaliable && VolumeDefault != null)
+				if (VolumeControlAvailable && VolumeDefault != null)
 					SetVolume((float)VolumeDefault);
 			}
 		}
@@ -235,9 +235,9 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 				IsMuted = !IsMuted;
 		}
 
-		private void UpdateCachedVolumeControlAvaliableState()
+		private void UpdateCachedVolumeControlAvailableState()
 		{
-			VolumeControlAvaliable = (PowerState == ePowerState.PowerOn);
+			VolumeControlAvailable = (PowerState == ePowerState.PowerOn);
 		}
 
 		#endregion

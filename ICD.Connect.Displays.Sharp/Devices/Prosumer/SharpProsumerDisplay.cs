@@ -162,7 +162,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		protected override void VolumeSetRawFinal(float raw)
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 
 			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, ((ushort)raw).ToString());
@@ -174,7 +174,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		public override void VolumeUpIncrement()
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 
 			SendCommand(SharpDisplayCommands.VOLUME_UP, CommandComparer);
@@ -184,7 +184,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		public override void VolumeDownIncrement()
 		{
-            if (!VolumeControlAvaliable)
+            if (!VolumeControlAvailable)
                 return;
 
 			SendCommand(SharpDisplayCommands.VOLUME_DOWN, CommandComparer);
@@ -277,7 +277,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			// Update ourselves.
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 
-			if (!VolumeControlAvaliable)
+			if (!VolumeControlAvailable)
 				return;
 
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
