@@ -278,6 +278,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public MockDisplayWithAudio()
 		{
+			m_PowerState = ePowerState.PowerOff;
+
 			m_WarmingTimer = SafeTimer.Stopped(WarmingComplete);
 			m_CoolingTimer = SafeTimer.Stopped(CoolingComplete);
 
@@ -316,6 +318,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOn()
 		{
+			if (PowerState == ePowerState.PowerOn || PowerState == ePowerState.Warming)
+				return;
+
 			m_CoolingTimer.Stop();
 
 			if (m_WarmingTime > 0)
@@ -332,6 +337,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void PowerOff()
 		{
+			if (PowerState == ePowerState.PowerOff || PowerState == ePowerState.Cooling)
+				return;
+
 			m_WarmingTimer.Stop();
 
 			if (m_CoolingTime > 0)
