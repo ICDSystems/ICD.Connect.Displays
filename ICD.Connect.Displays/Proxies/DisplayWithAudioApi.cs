@@ -25,7 +25,7 @@
 
 		public const string HELP_EVENT_VOLUME = "Raised when the volume changes.";
 		public const string HELP_EVENT_IS_MUTED = "Raised when the mute state changes.";
-		public const string HELP_EVENT_VOLUME_CONTROL_AVAILABLE = "Raised when the volume control avaliability changes.";
+		public const string HELP_EVENT_VOLUME_CONTROL_AVAILABLE = "Raised when the volume control availability changes.";
 
 		public const string HELP_PROPERTY_VOLUME = "Gets the volume of the display.";
 		public const string HELP_PROPERTY_VOLUME_PERCENT = "Gets the volume of the display as a percentage of its range from 0.0 to 1.0.";
@@ -35,7 +35,7 @@
 		public const string HELP_PROPERTY_VOLUME_SAFETY_MIN = "Gets/sets the min safety volume.";
 		public const string HELP_PROPERTY_VOLUME_SAFETY_MAX = "Gets/sets the max safety volume.";
 		public const string HELP_PROPERTY_VOLUME_DEFAULT = "Gets/sets the default volume.";
-		public const string HELP_PROPERTY_VOLUME_CONTROL_AVAILABLE = "Gets the avaliability of the volume control";
+		public const string HELP_PROPERTY_VOLUME_CONTROL_AVAILABLE = "Gets the availability of the volume control";
 
 		public const string HELP_METHOD_SET_VOLUME = "Sets the display volume.";
 		public const string HELP_METHOD_VOLUME_UP_INCREMENT = "Increments the display volume.";

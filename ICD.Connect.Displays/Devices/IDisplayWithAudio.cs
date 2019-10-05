@@ -26,7 +26,7 @@ namespace ICD.Connect.Displays.Devices
 		event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
 		/// <summary>
-		/// Raised when the volume control avaliability changes
+		/// Raised when the volume control availability changes
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME_CONTROL_AVAILABLE, DisplayWithAudioApi.HELP_EVENT_VOLUME_CONTROL_AVAILABLE)]
 		event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;

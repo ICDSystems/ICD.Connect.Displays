@@ -39,6 +39,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
 
+		/// <summary>
+		/// Raised when the volume control availability changes
+		/// </summary>
 		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
 		/// <summary>
