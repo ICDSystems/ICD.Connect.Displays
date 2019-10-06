@@ -67,6 +67,11 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private float? m_VolumeDefault;
 		private bool m_VolumeControlAvailable;
 
+		private int? m_RequestedInput;
+		private eScalingMode? m_RequestedScalingMode;
+		private bool? m_RequestedMute;
+		private float? m_RequestedVolume;
+
 		#region Properties
 
 		/// <summary>
@@ -89,6 +94,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
+				UpdateCachedVolumeControlAvalaibleState();
+
 				long expectedDuration = 0;
 
 				switch (value)
@@ -99,11 +106,25 @@ namespace ICD.Connect.Displays.Mock.Devices
 					case ePowerState.Cooling:
 						expectedDuration = m_CoolingTime;
 						break;
+
+					case ePowerState.PowerOn:
+						if (m_RequestedInput.HasValue)
+							SetActiveInput(m_RequestedInput.Value);
+						if (m_RequestedMute.HasValue)
+						{
+							if (m_RequestedMute.Value)
+								MuteOn();
+							else
+								MuteOff();
+						}
+						if (m_RequestedScalingMode.HasValue)
+							SetScalingMode(m_RequestedScalingMode.Value);
+						if (m_RequestedVolume.HasValue)
+							SetVolume(m_RequestedVolume.Value);
+						break;
 				}
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState, expectedDuration));
-
-				UpdateCachedVolumeControlAvalaibleState();
 			}
 		}
 
@@ -301,6 +322,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 			OnScalingModeChanged = null;
 			OnMuteStateChanged = null;
 			OnVolumeChanged = null;
+			OnVolumeControlAvailableChanged = null;
 
 			base.DisposeFinal(disposing);
 		}
@@ -360,6 +382,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="address"></param>
 		public void SetActiveInput(int address)
 		{
+			m_RequestedInput = address;
+
 			if (PowerState != ePowerState.PowerOn)
 				return;
 
@@ -372,6 +396,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="mode"></param>
 		public void SetScalingMode(eScalingMode mode)
 		{
+			m_RequestedScalingMode = mode;
+
 			if (PowerState != ePowerState.PowerOn)
 				return;
 
@@ -383,6 +409,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOn()
 		{
+			m_RequestedMute = true;
+
 			if (!VolumeControlAvailable)
 				return;
 
@@ -394,6 +422,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteOff()
 		{
+			m_RequestedMute = false;
+
 			if (!VolumeControlAvailable)
 				return;
 
@@ -405,9 +435,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void MuteToggle()
 		{
-			if (!VolumeControlAvailable)
-				return;
-
 			if (IsMuted)
 				MuteOff();
 			else
@@ -420,6 +447,8 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// <param name="raw"></param>
 		public void SetVolume(float raw)
 		{
+			m_RequestedVolume = raw;
+
 			if (!VolumeControlAvailable)
 				return;
 
