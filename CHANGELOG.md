@@ -6,10 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [12.3.0] - 2019-10-07
 ### Changed
  - Fixed a bug where volume control was not working due to power state
  - Added ExpectedDuration to DisplayPowerStateApiEventArgs
  - MockDisplayWithAudio starts powered off
+ - MockDisplayWithAudio will set last requested input, volume, etc when powered
 
 ## [12.2.0] - 2019-09-16
 ### Changed
