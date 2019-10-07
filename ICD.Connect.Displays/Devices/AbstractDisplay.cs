@@ -348,12 +348,12 @@ namespace ICD.Connect.Displays.Devices
 				&& m_ConnectionStateManager.IsOnline;
 		}
 
-		private void PortOnIsOnlineStateChanged(object sender, BoolEventArgs eventArgs)
+		protected virtual void PortOnIsOnlineStateChanged(object sender, BoolEventArgs eventArgs)
 		{
 			UpdateCachedOnlineStatus();
 		}
 
-		private void PortOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
+		protected virtual void PortOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
 		{
 			if (m_ConnectionStateManager.IsConnected)
 				QueryState();
