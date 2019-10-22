@@ -99,8 +99,14 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// </summary>
 		private static readonly BiDictionary<int, string> s_InputAddressValues = new BiDictionary<int, string>()
 		{
-			{1,"10" },
-			{2,"20" }
+			{1,"11" },
+			{2,"21" },
+			{3,"31" },
+			{4,"41" },
+			{11,"12" },
+			{12,"22" },
+			{13,"32" },
+			{14,"42" }
 		};
 
 		private bool m_IsNetworkPort;
