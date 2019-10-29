@@ -136,8 +136,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			SendCommand(new SamsungProCommand(VOLUME, WallId, (byte)raw), CommandComparer);
 
-			// Display unmutes on volume change
-			SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), CommandComparer);
+			// Display unmutes on volume change, if and only if its currently muted
+			if(IsMuted)
+				SendCommand(new SamsungProCommand(MUTE, WallId, 0).ToQuery(), CommandComparer);
 		}
 
 		/// <summary>
