@@ -38,6 +38,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.4.1] - 2019-10-29
+### Changed
+  - On SamsungProDisplay, only send an unmute command with the volume change if the tv is already muted.
+  - Fix issue where PanasonicClassicDisplay did not call base when configuring port
+
 ## [11.4.0] - 2019-09-03
 ### Changed
  - Added additional input options to Christie J-Series

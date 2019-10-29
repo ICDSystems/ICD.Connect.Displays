@@ -74,7 +74,17 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
 		/// </summary>
-		public float VolumePercent { get; private set; }
+		public float VolumePercent
+		{
+			get
+			{
+				// Update the volume percentage
+				float min = this.GetVolumeSafetyOrDeviceMin();
+				float max = this.GetVolumeSafetyOrDeviceMax();
+
+				return Math.Abs(min - max) < 0.01f ? 1.0f : MathUtils.MapRange(min, max, 0.0f, 1.0f, Volume);
+			}
+		}
 
 		/// <summary>
 		/// Gets the muted state.
@@ -230,18 +240,11 @@ namespace ICD.Connect.Displays.Devices
 			if (PowerState != ePowerState.PowerOn && PowerState != ePowerState.Warming)
 				return;
 
-			// Set the volume
 			float min = this.GetVolumeSafetyOrDeviceMin();
 			float max = this.GetVolumeSafetyOrDeviceMax();
-
 			raw = MathUtils.Clamp(raw, min, max);
+
 			VolumeSetRawFinal(raw);
-
-			// Update the volume percentage
-			min = this.GetVolumeSafetyOrDeviceMin();
-			max = this.GetVolumeSafetyOrDeviceMax();
-
-			VolumePercent = Math.Abs(min - max) < 0.01f ? 1.0f : MathUtils.MapRange(min, max,  0.0f, 1.0f, raw);
 		}
 
 		/// <summary>
