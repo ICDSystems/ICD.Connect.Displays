@@ -81,8 +81,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// </summary>
 		protected override void ConfigurePort(ISerialPort port)
 		{
-			if (port is IComPort)
-				ConfigureComPort(port as IComPort);
+			base.ConfigurePort(port);
 
 			if (port is AsyncTcpClient)
 			{
