@@ -7,7 +7,7 @@ using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.Settings;
 using ICD.Connect.Settings.Attributes;
 
-namespace ICD.Connect.Displays.Nec.Devices
+namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 {
 	[KrangSettings("NecDisplay", typeof(NecDisplay))]
 	public sealed class NecDisplaySettings : AbstractDisplayWithAudioSettings

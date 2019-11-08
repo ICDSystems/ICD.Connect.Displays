@@ -9,7 +9,7 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Data;
 
-namespace ICD.Connect.Displays.Nec.Devices
+namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 {
 	public sealed class NecDisplayCommand : ISerialData
 	{

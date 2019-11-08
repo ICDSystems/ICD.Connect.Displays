@@ -14,7 +14,7 @@ using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
 using ICD.Connect.Settings;
 
-namespace ICD.Connect.Displays.Nec.Devices
+namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 {
 	public sealed class NecDisplay : AbstractDisplayWithAudio<NecDisplaySettings>
 	{
