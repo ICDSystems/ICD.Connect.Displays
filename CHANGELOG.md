@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Epson Projector Driver - "EpsonProjector", tested against Epson PowerLite X39
+ 
+### Changed
+ - AbstractDisplay PortOnIsOnlineStateChanged and PortOnConnectedStateChanged methods are now protected virtual
 
 ## [12.3.0] - 2019-10-07
 ### Changed
