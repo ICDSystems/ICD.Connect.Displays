@@ -12,7 +12,6 @@ using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
-using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 {
