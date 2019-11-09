@@ -138,12 +138,20 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 
 		public override void MuteOn()
 		{
+			// Hack - Calling mute off at startup seems to toggle it?
+			if (IsMuted)
+				return;
+
 			SendCommand(SharpDisplayCommands.MUTE_ON);
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
 		public override void MuteOff()
 		{
+			// Hack - Calling mute off at startup seems to toggle it?
+			if (!IsMuted)
+				return;
+
 			SendCommand(SharpDisplayCommands.MUTE_OFF);
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
