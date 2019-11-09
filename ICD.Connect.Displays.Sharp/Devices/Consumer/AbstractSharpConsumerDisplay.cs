@@ -66,21 +66,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		private readonly SafeTimer m_KeepAliveTimer;
 
 		private int? m_RequestedInput;
-
-		#region Properties
-
-		public override ePowerState PowerState
-		{
-			get { return base.PowerState; }
-			protected set
-			{
-				if (value == ePowerState.PowerOff)
-					m_RequestedInput = null;
-				base.PowerState = value;
-			}
-		}
-
-		#endregion
+		private ePowerState? m_RequestedPower;
+		private bool? m_RequestedMute;
 
 		/// <summary>
 		/// Constructor.
@@ -124,7 +111,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		public override void PowerOn()
 		{
-			SendCommandPriority(SharpDisplayCommands.POWER_ON, 0);
+			m_RequestedPower = ePowerState.PowerOn;
 			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
 		}
 
@@ -133,30 +120,23 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		public override void PowerOff()
 		{
+			m_RequestedPower = ePowerState.PowerOff;
+
 			// So we can PowerOn the TV later.
 			PowerOnCommand();
 
-			SendCommandPriority(SharpDisplayCommands.POWER_OFF, 1);
 			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 1);
 		}
 
 		public override void MuteOn()
 		{
-			// Hack - Calling mute off at startup seems to toggle it?
-			if (IsMuted)
-				return;
-
-			SendCommand(SharpDisplayCommands.MUTE_ON);
+			m_RequestedMute = true;
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
 		public override void MuteOff()
 		{
-			// Hack - Calling mute off at startup seems to toggle it?
-			if (!IsMuted)
-				return;
-
-			SendCommand(SharpDisplayCommands.MUTE_OFF);
+			m_RequestedMute = false;
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 		}
 
@@ -207,7 +187,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		public override void SetActiveInput(int address)
 		{
 			m_RequestedInput = address;
-			//SendCommand(s_InputMap[address]);
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 		}
 
@@ -286,12 +265,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		{
 			base.QueryState();
 
-			// Update ourselves.
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
-
-			if (!VolumeControlAvailable)
-				return;
-
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
@@ -363,6 +337,16 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			{
 				case SharpDisplayCommands.POWER_QUERY:
 					PowerState = responseValue == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
+					if (m_RequestedPower != null)
+						if (PowerState != m_RequestedPower)
+						{
+							SendCommand(m_RequestedPower.Value == ePowerState.PowerOn
+								? SharpDisplayCommands.POWER_ON
+								: SharpDisplayCommands.POWER_OFF);
+							SendCommand(SharpDisplayCommands.POWER_QUERY);
+						}
+						else
+							m_RequestedPower = null;
 					break;
 
 				case SharpDisplayCommands.VOLUME_QUERY:
@@ -371,12 +355,20 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 
 				case SharpDisplayCommands.MUTE_QUERY:
 					IsMuted = responseValue == 1;
+					if (m_RequestedMute != null)
+						if (IsMuted != m_RequestedMute)
+						{
+							SendCommand(m_RequestedMute.Value ? SharpDisplayCommands.MUTE_ON : SharpDisplayCommands.MUTE_OFF);
+							SendCommand(SharpDisplayCommands.MUTE_QUERY);
+						}
+						else
+							m_RequestedMute = null;
 					break;
 
 				case SharpDisplayCommands.INPUT_HDMI_QUERY:
 					ActiveInput = responseValue;
 					if (m_RequestedInput != null)
-						if (responseValue != (int)m_RequestedInput)
+						if (responseValue != m_RequestedInput)
 						{
 							SendCommand(s_InputMap.GetValue((int)m_RequestedInput));
 							SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
