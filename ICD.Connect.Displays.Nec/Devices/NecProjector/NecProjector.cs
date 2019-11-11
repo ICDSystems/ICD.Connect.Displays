@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -19,26 +20,70 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private const int PRIORITY_POWER = 16;
 		private const int PRIORITY_INPUT_POLL = 32;
 		private const int PRIORITY_INPUT = 64;
-		private const int PRIORITY_ASPECT = 100;
+		private const int PRIORITY_ASPECT = 128;
 
-		private static readonly BiDictionary<int, string> s_InputAddressMap = new BiDictionary<int, string>()
+
+		private const int POWER_TRANSIENT_POLL_INTERVAL = 2 * 1000;
+
+		private static readonly BiDictionary<int, string> s_InputAddressMap = new BiDictionary<int, string>
 		{
-			{1, "\xA1" }, //HDMI 1
-			{2, "\xA2" }, //HDMI 2
-			{11, "\x1A" }, //HDMI 1 Alternate
-			{12, "\x1B" }, //HDMI 2 Alternate && DP Alternate
-			{13, "\xBF" }, // HDBT
-			{14, "\x1C" }, //SLOT
-			{21, "\xA6" }, //DP 1
-			{22, "\xA7" }, //DP 2
-			{31, "\x01" }, //Computer 1
-			{32, "\x02" }, //Computer 2
-			{33, "\x03" }, //Computer 3
-			{40, "\xAB" }, //SLOT Alternate
-			{41, "\x20" }  //LAN & HDBT Alternate
+			{1, "\xA1" },	//HDMI 1
+			{2, "\xA2" },	//HDMI 2
+			{11, "\xA6" },	//DP 1
+			{12, "\xA7" },	//DP 2
+			{21, "\x01" },	//Computer 1
+			{22, "\x02" },	//Computer 2
+			{31, "\xBF" },	// HDBT
+			{32, "\x20" },	//LAN
+			{33, "\xAB" },	//SLOT
+			{34, "\x1F" }	//USB-A
 		};
 
+		private static readonly BiDictionary<int, string> s_InputResponseAddressMap = new BiDictionary<int, string>
+		{
+			{1, "\x01\x21" },	//HDMI 1
+			{2, "\x02\x21" },	//HDMI 2
+			{11, "\x01\x22" },	//DP 1
+			{12, "\x02\x22" },	//DP 2
+			{21, "\x01\x01" },  //Computer 1
+			{22, "\x02\x01" },	//Computer 2
+			{31, "\x01\x27" },	//HDBT
+			{32, "\x02\x07" },	//LAN
+			{33, "\x01\x23" },  //SLOT
+			{34, "\x01\x07" }	//USB-A
+		};
+
+		private readonly SafeTimer m_PowerTransientTimer;
+
+
+		public NecProjector() : base()
+		{
+			m_PowerTransientTimer = SafeTimer.Stopped(PowerTransientTimerCallback);
+		}
+
+		private void RestartPowerTransientTimer()
+		{
+			m_PowerTransientTimer.Reset(POWER_TRANSIENT_POLL_INTERVAL);
+		}
+
+		private void PowerTransientTimerCallback()
+		{
+			if (PowerState == ePowerState.Warming || PowerState == ePowerState.Cooling || PowerState == ePowerState.Unknown)
+				QueryPower();
+		}
+
 		#region IDisplay
+
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		public override ePowerState PowerState { get { return base.PowerState; }
+			protected set
+			{
+				base.PowerState = value;
+				if (value == ePowerState.Warming || value == ePowerState.Cooling)
+					RestartPowerTransientTimer();
+			} }
 
 		/// <summary>
 		/// Powers the TV.
@@ -115,7 +160,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (command == null)
 			{
-				Log(eSeverity.Error, "TrustMode - unable to cast to NecProjectorCommand - {0}", args.Data.Serialize());
+				Log(eSeverity.Error, "TrustMode - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
 				return;
 			}
 
@@ -144,7 +189,10 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (command == null)
 			{
-				Log(eSeverity.Error, "Queue Response - unable to cast to NecProjectorCommand - {0}", args.Data.Serialize());
+				if (args.Data != null)
+					Log(eSeverity.Error, "Queue Response - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
+				else
+					Log(eSeverity.Warning, "Unsolicited serial message: {0}", args.Response);
 				return;
 			}
 
@@ -165,11 +213,11 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (command == null)
 			{
-				Log(eSeverity.Error, "Queue Timeout - unable to cast to NecProjectorCommand - {0}", args.Data.Serialize());
+				Log(eSeverity.Error, "Queue Timeout - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
 				return;
 			}
 
-			//Retry command at the same priority
+			//Retry command
 			SendCommandCollapse(command, GetPriorityForCommand(command.CommandType));
 		}
 
@@ -179,11 +227,15 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		private void ParseSuccess(string argsResponse, NecProjectorCommand command)
 		{
+			// For successful power on/off commands, set the power state to the tranisent state, so it will poll the state again.
+			// Device doesn't immediately report the power state after the power on/off command
 			switch (command.CommandType)
 			{
 				case eCommandType.PowerOn:
+					PowerState = ePowerState.Warming;
+					break;
 				case eCommandType.PowerOff:
-					QueryPower();
+					PowerState = ePowerState.Cooling;
 					break;
 				case eCommandType.InputSwitch:
 					ParseInputSwitch(argsResponse, command);
@@ -212,25 +264,17 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (s_InputAddressMap.TryGetKey(command.CommandArgs[0], out address))
 				ActiveInput = address;
 			else
-				Log(eSeverity.Error, "Unable to find address for input {0}", command.CommandArgs[0]);
+				Log(eSeverity.Error, "Unable to find address for input {0:x}", command.CommandArgs[0]);
 		}
 
 		private void ParseInputPoll(string argsResponse)
 		{
-			byte data = (byte)argsResponse[6];
-
-			//Add 1, because NEC?
-			data++;
-
-
-
-
-
+			string responseAddress = argsResponse.Substring(7, 2);
 			int address;
-			if (s_InputAddressMap.TryGetKey(data.ToString(), out address))
+			if (s_InputResponseAddressMap.TryGetKey(responseAddress, out address))
 				ActiveInput = address;
 			else
-				Log(eSeverity.Warning, "Unable to find input at address {0}", data);
+				Log(eSeverity.Warning, "Unable to find input at address {0:x}", responseAddress);
 		}
 
 		private void ParsePowerPoll(string argsResponse)
@@ -238,6 +282,22 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			string data = argsResponse.Substring(5, 16);
 
+			// One of the ways to indicate cooling state
+			if (data[3] == '\x01')
+			{
+				PowerState = ePowerState.Cooling;
+				return;
+			}
+
+			//Power Command is executing
+			if (data[4] == '\x01')
+			{
+				// This is an undocumented way of determining warming vs cooling excution - may break later
+				PowerState = data[5] == '\xFF' ? ePowerState.Cooling : ePowerState.Warming;
+				return;
+			}
+
+			//Power On/Off states, plus an additional cooling we may never see
 			switch (data[5])
 			{
 				case '\x00':
