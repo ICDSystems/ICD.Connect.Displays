@@ -3,9 +3,11 @@ using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Ports.ComPort;
 using ICD.Connect.Protocol.Settings;
+using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 {
+	[KrangSettings("NecProjector", typeof(NecProjector))]
 	public sealed class NecProjectorSettings : AbstractDisplaySettings
 	{
 		/// <summary>
