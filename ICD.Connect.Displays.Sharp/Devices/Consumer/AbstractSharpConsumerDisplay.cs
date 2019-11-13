@@ -66,7 +66,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		private readonly SafeTimer m_KeepAliveTimer;
 
 		private int? m_RequestedInput;
-		private ePowerState? m_RequestedPower;
 		private bool? m_RequestedMute;
 
 		/// <summary>
@@ -111,7 +110,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		public override void PowerOn()
 		{
-			m_RequestedPower = ePowerState.PowerOn;
+			SendCommandPriority(SharpDisplayCommands.POWER_ON, 0);
 			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
 		}
 
@@ -120,11 +119,10 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		public override void PowerOff()
 		{
-			m_RequestedPower = ePowerState.PowerOff;
-
 			// So we can PowerOn the TV later.
 			PowerOnCommand();
 
+			SendCommandPriority(SharpDisplayCommands.POWER_OFF, 1);
 			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 1);
 		}
 
@@ -337,16 +335,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			{
 				case SharpDisplayCommands.POWER_QUERY:
 					PowerState = responseValue == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
-					if (m_RequestedPower != null)
-						if (PowerState != m_RequestedPower)
-						{
-							SendCommand(m_RequestedPower.Value == ePowerState.PowerOn
-								? SharpDisplayCommands.POWER_ON
-								: SharpDisplayCommands.POWER_OFF);
-							SendCommand(SharpDisplayCommands.POWER_QUERY);
-						}
-						else
-							m_RequestedPower = null;
 					break;
 
 				case SharpDisplayCommands.VOLUME_QUERY:
