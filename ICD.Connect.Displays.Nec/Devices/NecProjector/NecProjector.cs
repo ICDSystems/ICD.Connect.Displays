@@ -14,14 +14,12 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 {
 	public sealed class NecProjector : AbstractDisplay<NecProjectorSettings>
 	{
-
 		//Command Prioritys
 		private const int PRIORITY_POWER_POLL = 8;
 		private const int PRIORITY_POWER = 16;
 		private const int PRIORITY_INPUT_POLL = 32;
 		private const int PRIORITY_INPUT = 64;
 		private const int PRIORITY_ASPECT = 128;
-
 
 		private const int POWER_TRANSIENT_POLL_INTERVAL = 2 * 1000;
 
@@ -55,8 +53,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		private readonly SafeTimer m_PowerTransientTimer;
 
-
-		public NecProjector() : base()
+		public NecProjector()
 		{
 			m_PowerTransientTimer = SafeTimer.Stopped(PowerTransientTimerCallback);
 		}
@@ -128,6 +125,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		protected override void QueryState()
 		{
 			base.QueryState();
+
 			QueryPower();
 			QueryInput();
 		}
@@ -144,8 +142,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		#endregion
 
-
 		#region Serial Queue Callbacks
+
 		/// <summary>
 		/// Called when a command is sent to the physical display.
 		/// </summary>

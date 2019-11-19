@@ -5,7 +5,6 @@ using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 {
-
 	public enum eCommandType
 	{
 		PowerOn,
@@ -19,9 +18,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 	sealed class NecProjectorCommand : ISerialData
 	{
-
-		
-
 		#region Commands and Responses
 
 		/// <summary>
@@ -48,8 +44,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.RunningStatusRequest,0 },
 			{eCommandType.InputStatusRequest, 0}
 		};
-
-
 
 		private static readonly BiDictionary<eCommandType, string> s_ResponseSuccessHeader = new BiDictionary<eCommandType, string>()
 		{
@@ -101,11 +95,9 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		#endregion
 
-
 		public eCommandType CommandType { get; private set; }
 
 		public string[] CommandArgs { get; private set; }
-
 
 		#region Constructor
 
@@ -116,7 +108,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (CommandArgs.Length != s_CommandCodesArgs[CommandType])
 				throw new
-					ArgumentException(string.Format("Command Type {0} requires {1} parameters, {2} given", CommandType, s_CommandCodesArgs[CommandType], CommandArgs.Length),
+					ArgumentException(string.Format("Command Type {0} requires {1} parameters, {2} given",
+					                                CommandType, s_CommandCodesArgs[CommandType], CommandArgs.Length),
 					                  "commandArgs");
 		}
 
