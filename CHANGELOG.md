@@ -5,11 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [12.4.0] - 2019-11-19
 ### Added
  - Epson Projector Driver - "EpsonProjector", tested against Epson PowerLite X39
+ - NEC Projector Driver - "NecProjector", tested against NEC P525UL
  
 ### Changed
  - AbstractDisplay PortOnIsOnlineStateChanged and PortOnConnectedStateChanged methods are now protected virtual
+ - Fixed mute toggle bug with Sharp prosumer displays
+ - Fixed power feedback bug with Sharp prosumer displays
 
 ## [12.3.0] - 2019-10-07
 ### Changed
