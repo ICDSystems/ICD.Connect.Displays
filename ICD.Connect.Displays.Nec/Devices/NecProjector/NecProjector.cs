@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -390,6 +392,30 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 					Log(eSeverity.Warning, "Command Error - Adjustment Failed: {0}:{1}", command.CommandType, command.CommandArgs);
 					break;
 			}
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new ConsoleCommand("PollPower", "Poll the projector for current power status", () => QueryPower());
+			yield return new ConsoleCommand("PollInput", "Poll the projector for current input status" ,() => QueryInput());
+
+
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion
