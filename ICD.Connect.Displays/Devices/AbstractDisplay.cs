@@ -361,7 +361,7 @@ namespace ICD.Connect.Displays.Devices
 
 		protected virtual void RaisePowerStateChanged(ePowerState state)
 		{
-			OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(state));
+			RaisePowerStateChanged(state, 0);
 		}
 
 		protected void RaisePowerStateChanged(ePowerState state, long expectedDuration)
