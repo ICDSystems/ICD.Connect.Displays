@@ -13,7 +13,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		AspectAdjust,
 		ErrorStatusRequest,
 		RunningStatusRequest,
-		InputStatusRequest
+		InputStatusRequest,
+		LampInformationRequest
 	}
 
 	sealed class NecProjectorCommand : ISerialData
@@ -31,7 +32,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.AspectAdjust, "\x03\x10\x00\x00\x05\x18\x00\x00{0}\x00" },
 			{eCommandType.ErrorStatusRequest, "\x00\x88\x00\x00\x00" },
 			{eCommandType.RunningStatusRequest, "\x00\x85\x00\x00\x01\x01" },
-			{eCommandType.InputStatusRequest, "\x00\x85\x00\x00\x01\x02"}
+			{eCommandType.InputStatusRequest, "\x00\x85\x00\x00\x01\x02" },
+			{eCommandType.LampInformationRequest, "\x03\x96\x00\x00\x02{0}\x01" }
 		};
 
 		private static readonly Dictionary<eCommandType, int> s_CommandCodesArgs = new Dictionary<eCommandType, int>()
@@ -42,7 +44,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.AspectAdjust, 1},
 			{eCommandType.ErrorStatusRequest,0 },
 			{eCommandType.RunningStatusRequest,0 },
-			{eCommandType.InputStatusRequest, 0}
+			{eCommandType.InputStatusRequest, 0},
+			{eCommandType.LampInformationRequest, 1 }
 		};
 
 		private static readonly BiDictionary<eCommandType, string> s_ResponseSuccessHeader = new BiDictionary<eCommandType, string>()
@@ -52,7 +55,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.InputSwitch, "\x22\x03" },
 			{eCommandType.AspectAdjust, "\x23\x10" },
 			{eCommandType.ErrorStatusRequest, "\x20\x88" },
-			{eCommandType.RunningStatusRequest, "\x20\x85" }
+			{eCommandType.RunningStatusRequest, "\x20\x85" },
+			{eCommandType.LampInformationRequest, "\x23\x96" }
 		};
 
 		private static readonly BiDictionary<eCommandType, string> s_ResponseFailHeader = new BiDictionary<eCommandType, string>()
@@ -62,7 +66,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.InputSwitch, "\xA2\x03" },
 			{eCommandType.AspectAdjust, "\xA3\x10" },
 			{eCommandType.ErrorStatusRequest, "\xA0\x88" },
-			{eCommandType.RunningStatusRequest, "\xA0\x85" }
+			{eCommandType.RunningStatusRequest, "\xA0\x85" },
+			{eCommandType.LampInformationRequest, "\xA3\x96" }
 		};
 
 		/// <summary>
@@ -76,7 +81,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.AspectAdjust, 8 },
 			{eCommandType.ErrorStatusRequest, 18 },
 			{eCommandType.RunningStatusRequest, 22},
-			{eCommandType.InputStatusRequest, 22 }
+			{eCommandType.InputStatusRequest, 22 },
+			{eCommandType.LampInformationRequest, 12 }
 		};
 
 		/// <summary>
@@ -90,7 +96,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.AspectAdjust, 8 },
 			{eCommandType.ErrorStatusRequest, 8 },
 			{eCommandType.RunningStatusRequest, 8},
-			{eCommandType.InputStatusRequest, 8 }
+			{eCommandType.InputStatusRequest, 8 },
+			{eCommandType.LampInformationRequest, 8 }
 		};
 
 		#endregion
@@ -170,7 +177,13 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		public static bool CommandComparer(NecProjectorCommand commandA, NecProjectorCommand commandB)
 		{
 			if (commandA.CommandType == commandB.CommandType)
-				return true;
+			{
+				if (commandA.CommandType != eCommandType.LampInformationRequest)
+					return true;
+
+				//Lamp Information Commands with different data are different commands
+				return commandA.CommandArgs[0] == commandB.CommandArgs[0];
+			}
 
 			if ((commandA.CommandType == eCommandType.PowerOn ||
 			     commandA.CommandType == eCommandType.PowerOff) &&

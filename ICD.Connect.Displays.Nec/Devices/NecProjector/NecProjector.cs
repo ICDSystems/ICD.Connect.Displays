@@ -24,6 +24,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private const int PRIORITY_ASPECT = 128;
 
 		private const int POWER_TRANSIENT_POLL_INTERVAL = 5 * 1000;
+		private const int POWER_EQUILIBRIUM_POLL_INTERVAL = 60 * 1000;
 
 		private static readonly BiDictionary<int, string> s_InputAddressMap = new BiDictionary<int, string>
 		{
@@ -54,15 +55,24 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		};
 
 		private readonly SafeTimer m_PowerTransientTimer;
+		private readonly SafeTimer m_PowerEquilibriumTimer;
 
 		public NecProjector()
 		{
 			m_PowerTransientTimer = SafeTimer.Stopped(PowerTransientTimerCallback);
+			m_PowerEquilibriumTimer = SafeTimer.Stopped(PowerEquilibriumTimerCallback);
 		}
+
+		#region Power Timers
 
 		private void RestartPowerTransientTimer()
 		{
 			m_PowerTransientTimer.Reset(POWER_TRANSIENT_POLL_INTERVAL);
+		}
+
+		private void StopPowerTransientTimer()
+		{
+			m_PowerTransientTimer.Stop();
 		}
 
 		private void PowerTransientTimerCallback()
@@ -70,6 +80,24 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (PowerState == ePowerState.Warming || PowerState == ePowerState.Cooling || PowerState == ePowerState.Unknown)
 				QueryPower();
 		}
+
+		private void RestartPowerEquilibriumTimer()
+		{
+			m_PowerEquilibriumTimer.Reset(POWER_EQUILIBRIUM_POLL_INTERVAL);
+		}
+
+		private void StopPowerEquilibriumTimer()
+		{
+			m_PowerEquilibriumTimer.Stop();
+		}
+
+		private void PowerEquilibriumTimerCallback()
+		{
+			if (PowerState == ePowerState.PowerOn || PowerState == ePowerState.PowerOff)
+				QueryState();
+		}
+
+		#endregion
 
 		#region IDisplay
 
@@ -81,7 +109,15 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{
 				base.PowerState = value;
 				if (value == ePowerState.Warming || value == ePowerState.Cooling)
+				{
+					StopPowerEquilibriumTimer();
 					RestartPowerTransientTimer();
+				}
+				else if (value == ePowerState.PowerOn || value == ePowerState.PowerOff)
+				{
+					StopPowerTransientTimer();
+					RestartPowerEquilibriumTimer();
+				}
 			} }
 
 		/// <summary>
@@ -130,6 +166,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			QueryPower();
 			QueryInput();
+			if (PowerState == ePowerState.PowerOn)
+				QueryLamp();
 		}
 
 		private void QueryPower()
@@ -140,6 +178,12 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private void QueryInput()
 		{
 			SendCommand(eCommandType.InputStatusRequest);
+		}
+
+		private void QueryLamp()
+		{
+			//Query Lamp 1 (\x00)
+			SendCommand(eCommandType.LampInformationRequest, "\x00");
 		}
 
 		#endregion
@@ -246,6 +290,9 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 				case eCommandType.InputStatusRequest:
 					ParseInputPoll(argsResponse);
 					break;
+				case eCommandType.LampInformationRequest:
+					ParseLampInformation(argsResponse);
+					break;
 			}
 		}
 
@@ -317,6 +364,24 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 					break;
 					
 			}
+		}
+
+		private void ParseLampInformation(string argsResponse)
+		{
+			string data = argsResponse.Substring(5, 6);
+
+			//Check if data is for lamp 1
+			if (data[0] != '\x00')
+				return;
+
+			uint lampSeconds = 0;
+
+			lampSeconds += (uint)data[5] << 24;
+			lampSeconds += (uint)data[4] << 16;
+			lampSeconds += (uint)data[3] << 8;
+			lampSeconds += (uint)data[2];
+
+			uint lampHours = lampSeconds / 60 / 60;
 		}
 
 		private void ParseFailure(string argsResponse, NecProjectorCommand command)
