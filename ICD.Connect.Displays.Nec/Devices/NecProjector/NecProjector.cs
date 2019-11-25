@@ -21,7 +21,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private const int PRIORITY_INPUT = 64;
 		private const int PRIORITY_ASPECT = 128;
 
-		private const int POWER_TRANSIENT_POLL_INTERVAL = 2 * 1000;
+		private const int POWER_TRANSIENT_POLL_INTERVAL = 5 * 1000;
 
 		private static readonly BiDictionary<int, string> s_InputAddressMap = new BiDictionary<int, string>
 		{
