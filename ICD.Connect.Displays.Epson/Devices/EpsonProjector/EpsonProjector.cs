@@ -29,6 +29,8 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			PreWarming //This s a state we set when we successfully send power on command, before the projector has responded
 		}
 
+		#region Commands
+
 		private const string INITIAL_IP_HANDSHAKE = "ESC/VP.net\x10\x03\x00\x00\x00\x00";
 		private const string INITIAL_IP_RESPONSE = "ESC/VP.net\x10\x03\x00\x00\x20\x00";
 
@@ -53,9 +55,12 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		private const int PRIORITY_POLL = 100;
 		private const int PRIORITY_POWER = 1000;
 		private const int PRIORITY_INPUT = 10000;
-		private const int PRIORITY_OTHER = 100000;
 
 		private const string COMMAND_SUFFIX = "\x0d";
+
+		#endregion
+
+		#region Command Value Maps
 
 		/// <summary>
 		/// Power Response Codes to EpsonPowerState
@@ -111,9 +116,17 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			{14,"42" }
 		};
 
+		#endregion
+
+		#region Fields
+
 		private bool m_IsNetworkPort;
 
 		private eEpsonPowerState m_EpsonPowerState;
+
+		#endregion
+
+		#region Properties
 
 		private eEpsonPowerState EpsonPowerState
 		{
@@ -131,6 +144,10 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 					ActiveInput = null;
 			}
 		}
+
+		#endregion
+
+		#region Methods
 
 		/// <summary>
 		/// Powers the TV.
@@ -204,6 +221,11 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				PollLamp();
 			}
 		}
+
+		#endregion
+
+
+		#region SerialQueue/Respons Handling
 
 		/// <summary>
 		/// Called when a command is sent to the physical display.
@@ -340,6 +362,10 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			SendCommandPriority(args.Data, PRIORITY_RETRY);
 		}
 
+		#endregion
+
+		#region Port Callbacks
+
 		protected override void PortOnConnectedStateChanged(object sender, BoolEventArgs boolEventArgs)
 		{
 			if (boolEventArgs.Data && m_IsNetworkPort)
@@ -347,6 +373,10 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 
 			base.PortOnConnectedStateChanged(sender, boolEventArgs);
 		}
+
+		#endregion
+
+		#region Private Methods
 
 		private void PollPower()
 		{
@@ -372,5 +402,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		{
 			SendCommandPriority(new SerialData(string.Format("{0}{1}", command, COMMAND_SUFFIX)), priority);
 		}
+
+		#endregion
 	}
 }
