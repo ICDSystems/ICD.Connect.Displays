@@ -43,6 +43,9 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		private const string INPUT_COMMAND_FORMAT = INPUT_PREFIX + " {0}";
 		private const string INPUT_POLL = INPUT_PREFIX + "?";
 
+		private const string LAMP_PREFIX = "LAMP";
+		private const string LAMP_POLL = LAMP_PREFIX + "?";
+
 		private const string EVENT_PREFIX = "IMEVENT";
 
 		private const int PRIORITY_HANDSHAKE = 1;
@@ -196,7 +199,10 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			PollPower();
 
 			if( PowerState == ePowerState.PowerOn)
+			{
 				PollInput();
+				PollLamp();
+			}
 		}
 
 		/// <summary>
@@ -269,6 +275,9 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				case EVENT_PREFIX:
 					ParseEventResponse(args);
 					break;
+				case LAMP_PREFIX:
+					ParseLampResponse(args);
+					break;
 			}
 
 		}
@@ -294,6 +303,15 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				ActiveInput = null;
 				Log(eSeverity.Error, "Unknown Input Address: {0}" , args);
 			}
+		}
+
+		private void ParseLampResponse(string args)
+		{
+			int lampHours;
+
+			//todo: update LampHours when iProjector implemented
+			if (int.TryParse(args, out lampHours))
+				Log(eSeverity.Debug, "Lamp Hours{0}", lampHours);
 		}
 
 		private void ParseEventResponse(string args)
@@ -338,6 +356,11 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		private void PollInput()
 		{
 			SendCommandPriority(INPUT_POLL, PRIORITY_POLL);
+		}
+
+		private void PollLamp()
+		{
+			SendCommandPriority(LAMP_POLL, PRIORITY_POLL);
 		}
 
 		private void SendCommand(string command)
