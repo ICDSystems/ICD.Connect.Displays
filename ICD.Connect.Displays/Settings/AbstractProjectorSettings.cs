@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Displays.Settings
 {
-	public abstract class AbstractProjectorSettings : AbstractDisplaySettings
+	public abstract class AbstractProjectorSettings : AbstractDisplaySettings, IProjectorSettings
 	{
 
 		private const string WARMING_TIME_ELEMENT = "WarmingTime";
