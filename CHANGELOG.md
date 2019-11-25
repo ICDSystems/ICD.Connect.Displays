@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - AbstractProjector implements IProjector, supports lamp hours and expected warming/cooling durations
+ - AbstractDisplay calls RaisePowerStateChanged to allow ExpectedDuration to be implemented
+ - IProjector now uses int API event args for OnLampHoursUpdated, with ApiEvent decorator
+ - IProjector now uses int property for LampHours, with ApiProperty decorator
+
 ### Changed
  - Fixed IndexOutOfRange exception for NEX display power feedback handling
  - Fixed Sony Bravia feedback issues related to "success" messages
@@ -14,13 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Epson Projector Driver - "EpsonProjector", tested against Epson PowerLite X39
  - NEC Projector Driver - "NecProjector", tested against NEC P525UL
- - AbstractProjector - implements IProjector, supports lamp hours and expected warming/cooling durations
  
 ### Changed
  - AbstractDisplay PortOnIsOnlineStateChanged and PortOnConnectedStateChanged methods are now protected virtual
- - AbstractDisplay calls RaisePowerStateChanged to allow ExpectedDuration to be implemented
- - IProjector now uses int API event args for OnLampHoursUpdated, with ApiEvent decorator
- - IProjector now uses int property for LampHours, with ApiProperty decorator
  - Fixed mute toggle bug with Sharp prosumer displays
  - Fixed power feedback bug with Sharp prosumer displays
 
