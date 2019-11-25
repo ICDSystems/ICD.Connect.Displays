@@ -267,6 +267,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		private void ParseCommand(NecDisplayCommand response)
 		{
 			byte[] message = response.GetMessageWithoutStartEndCodes().ToArray();
+			if (message.Length < 8)
+				return;
 
 			// Response to power query is prefixed with some unused data
 			if (message[4] == 0x44 && message[5] == 0x36)
