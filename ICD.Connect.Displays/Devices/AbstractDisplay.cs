@@ -104,7 +104,7 @@ namespace ICD.Connect.Displays.Devices
 				if (m_PowerState == ePowerState.PowerOn)
 					QueryState();
 
-				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
+				RaisePowerStateChanged(value);
 			}
 		}
 
@@ -357,6 +357,16 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (m_ConnectionStateManager.IsConnected)
 				QueryState();
+		}
+
+		protected virtual void RaisePowerStateChanged(ePowerState state)
+		{
+			OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(state));
+		}
+
+		protected void RaisePowerStateChanged(ePowerState state, long expectedDuration)
+		{
+			OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(state, expectedDuration));
 		}
 
 		#endregion
