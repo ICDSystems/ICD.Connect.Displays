@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ICD.Connect.Displays.Settings
+﻿namespace ICD.Connect.Displays.Settings
 {
 	public interface IProjectorSettings : IDisplaySettings
 	{
