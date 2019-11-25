@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Fixed IndexOutOfRange exception for NEX display power feedback handling
+ - Fixed Sony Bravia feedback issues related to "success" messages
+
 ## [12.4.0] - 2019-11-19
 ### Added
  - Epson Projector Driver - "EpsonProjector", tested against Epson PowerLite X39
