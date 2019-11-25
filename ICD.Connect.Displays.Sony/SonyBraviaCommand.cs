@@ -47,6 +47,7 @@ namespace ICD.Connect.Displays.Sony
 		private const char PARAMETER_NONE = '#';
 
 		public const string ERROR = "FFFFFFFFFFFFFFFF";
+		public const string SUCCESS = "0000000000000000";
 
 		public enum eCommand
 		{
@@ -179,10 +180,18 @@ namespace ICD.Connect.Displays.Sony
 		/// <returns></returns>
 		public static int? GetHdmiInputParameter(string parameter)
 		{
-			char mode = parameter[7];
-			string input = parameter.Substring(12, 4);
+			// 0000000M0000XXXX
+			// M0000XXXX
+			char mode = parameter[parameter.Length - 9];
+			if (mode != '1')
+				return null;
 
-			return mode == '1' ? int.Parse(input) : (int?)null;
+			string inputString = parameter.Substring(parameter.Length - 4);
+			int input;
+			if (!StringUtils.TryParse(inputString, out input))
+				return null;
+
+			return input;
 		}
 	}
 }

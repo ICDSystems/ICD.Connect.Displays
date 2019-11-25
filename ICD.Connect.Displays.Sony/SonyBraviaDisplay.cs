@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
@@ -194,19 +195,70 @@ namespace ICD.Connect.Displays.Sony
 			SonyBraviaCommand response = SonyBraviaCommand.Response(args.Response);
 
 			if (response.Parameter == SonyBraviaCommand.ERROR)
+			{
 				ParseError(args);
-			else if (response.Type == SonyBraviaCommand.eCommand.Notify)
-				ParseQuery(response);
-			else if (command != null && command.Type == SonyBraviaCommand.eCommand.Enquiry && response.Type == SonyBraviaCommand.eCommand.Answer)
-				ParseQuery(response);
+				return;
+			}
+
+			switch (response.Type)
+			{
+				// Command result
+				case SonyBraviaCommand.eCommand.Answer:
+					// This shouldn't happen
+					if (command == null)
+						break;
+
+					switch (command.Type)
+					{
+						// Control result
+						case SonyBraviaCommand.eCommand.Control:
+							ParseControlResult(command, response);
+							break;
+						// Query result
+						case SonyBraviaCommand.eCommand.Enquiry:
+							ParseQuery(response);
+							break;
+					}
+					break;
+
+				// Event notification
+				case SonyBraviaCommand.eCommand.Notify:
+					ParseQuery(response);
+					break;
+			}
+		}
+
+		/// <summary>
+		/// Parses the command result.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="response"></param>
+// ReSharper disable UnusedParameter.Local
+		private void ParseControlResult([NotNull] SonyBraviaCommand command, [NotNull] SonyBraviaCommand response)
+// ReSharper restore UnusedParameter.Local
+		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
+			if (response == null)
+				throw new ArgumentNullException("response");
+
+			if (response.Parameter != SonyBraviaCommand.SUCCESS)
+				throw new InvalidOperationException("Response does not represent a successful command");
+
+			// Hack - Bravia uses the value "0" for success, so lets treat the command as the result
+			ParseQuery(command);
 		}
 
 		/// <summary>
 		/// Called when a query command is successful.
 		/// </summary>
 		/// <param name="response"></param>
-		private void ParseQuery(SonyBraviaCommand response)
+		private void ParseQuery([NotNull] SonyBraviaCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			switch (response.Function)
 			{
 				case POWER_FUNCTION:
