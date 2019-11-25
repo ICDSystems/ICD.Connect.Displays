@@ -8,7 +8,7 @@ using ICD.Connect.Settings.Attributes;
 namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 {
 	[KrangSettings("NecProjector", typeof(NecProjector))]
-	public sealed class NecProjectorSettings : AbstractDisplaySettings
+	public sealed class NecProjectorSettings : AbstractProjectorSettings
 	{
 		/// <summary>
 		/// Sets default values for unconfigured network properties.

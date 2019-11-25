@@ -14,7 +14,7 @@ using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 {
-	public sealed class NecProjector : AbstractDisplay<NecProjectorSettings>
+	public sealed class NecProjector : AbstractProjector<NecProjectorSettings>
 	{
 		//Command Prioritys
 		private const int PRIORITY_POWER_POLL = 8;
@@ -382,6 +382,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			lampSeconds += (uint)data[2];
 
 			uint lampHours = lampSeconds / 60 / 60;
+
+			LampHours = (int)lampHours;
 		}
 
 		private void ParseFailure(string argsResponse, NecProjectorCommand command)
