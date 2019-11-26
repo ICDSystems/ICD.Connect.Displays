@@ -326,11 +326,14 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 
 		private void ParseLampResponse(string args)
 		{
-			int lampHours;
-
-			//todo: update LampHours when iProjector implemented
-			if (StringUtils.TryParse(args, out lampHours))
-				Log(eSeverity.Debug, "Lamp Hours{0}", lampHours);
+			try
+			{
+				LampHours = int.Parse(args);
+			}
+			catch (FormatException)
+			{
+				Log(eSeverity.Error, "Unable to parse lamp hours string: {0}", args);
+			}
 		}
 
 		private void ParseEventResponse(string args)
