@@ -11,10 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - AbstractDisplay calls RaisePowerStateChanged to allow ExpectedDuration to be implemented
  - IProjector now uses int API event args for OnLampHoursUpdated, with ApiEvent decorator
  - IProjector now uses int property for LampHours, with ApiProperty decorator
+ - EpsonProjector implements iProjector with LampHours support
 
 ### Changed
  - Fixed IndexOutOfRange exception for NEX display power feedback handling
  - Fixed Sony Bravia feedback issues related to "success" messages
+ - Fixed issues with RS-232 control on EpsonProjector
 
 ## [12.4.0] - 2019-11-19
 ### Added
