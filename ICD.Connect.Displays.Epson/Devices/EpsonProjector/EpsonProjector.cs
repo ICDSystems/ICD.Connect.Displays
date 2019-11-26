@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -27,8 +28,11 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			StandbyNetworkOn,
 			AbnormalityStandby,
 			AvStandby,
-			PreWarming //This s a state we set when we successfully send power on command, before the projector has responded
+			PreWarming, //This is a state we set when we successfully send power on command, before the projector has responded
+			PreCooling //This is a state we set when we successfully send power off command
 		}
+
+		private const int POWER_TRANSIENT_POLL_INTERVAL = 5 * 1000;
 
 		#region Commands
 
@@ -66,40 +70,44 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// <summary>
 		/// Power Response Codes to EpsonPowerState
 		/// </summary>
-		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerStateValues = new Dictionary<string, eEpsonPowerState>()
-		{
-			{"00", eEpsonPowerState.StandbyNetworkOff },
-			{"01", eEpsonPowerState.LampOn },
-			{"02", eEpsonPowerState.Warmup },
-			{"03", eEpsonPowerState.Cooldown },
-			{"04", eEpsonPowerState.StandbyNetworkOn },
-			{"05", eEpsonPowerState.AbnormalityStandby },
-			{"09", eEpsonPowerState.AvStandby }
-		};
+		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerStateValues =
+			new Dictionary<string, eEpsonPowerState>()
+			{
+				{"00", eEpsonPowerState.StandbyNetworkOff},
+				{"01", eEpsonPowerState.LampOn},
+				{"02", eEpsonPowerState.Warmup},
+				{"03", eEpsonPowerState.Cooldown},
+				{"04", eEpsonPowerState.StandbyNetworkOn},
+				{"05", eEpsonPowerState.AbnormalityStandby},
+				{"09", eEpsonPowerState.AvStandby}
+			};
 
-		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerEventValues = new Dictionary<string, eEpsonPowerState>()
-		{
-			{"01", eEpsonPowerState.StandbyNetworkOn },
-			{"02", eEpsonPowerState.Warmup },
-			{"03", eEpsonPowerState.LampOn },
-			{"04", eEpsonPowerState.Cooldown },
-			{"FF", eEpsonPowerState.AbnormalityStandby }
-		};
+		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerEventValues =
+			new Dictionary<string, eEpsonPowerState>()
+			{
+				{"01", eEpsonPowerState.StandbyNetworkOn},
+				{"02", eEpsonPowerState.Warmup},
+				{"03", eEpsonPowerState.LampOn},
+				{"04", eEpsonPowerState.Cooldown},
+				{"FF", eEpsonPowerState.AbnormalityStandby}
+			};
 
 		/// <summary>
 		/// Mapping of EpsonPowerState to PowerState
 		/// </summary>
-		private static readonly Dictionary<eEpsonPowerState, ePowerState> s_PowerStateMap = new Dictionary<eEpsonPowerState, ePowerState>()
-		{
-			{eEpsonPowerState.StandbyNetworkOff, ePowerState.PowerOff },
-			{eEpsonPowerState.LampOn, ePowerState.PowerOn },
-			{eEpsonPowerState.Warmup, ePowerState.Warming },
-			{eEpsonPowerState.Cooldown, ePowerState.Cooling },
-			{eEpsonPowerState.StandbyNetworkOn, ePowerState.PowerOff },
-			{eEpsonPowerState.AbnormalityStandby, ePowerState.PowerOff },
-			{eEpsonPowerState.AvStandby, ePowerState.PowerOff },
-			{eEpsonPowerState.PreWarming, ePowerState.Warming }
-		};
+		private static readonly Dictionary<eEpsonPowerState, ePowerState> s_PowerStateMap =
+			new Dictionary<eEpsonPowerState, ePowerState>()
+			{
+				{eEpsonPowerState.StandbyNetworkOff, ePowerState.PowerOff},
+				{eEpsonPowerState.LampOn, ePowerState.PowerOn},
+				{eEpsonPowerState.Warmup, ePowerState.Warming},
+				{eEpsonPowerState.Cooldown, ePowerState.Cooling},
+				{eEpsonPowerState.StandbyNetworkOn, ePowerState.PowerOff},
+				{eEpsonPowerState.AbnormalityStandby, ePowerState.PowerOff},
+				{eEpsonPowerState.AvStandby, ePowerState.PowerOff},
+				{eEpsonPowerState.PreWarming, ePowerState.Warming},
+				{eEpsonPowerState.PreCooling, ePowerState.Cooling}
+			};
 
 		/// <summary>
 		/// Input address to protocol codes
@@ -107,14 +115,14 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// </summary>
 		private static readonly BiDictionary<int, string> s_InputAddressValues = new BiDictionary<int, string>()
 		{
-			{1,"11" },
-			{2,"21" },
-			{3,"31" },
-			{4,"41" },
-			{11,"12" },
-			{12,"22" },
-			{13,"32" },
-			{14,"42" }
+			{1, "11"},
+			{2, "21"},
+			{3, "31"},
+			{4, "41"},
+			{11, "12"},
+			{12, "22"},
+			{13, "32"},
+			{14, "42"}
 		};
 
 		#endregion
@@ -124,6 +132,8 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		private bool m_IsNetworkPort;
 
 		private eEpsonPowerState m_EpsonPowerState;
+
+		private readonly SafeTimer m_PowerTransientTimer;
 
 		#endregion
 
@@ -146,7 +156,29 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			}
 		}
 
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		public override ePowerState PowerState
+		{
+			get { return base.PowerState; }
+			protected set
+			{
+				base.PowerState = value;
+
+				if (value == ePowerState.Cooling || value == ePowerState.Warming || value == ePowerState.Unknown)
+					PowerTransientTimerReset();
+				else
+					PowerTransientTimerStop();
+			}
+		}
+
 		#endregion
+
+		public EpsonProjector()
+		{
+			m_PowerTransientTimer = SafeTimer.Stopped(PowerTransientTimerCallback);
+		}
 
 		#region Methods
 
@@ -219,6 +251,17 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			}
 		}
 
+		/// <summary>
+		/// Clears resources.
+		/// </summary>
+		protected override void DisposeFinal(bool disposing)
+		{
+			base.DisposeFinal(disposing);
+
+			m_PowerTransientTimer.Stop();
+			m_PowerTransientTimer.Dispose();
+		}
+
 		#endregion
 
 
@@ -249,12 +292,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			//Empty response for power on command sets pre-warming state
 			if (string.IsNullOrEmpty(args.Response))
 			{
-				if (args.Data.Serialize().Trim().Equals(POWER_COMMAND_ON, StringComparison.OrdinalIgnoreCase))
-				{
-					EpsonPowerState = eEpsonPowerState.PreWarming;
-					return;
-				}
-
+				ParseEmptyResponse(args.Data.Serialize().Trim());
 				return;
 			}
 
@@ -274,6 +312,20 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				return;
 
 			Log(eSeverity.Warning, "Unknown Response:{0}",args.Response);
+		}
+
+		/// <summary>
+		/// This is executed when the projector returns an empty response.  It looks at the sent command and takes the appropriate action.
+		/// </summary>
+		/// <param name="argsData">Command sent to the projector, trimmed </param>
+		private void ParseEmptyResponse(string argsData)
+		{
+			if (argsData.Equals(POWER_COMMAND_ON, StringComparison.OrdinalIgnoreCase))
+				EpsonPowerState = eEpsonPowerState.PreWarming;
+			else if (argsData.Equals(POWER_COMMAND_OFF, StringComparison.OrdinalIgnoreCase))
+				EpsonPowerState = eEpsonPowerState.PreCooling;
+			else if (argsData.Contains(INPUT_PREFIX))
+				PollInput();
 		}
 
 		private void ParsePollResponse(string response)
@@ -375,6 +427,28 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		}
 
 		#endregion
+
+		#region PowerTimer
+
+		private void PowerTransientTimerStop()
+		{
+			m_PowerTransientTimer.Stop();
+		}
+
+		private void PowerTransientTimerReset()
+		{
+			//Only poll for non-network ports - network ports give us events as feedback
+			if (!m_IsNetworkPort)
+				m_PowerTransientTimer.Reset(POWER_TRANSIENT_POLL_INTERVAL,POWER_TRANSIENT_POLL_INTERVAL);
+		}
+
+		private void PowerTransientTimerCallback()
+		{
+			PollPower();
+		}
+
+		#endregion
+
 
 		#region Private Methods
 
