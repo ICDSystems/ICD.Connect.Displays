@@ -16,7 +16,7 @@ using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 {
-	public sealed class EpsonProjector : AbstractDisplay<EpsonProjectorSettings>
+	public sealed class EpsonProjector : AbstractProjector<EpsonProjectorSettings>
 	{
 		private enum eEpsonPowerState
 		{

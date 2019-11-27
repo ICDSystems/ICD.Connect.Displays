@@ -8,7 +8,7 @@ using ICD.Connect.Settings.Attributes;
 namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 {
 	[KrangSettings("EpsonProjector", typeof(EpsonProjector))]
-	public sealed class EpsonProjectorSettings : AbstractDisplaySettings
+	public sealed class EpsonProjectorSettings : AbstractProjectorSettings
 	{
 		/// <summary>
 		/// Sets default values for unconfigured network properties.
