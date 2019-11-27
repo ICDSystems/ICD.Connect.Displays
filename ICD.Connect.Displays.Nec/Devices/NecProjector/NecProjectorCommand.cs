@@ -24,7 +24,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		/// <summary>
 		/// Commands string formats for operations, minus checksums
 		/// </summary>
-		private static readonly Dictionary<eCommandType, string> s_CommandCodes = new Dictionary<eCommandType, string>()
+		private static readonly Dictionary<eCommandType, string> s_CommandCodes = new Dictionary<eCommandType, string>
 		{
 			{eCommandType.PowerOn, "\x02\x00\x00\x00\x00" },
 			{eCommandType.PowerOff, "\x02\x01\x00\x00\x00" },
@@ -36,7 +36,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.LampInformationRequest, "\x03\x96\x00\x00\x02{0}\x01" }
 		};
 
-		private static readonly Dictionary<eCommandType, int> s_CommandCodesArgs = new Dictionary<eCommandType, int>()
+		private static readonly Dictionary<eCommandType, int> s_CommandCodesArgs = new Dictionary<eCommandType, int>
 		{
 			{eCommandType.PowerOn, 0 },
 			{eCommandType.PowerOff, 0 },
@@ -48,7 +48,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.LampInformationRequest, 1 }
 		};
 
-		private static readonly BiDictionary<eCommandType, string> s_ResponseSuccessHeader = new BiDictionary<eCommandType, string>()
+		private static readonly BiDictionary<eCommandType, string> s_ResponseSuccessHeader = new BiDictionary<eCommandType, string>
 		{
 			{eCommandType.PowerOn, "\x22\x00" },
 			{eCommandType.PowerOff, "\x22\x01" },
@@ -59,7 +59,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			{eCommandType.LampInformationRequest, "\x23\x96" }
 		};
 
-		private static readonly BiDictionary<eCommandType, string> s_ResponseFailHeader = new BiDictionary<eCommandType, string>()
+		private static readonly BiDictionary<eCommandType, string> s_ResponseFailHeader = new BiDictionary<eCommandType, string>
 		{
 			{eCommandType.PowerOn, "\xA2\x00" },
 			{eCommandType.PowerOff, "\xA2\x01" },
@@ -73,7 +73,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		/// <summary>
 		/// Total length of successful command responses, including checksum - this is used to find complete strings in the receive buffer
 		/// </summary>
-		private static readonly Dictionary<eCommandType, int> s_ResponseSuccessLength = new Dictionary<eCommandType, int>()
+		private static readonly Dictionary<eCommandType, int> s_ResponseSuccessLength = new Dictionary<eCommandType, int>
 		{
 			{eCommandType.PowerOn, 6 },
 			{eCommandType.PowerOff, 6 },
@@ -88,7 +88,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		/// <summary>
 		/// Total length of failed command responses, including checksum - this is used to find complete strings in the receive buffer
 		/// </summary>
-		private static readonly Dictionary<eCommandType, int> s_ResponseFailLength = new Dictionary<eCommandType, int>()
+		private static readonly Dictionary<eCommandType, int> s_ResponseFailLength = new Dictionary<eCommandType, int>
 		{
 			{eCommandType.PowerOn, 8 },
 			{eCommandType.PowerOff, 8 },

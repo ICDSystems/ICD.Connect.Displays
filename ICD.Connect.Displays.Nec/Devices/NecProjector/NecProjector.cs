@@ -108,17 +108,22 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			protected set
 			{
 				base.PowerState = value;
-				if (value == ePowerState.Warming || value == ePowerState.Cooling)
+
+				switch (value)
 				{
-					StopPowerEquilibriumTimer();
-					RestartPowerTransientTimer();
+					case ePowerState.Cooling:
+					case ePowerState.Warming:
+						StopPowerEquilibriumTimer();
+						RestartPowerTransientTimer();
+						break;
+					case ePowerState.PowerOff:
+					case ePowerState.PowerOn:
+						StopPowerTransientTimer();
+						RestartPowerEquilibriumTimer();
+						break;
 				}
-				else if (value == ePowerState.PowerOn || value == ePowerState.PowerOff)
-				{
-					StopPowerTransientTimer();
-					RestartPowerEquilibriumTimer();
-				}
-			} }
+			}
+		}
 
 		/// <summary>
 		/// Powers the TV.
