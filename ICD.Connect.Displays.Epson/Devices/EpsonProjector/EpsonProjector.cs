@@ -193,13 +193,9 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		{
 			base.ConfigurePort(port);
 
-			//todo: Remove Debugging
-			port.DebugRx = eDebugMode.MixedAsciiHex;
-			port.DebugTx = eDebugMode.MixedAsciiHex;
-
 			m_IsNetworkPort = port is INetworkPort;
 
-			ISerialBuffer buffer = new DelimiterSerialBuffer(':',true);
+			ISerialBuffer buffer = new DelimiterSerialBuffer(':', true);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
@@ -216,7 +212,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		{
 			PollPower();
 
-			if( PowerState == ePowerState.PowerOn)
+			if (PowerState == ePowerState.PowerOn)
 			{
 				PollInput();
 				PollLamp();
