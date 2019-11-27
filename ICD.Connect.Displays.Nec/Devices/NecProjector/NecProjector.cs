@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
@@ -396,72 +397,74 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			//Only want to retry on "command execution failed"
 			string errorCode = argsResponse.Substring(5, 2);
 
+			string commandArgs = StringUtils.ToHexLiteral(string.Join("", command.CommandArgs));
+
 			switch (errorCode)
 			{
 				case "\x00\x00":
-					Log(eSeverity.Warning, "Command Error - Not Recognized: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Not Recognized: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x00\x01":
-					Log(eSeverity.Warning, "Command Error - Not Supported by Model: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Not Supported by Model: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x00":
-					Log(eSeverity.Warning, "Command Error - Value Invalid: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Value Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x01":
-					Log(eSeverity.Warning, "Command Error - Input Terminal Invalid: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Input Terminal Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x02":
-					Log(eSeverity.Warning, "Command Error - Language Invalid: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Language Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x00":
-					Log(eSeverity.Warning, "Command Error - Memory Allocation Error: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Memory Allocation Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x02":
-					Log(eSeverity.Warning, "Command Error - Memory In Use: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Memory In Use: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x03":
-					Log(eSeverity.Warning, "Command Error - Value Cannot Be Set: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Value Cannot Be Set: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x04":
-					Log(eSeverity.Warning, "Command Error - Forced Onscreen Mute On: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Forced Onscreen Mute On: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x06":
-					Log(eSeverity.Warning, "Command Error - Viewer Error: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Viewer Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x07":
-					Log(eSeverity.Warning, "Command Error -No Signal: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error -No Signal: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x08":
-					Log(eSeverity.Warning, "Command Error - Test Pattern or Filter Displayed: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Test Pattern or Filter Displayed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x09":
-					Log(eSeverity.Warning, "Command Error - No PC Card Inserted: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - No PC Card Inserted: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0A":
-					Log(eSeverity.Warning, "Command Error - Memory Operation Error: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Memory Operation Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0C":
-					Log(eSeverity.Warning, "Command Error - Entry List is Displayed: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Entry List is Displayed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0D":
-					Log(eSeverity.Warning, "Command Error - Command cannot be accepted because power is off: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Command cannot be accepted because power is off: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0E":
-					Log(eSeverity.Warning, "Command Error - Command execution failed (retrying): {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Command execution failed (retrying): {0}:{1}", command.CommandType, commandArgs);
 					// Retry
 					SendCommandCollapse(command, GetPriorityForCommand(command.CommandType));
 					break;
 				case "\x02\x0F":
-					Log(eSeverity.Warning, "Command Error - No Authority: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - No Authority: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x00":
-					Log(eSeverity.Warning, "Command Error - Specified Gain Number Incorrect: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Specified Gain Number Incorrect: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x01":
-					Log(eSeverity.Warning, "Command Error - Specified Gain Invalid: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Specified Gain Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x02":
-					Log(eSeverity.Warning, "Command Error - Adjustment Failed: {0}:{1}", command.CommandType, command.CommandArgs);
+					Log(eSeverity.Warning, "Command Error - Adjustment Failed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 			}
 		}
