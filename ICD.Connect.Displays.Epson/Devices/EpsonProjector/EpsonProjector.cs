@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
@@ -332,7 +333,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			int lampHours;
 
 			//todo: update LampHours when iProjector implemented
-			if (int.TryParse(args, out lampHours))
+			if (StringUtils.TryParse(args, out lampHours))
 				Log(eSeverity.Debug, "Lamp Hours{0}", lampHours);
 		}
 
