@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Fixed IndexOutOfRange exception for NEX display power feedback handling
  - Fixed Sony Bravia feedback issues related to "success" messages
  - Fixed issues with RS-232 control on EpsonProjector
+ - Fixed NEC monitor ID offset
 
 ## [12.4.0] - 2019-11-19
 ### Added

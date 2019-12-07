@@ -362,18 +362,30 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		/// <returns></returns>
 		private static byte[] GetHeader(byte monitorId, byte messageType, byte messageLength)
 		{
+			byte destinationAddress = GetDestinationAddressForMonitorId(monitorId);
 			byte[] lengthBytes = ToAsciiCharacters(messageLength);
 
 			return new[]
 			{
 				START_HEADER,
 				RESERVED,
-				monitorId,
+				destinationAddress,
 				CONTROLLER_ID,
 				messageType,
 				lengthBytes[0],
 				lengthBytes[1]
 			};
+		}
+
+		/// <summary>
+		/// Returns the destination address code for the given monitor id.
+		/// </summary>
+		/// <param name="monitorId"></param>
+		/// <returns></returns>
+		private static byte GetDestinationAddressForMonitorId(byte monitorId)
+		{
+			// Monitor ID 1 = Destination Address 0x41h ('A')
+			return (byte)(0x40 + monitorId);
 		}
 
 		/// <summary>
