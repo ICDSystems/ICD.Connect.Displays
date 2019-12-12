@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [11.4.2] - 2019-12-12
 ### Changed
  - Sharp Consumer and Prosumer - wait after setting display power states to poll, so the display returns the correct state
 
