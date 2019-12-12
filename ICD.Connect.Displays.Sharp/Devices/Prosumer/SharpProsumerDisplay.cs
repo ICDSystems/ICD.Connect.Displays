@@ -27,7 +27,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 		/// </summary>
 		private const long KEEP_ALIVE_INTERVAL = 2 * 60 * 1000;
 
+		/// <summary>
+		/// Wait after sending a power command to query, so the display responds correctly
+		/// </summary>
+		private const long POWER_QUERY_DELAY = 2 * 1000;
+
 		private const int MAX_RETRY_ATTEMPTS = 500;
+
+		private const int PRIORITY_POLL_POWER = 1;
 
 		/// <summary>
 		/// Maps the Sharp view mode to the command.
@@ -68,6 +75,11 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 		private readonly SafeTimer m_KeepAliveTimer;
 
+		/// <summary>
+		/// After Power On/Off commands, wait to query so display responds approprately
+		/// </summary>
+		private readonly SafeTimer m_PowerQueryTimer;
+
 		private int? m_RequestedInput;
 
 		#region Properties
@@ -91,6 +103,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 		public SharpProsumerDisplay()
 		{
 			m_KeepAliveTimer = new SafeTimer(KeepAliveCallback, KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL);
+			m_PowerQueryTimer = SafeTimer.Stopped(QueryPowerState);
 		}
 
 		/// <summary>
@@ -124,7 +137,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 		public override void PowerOn()
 		{
 			SendCommandPriority(SharpDisplayCommands.POWER_ON, 0);
-			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
+			m_PowerQueryTimer.Reset(POWER_QUERY_DELAY);
 		}
 
 		public override void PowerOff()
@@ -133,7 +146,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			PowerOnCommand();
 
 			SendCommandPriority(SharpDisplayCommands.POWER_OFF, 1);
-			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 1);
+			m_PowerQueryTimer.Reset(POWER_QUERY_DELAY);
 		}
 
 		public override void MuteOn()
@@ -284,6 +297,11 @@ namespace ICD.Connect.Displays.Sharp.Devices.Prosumer
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
 			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY);
+		}
+
+		private void QueryPowerState()
+		{
+			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
 		}
 
 		/// <summary>

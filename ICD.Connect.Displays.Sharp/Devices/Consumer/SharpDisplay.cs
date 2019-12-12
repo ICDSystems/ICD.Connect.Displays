@@ -26,7 +26,14 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// </summary>
 		private const long KEEP_ALIVE_INTERVAL = 2 * 60 * 1000;
 
+		/// <summary>
+		/// Wait after sending a power command to query, so the display responds correctly
+		/// </summary>
+		private const long POWER_QUERY_DELAY = 2 * 1000;
+
 		private const int MAX_RETRY_ATTEMPTS = 500;
+
+		private const int PRIORITY_POLL_POWER = 1;
 
 		/// <summary>
 		/// Maps the Sharp view mode to the command.
@@ -67,6 +74,11 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 		private readonly SafeTimer m_KeepAliveTimer;
 
+		/// <summary>
+		/// After Power On/Off commands, wait to query so display responds approprately
+		/// </summary>
+		private readonly SafeTimer m_PowerQueryTimer;
+
 		private int? m_RequestedInput;
 
 		#region Properties
@@ -90,6 +102,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		public SharpDisplay()
 		{
 			m_KeepAliveTimer = new SafeTimer(KeepAliveCallback, KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL);
+			m_PowerQueryTimer = SafeTimer.Stopped(QueryPowerState);
 		}
 
 		/// <summary>
@@ -127,7 +140,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		public override void PowerOn()
 		{
 			SendCommandPriority(SharpDisplayCommands.POWER_ON, 0);
-			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 0);
+			m_PowerQueryTimer.Reset(POWER_QUERY_DELAY);
 		}
 
 		/// <summary>
@@ -139,7 +152,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			PowerOnCommand();
 
 			SendCommandPriority(SharpDisplayCommands.POWER_OFF, 1);
-			SendCommandPriority(SharpDisplayCommands.POWER_QUERY, 1);
+			m_PowerQueryTimer.Reset(POWER_QUERY_DELAY);
 		}
 
 		public override void MuteOn()
@@ -292,6 +305,11 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY);
 		}
 
+		private void QueryPowerState()
+		{
+			SendCommandPriority(SharpDisplayCommands.POWER_QUERY,0);
+		}
+
 		/// <summary>
 		/// Called when a command is sent to the physical display.
 		/// </summary>
@@ -402,10 +420,15 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			bool query = command.Substring(4, 4) == SharpDisplayCommands.QUERY;
 			
 			// Check to see if we are getting an error because we are setting a value to the same thing
+			// Check to see if we're actually powered off
 			if (!query)
 			{
 				switch (commandType)
 				{
+						// If RSPW errors, power state is probably wrong.
+					case SharpDisplayCommands.POWER_ON_COMMAND:
+						SendCommandPriority(SharpDisplayCommands.POWER_QUERY, PRIORITY_POLL_POWER);
+						return;
 					case SharpDisplayCommands.INPUT:
 						int input;
 						if (StringUtils.TryParse(command.Substring(4, 4).Trim(), out input))
