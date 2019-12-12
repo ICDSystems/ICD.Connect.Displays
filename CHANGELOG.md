@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [13.0.0] - 2019-12-12
 ### Added
  - AbstractProjector implements IProjector, supports lamp hours and expected warming/cooling durations
  - AbstractDisplay calls RaisePowerStateChanged to allow ExpectedDuration to be implemented
