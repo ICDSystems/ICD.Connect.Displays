@@ -8,6 +8,7 @@ using ICD.Connect.API;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Info;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 
@@ -34,6 +35,11 @@ namespace ICD.Connect.Displays.Proxies
 		#region Properties
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public eVolumeFeatures SupportedVolumeFeatures { get; [UsedImplicitly] private set; }
+
+		/// <summary>
 		/// Gets the current volume.
 		/// </summary>
 		public float Volume
@@ -51,8 +57,6 @@ namespace ICD.Connect.Displays.Proxies
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
-
-		public float VolumePercent{get { return Volume; }}
 
 		/// <summary>
 		/// Gets the muted state.
@@ -82,21 +86,6 @@ namespace ICD.Connect.Displays.Proxies
 		/// The max volume.
 		/// </summary>
 		public float VolumeDeviceMax { get; [UsedImplicitly] private set; }
-
-		/// <summary>
-		/// Prevents the device from going below this volume.
-		/// </summary>
-		public float? VolumeSafetyMin { get; set; }
-
-		/// <summary>
-		/// Prevents the device from going above this volume.
-		/// </summary>
-		public float? VolumeSafetyMax { get; set; }
-
-		/// <summary>
-		/// The volume the device is set to when powered.
-		/// </summary>
-		public float? VolumeDefault { get; set; }
 
 		/// <summary>
 		/// Indicates if volume control is currently available or not
@@ -141,13 +130,11 @@ namespace ICD.Connect.Displays.Proxies
 			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_VOLUME)
 			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_IS_MUTED)
 			                 .SubscribeEvent(DisplayWithAudioApi.EVENT_VOLUME_CONTROL_AVAILABLE)
+							 .GetProperty(DisplayWithAudioApi.PROPERTY_SUPPORTED_VOLUME_FEATURES)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED)
-			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN)
-			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX)
-			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN)
 			                 .GetProperty(DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVAILABLE)
 							 .Complete();
 		}
@@ -192,20 +179,11 @@ namespace ICD.Connect.Displays.Proxies
 				case DisplayWithAudioApi.PROPERTY_IS_MUTED:
 					IsMuted = result.GetValue<bool>();
 					break;
-				case DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT:
-					VolumeDefault = result.GetValue<float?>();
-					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MAX:
 					VolumeDeviceMax = result.GetValue<float>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_DEVICE_MIN:
 					VolumeDeviceMin = result.GetValue<float>();
-					break;
-				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX:
-					VolumeSafetyMax = result.GetValue<float?>();
-					break;
-				case DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN:
-					VolumeSafetyMin = result.GetValue<float?>();
 					break;
 				case DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVAILABLE:
 					VolumeControlAvailable = result.GetValue<bool>();
@@ -218,10 +196,10 @@ namespace ICD.Connect.Displays.Proxies
 		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
-		/// <param name="raw"></param>
-		public void SetVolume(float raw)
+		/// <param name="level"></param>
+		public void SetVolume(float level)
 		{
-			CallMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, raw);
+			CallMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, level);
 		}
 
 		/// <summary>
@@ -262,6 +240,25 @@ namespace ICD.Connect.Displays.Proxies
 		public void MuteToggle()
 		{
 			CallMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE);
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public void VolumeRamp(bool increment, long timeout)
+		{
+			CallMethod(DisplayWithAudioApi.METHOD_VOLUME_RAMP, increment, timeout);
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public void VolumeRampStop()
+		{
+			CallMethod(DisplayWithAudioApi.METHOD_VOLUME_RAMP_STOP);
 		}
 
 		#endregion

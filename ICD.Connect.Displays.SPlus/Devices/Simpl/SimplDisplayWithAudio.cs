@@ -5,6 +5,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -59,6 +60,22 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			{
 				base.PowerState = value;
 				UpdateCachedVolumeControlAvailableState();
+			}
+		}
+
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
 			}
 		}
 
@@ -175,13 +192,13 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// <summary>
 		/// Sets the current volume.
 		/// </summary>
-		/// <param name="raw"></param>
-		public void SetVolume(float raw)
+		/// <param name="level"></param>
+		public void SetVolume(float level)
 		{
-			OnSetVolume.Raise(this, new SetVolumeApiEventArgs(raw));
+			OnSetVolume.Raise(this, new SetVolumeApiEventArgs(level));
 
 			if (Trust)
-				Volume = raw;
+				Volume = level;
 		}
 
 		/// <summary>
@@ -233,6 +250,25 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 			if (Trust)
 				IsMuted = !IsMuted;
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public void VolumeRampStop()
+		{
+			throw new NotSupportedException();
 		}
 
 		private void UpdateCachedVolumeControlAvailableState()

@@ -2,6 +2,7 @@
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -19,6 +20,22 @@ namespace ICD.Connect.Displays.Sony
 		private const string MUTE_FUNCTION = "AMUT";
 		private const string INPUT_FUNCTION = "INPT";
 		private const string IRCODE_FUNCTION = "IRCC";
+
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
 
 		#region Methods
 
@@ -108,7 +125,7 @@ namespace ICD.Connect.Displays.Sony
 		/// Sends the volume set command to the device after validation has been performed.
 		/// </summary>
 		/// <param name="raw"></param>
-		protected override void VolumeSetRawFinal(float raw)
+		protected override void SetVolumeFinal(float raw)
 		{
 			SonyBraviaCommand command = SonyBraviaCommand.Control(VOLUME_FUNCTION, ((uint)raw).ToString());
 			SendCommand(command, VolumeComparer);
@@ -143,6 +160,25 @@ namespace ICD.Connect.Displays.Sony
 		{
 			SonyBraviaCommand command = SonyBraviaCommand.Control(MUTE_FUNCTION, "0");
 			SendCommand(command);
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
 		}
 
 		#endregion

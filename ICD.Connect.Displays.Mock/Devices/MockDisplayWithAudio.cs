@@ -6,6 +6,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
@@ -62,9 +63,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private bool m_IsMuted;
 		private float m_Volume;
 
-		private float? m_VolumeSafetyMin;
-		private float? m_VolumeSafetyMax;
-		private float? m_VolumeDefault;
 		private bool m_VolumeControlAvailable;
 
 		private int? m_RequestedInput;
@@ -94,7 +92,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
 
-				UpdateCachedVolumeControlAvalaibleState();
+				UpdateCachedVolumeControlAvailableState();
 
 				long expectedDuration = 0;
 
@@ -172,6 +170,22 @@ namespace ICD.Connect.Displays.Mock.Devices
 		}
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
+		/// <summary>
 		/// Gets the raw volume of the display.
 		/// </summary>
 		public float Volume
@@ -184,21 +198,16 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
+				Log(eSeverity.Informational, "Raw volume set to {0:F2}", m_Volume);
 
 				// If the volume went outside of safe limits clamp the volume to a safe value.
-				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
+				float safeVolume = MathUtils.Clamp(m_Volume, VolumeDeviceMin, VolumeDeviceMax);
 				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
 					SetVolume(safeVolume);
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
-
-		/// <summary>
-		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
-		/// </summary>
-		public float VolumePercent { get; private set; }
 
 		/// <summary>
 		/// Gets the muted state.
@@ -230,52 +239,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		public float VolumeDeviceMax { get { return 100; } }
 
 		/// <summary>
-		/// Prevents the device from going below this volume.
-		/// </summary>
-		public float? VolumeSafetyMin
-		{
-			get { return m_VolumeSafetyMin; }
-			set
-			{
-				if (value != null)
-					value = Math.Max((float)value, VolumeDeviceMin);
-				m_VolumeSafetyMin = value;
-			}
-		}
-
-		/// <summary>
-		/// Prevents the device from going above this volume.
-		/// </summary>
-		public float? VolumeSafetyMax
-		{
-			get { return m_VolumeSafetyMax; }
-			set
-			{
-				if (value != null)
-					value = Math.Min((float)value, VolumeDeviceMax);
-				m_VolumeSafetyMax = value;
-			}
-		}
-
-		/// <summary>
-		/// The default volume to use when the display powers on.
-		/// </summary>
-		public float? VolumeDefault
-		{
-			get { return m_VolumeDefault; }
-			set
-			{
-				if (value != null)
-				{
-					value = MathUtils.Clamp((float)value, this.GetVolumeSafetyOrDeviceMin(),
-					                        this.GetVolumeSafetyOrDeviceMax());
-				}
-
-				m_VolumeDefault = value;
-			}
-		}
-
-		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
 		public bool VolumeControlAvailable
@@ -289,9 +252,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 				m_VolumeControlAvailable = value;
 
 				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
-
-				if (VolumeControlAvailable && VolumeDefault != null)
-					SetVolume((float)VolumeDefault);
 			}
 		}
 
@@ -442,28 +402,36 @@ namespace ICD.Connect.Displays.Mock.Devices
 		}
 
 		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public void VolumeRampStop()
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
-		/// <param name="raw"></param>
-		public void SetVolume(float raw)
+		/// <param name="level"></param>
+		public void SetVolume(float level)
 		{
-			m_RequestedVolume = raw;
+			m_RequestedVolume = level;
 
 			if (!VolumeControlAvailable)
 				return;
 
-			// Set the volume
-			float min = this.GetVolumeSafetyOrDeviceMin();
-			float max = this.GetVolumeSafetyOrDeviceMax();
-
-			raw = MathUtils.Clamp(raw, min, max);
-			Volume = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
-
-			// Update the volume percentage
-			min = this.GetVolumeSafetyOrDeviceMin();
-			max = this.GetVolumeSafetyOrDeviceMax();
-
-			VolumePercent = Math.Abs(min - max) < 0.01f ? 1.0f : MathUtils.MapRange(min, max, 0.0f, 1.0f, raw);
+			Volume = MathUtils.Clamp(level, VolumeDeviceMin, VolumeDeviceMax);
 		}
 
 		/// <summary>
@@ -471,9 +439,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-
 			SetVolume(Volume + 1);
 		}
 
@@ -482,9 +447,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-
 			SetVolume(Volume - 1);
 		}
 
@@ -493,7 +455,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 			return PowerState == ePowerState.PowerOn;
 		}
 
-		private void UpdateCachedVolumeControlAvalaibleState()
+		private void UpdateCachedVolumeControlAvailableState()
 		{
 			VolumeControlAvailable = GetVolumeControlAvailable();
 		}

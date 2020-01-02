@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
@@ -58,9 +59,6 @@ namespace ICD.Connect.Displays.CrestronPro
 		private int? m_ActiveInput;
 		private float m_Volume;
 		private bool m_IsMuted;
-		private float? m_VolumeSafetyMin;
-		private float? m_VolumeSafetyMax;
-		private float? m_VolumeDefault;
 		private bool m_VolumeControlAvailable;
 
 		#region Properties
@@ -121,6 +119,22 @@ namespace ICD.Connect.Displays.CrestronPro
 		public eScalingMode ScalingMode { get { return eScalingMode.Unknown; } }
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
+		/// <summary>
 		/// Gets the raw volume of the display.
 		/// </summary>
 		public float Volume
@@ -135,19 +149,9 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
 
-				// If the volume went outside of safe limits clamp the volume to a safe value.
-				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
-				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
-					SetVolume(safeVolume);
-
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
 		}
-
-		/// <summary>
-		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
-		/// </summary>
-		public float VolumePercent { get { return Volume / 100.0f; } }
 
 		/// <summary>
 		/// Gets the muted state.
@@ -165,51 +169,6 @@ namespace ICD.Connect.Displays.CrestronPro
 				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
-			}
-		}
-
-		/// <summary>
-		/// Prevents the device from going below this volume.
-		/// </summary>
-		public float? VolumeSafetyMin
-		{
-			get { return m_VolumeSafetyMin; }
-			set
-			{
-				if (value != null)
-					value = Math.Max((float)value, VolumeDeviceMin);
-				m_VolumeSafetyMin = value;
-			}
-		}
-
-		/// <summary>
-		/// Prevents the device from going above this volume.
-		/// </summary>
-		public float? VolumeSafetyMax
-		{
-			get { return m_VolumeSafetyMax; }
-			set
-			{
-				if (value != null)
-					value = Math.Min((float)value, VolumeDeviceMax);
-				m_VolumeSafetyMax = value;
-			}
-		}
-
-		/// <summary>
-		/// The default volume to use when the display powers on.
-		/// </summary>
-		public float? VolumeDefault
-		{
-			get { return m_VolumeDefault; }
-			set
-			{
-				if (value != null)
-				{
-					value = MathUtils.Clamp((float)value, this.GetVolumeSafetyOrDeviceMin(),
-											this.GetVolumeSafetyOrDeviceMax());
-				}
-				m_VolumeDefault = value;
 			}
 		}
 
@@ -350,16 +309,16 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
-		/// <param name="raw"></param>
-		public void SetVolume(float raw)
+		/// <param name="level"></param>
+		public void SetVolume(float level)
 		{
 #if SIMPLSHARP
 			if (m_Display == null)
 				throw new InvalidOperationException("Wrapped display is null");
 
-			raw = MathUtils.Clamp(raw, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
+			level = MathUtils.Clamp(level, VolumeDeviceMin, VolumeDeviceMax);
 
-			m_Display.Volume.UShortValue = (ushort)MathUtils.MapRange(VolumeDeviceMin, VolumeDeviceMax, 0, ushort.MaxValue, raw);
+			m_Display.Volume.UShortValue = (ushort)MathUtils.MapRange(VolumeDeviceMin, VolumeDeviceMax, 0, ushort.MaxValue, level);
 #else
 			throw new NotSupportedException();
 #endif
@@ -438,6 +397,25 @@ namespace ICD.Connect.Displays.CrestronPro
 #else
 			throw new NotSupportedException();
 #endif
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public void VolumeRampStop()
+		{
+			throw new NotSupportedException();
 		}
 
 		/// <summary>

@@ -15,8 +15,8 @@
 		public const string MUTE_ON = "MuteOn";
 		public const string MUTE_OFF = "MuteOff";
 
-		public const string VOLUME = "Volume";
-		public const string VOLUME_CHANGED = "OnVolumeChanged";
+		public const string VOLUME_PERCENT = "Volume";
+		public const string VOLUME_PERCENT_CHANGED = "OnVolumeChanged";
 		public const string SET_VOLUME = "SetVolume";
 	}
 }

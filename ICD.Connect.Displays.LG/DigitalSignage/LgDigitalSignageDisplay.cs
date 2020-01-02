@@ -3,6 +3,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -134,11 +135,27 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		}
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
+		/// <summary>
 		/// Increments the raw volume.
 		/// </summary>
 		public override void VolumeUpIncrement()
 		{
-			VolumeSetRawFinal(Volume + 1);
+			SetVolumeFinal(Volume + 1);
 		}
 
 		/// <summary>
@@ -146,14 +163,14 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// </summary>
 		public override void VolumeDownIncrement()
 		{
-			VolumeSetRawFinal(Volume - 1);
+			SetVolumeFinal(Volume - 1);
 		}
 
 		/// <summary>
 		/// Sends the volume set command to the device after validation has been performed.
 		/// </summary>
 		/// <param name="raw"></param>
-		protected override void VolumeSetRawFinal(float raw)
+		protected override void SetVolumeFinal(float raw)
 		{
 			int volumeInt = (int)MathUtils.Clamp(raw, VolumeDeviceMin, VolumeDeviceMax);
 			string data = volumeInt.ToString("X2"); // 2 digit hex (00-64)
@@ -178,6 +195,25 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		{
 			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_MUTE, SetId, "01");
 			SendCommand(command);
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
 		}
 
 		#endregion

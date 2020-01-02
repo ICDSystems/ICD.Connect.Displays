@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -75,6 +76,22 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		#region Properties
 
 		public byte MonitorId { get; set; }
+
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
 
 		#endregion
 
@@ -168,6 +185,25 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, MUTE_PAGE, MUTE_CODE, UNMUTE));
 		}
 
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -176,7 +212,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		/// Sends the volume set command to the device after validation has been performed.
 		/// </summary>
 		/// <param name="raw"></param>
-		protected override void VolumeSetRawFinal(float raw)
+		protected override void SetVolumeFinal(float raw)
 		{
 			if (!VolumeControlAvailable)
 				return;

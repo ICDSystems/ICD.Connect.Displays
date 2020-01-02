@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -115,6 +116,22 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		#region Properties
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
+		/// <summary>
 		/// Override if the display volume minimum is not 0.
 		/// </summary>
 		public override float VolumeDeviceMin { get { return 0; } }
@@ -199,7 +216,26 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			SendCommand(MUTE_QUERY);
 		}
 
-		protected override void VolumeSetRawFinal(float raw)
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
+		}
+
+		protected override void SetVolumeFinal(float raw)
 		{
             if (!VolumeControlAvailable)
                 return;

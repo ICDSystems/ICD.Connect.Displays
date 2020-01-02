@@ -7,7 +7,7 @@ using ICD.Connect.Telemetry;
 namespace ICD.Connect.Displays.DisplayLift
 {
 	[UsedImplicitly]
-	public class DisplayLiftExternalTelemetryProvider : IDisplayLiftExternalTelemetryProvider
+	public sealed class DisplayLiftExternalTelemetryProvider : IDisplayLiftExternalTelemetryProvider
 	{
 		public event EventHandler<StringEventArgs> OnLiftStateChanged;
 		public event EventHandler<StringEventArgs> OnBootDelayChanged;

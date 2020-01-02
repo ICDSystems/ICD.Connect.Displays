@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Attributes;
 using ICD.Connect.API.Attributes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;
 using ICD.Connect.Telemetry.Attributes;
@@ -9,13 +9,13 @@ using ICD.Connect.Telemetry.Attributes;
 namespace ICD.Connect.Displays.Devices
 {
 	[ApiClass(typeof(ProxyDisplayWithAudio), typeof(IDisplay))]
+	[ExternalTelemetry("Display With Audio Telemetry", typeof(DisplayWithAudioExternalTelemetryProvider))]
 	public interface IDisplayWithAudio : IDisplay
 	{
 		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
-		[EventTelemetry(DisplayTelemetryNames.VOLUME_CHANGED)]
 		event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		/// <summary>
@@ -34,18 +34,16 @@ namespace ICD.Connect.Displays.Devices
 		#region Properties
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		[ApiProperty(DisplayWithAudioApi.PROPERTY_SUPPORTED_VOLUME_FEATURES, DisplayWithAudioApi.HELP_PROPERTY_SUPPORTED_VOLUME_FEATURES)]
+		eVolumeFeatures SupportedVolumeFeatures { get; }
+
+		/// <summary>
 		/// Gets the current volume.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
 		float Volume { get; }
-
-		/// <summary>
-		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
-		/// </summary>
-		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_PERCENT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_PERCENT)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.VOLUME, DisplayTelemetryNames.VOLUME_CHANGED)]
-		[Range(0.0f, 1.0f)]
-		float VolumePercent { get; }
 
 		/// <summary>
 		/// Gets the muted state.
@@ -67,24 +65,6 @@ namespace ICD.Connect.Displays.Devices
 		float VolumeDeviceMax { get; }
 
 		/// <summary>
-		/// Prevents the device from going below this volume.
-		/// </summary>
-		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MIN, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MIN)]
-		float? VolumeSafetyMin { get; set; }
-
-		/// <summary>
-		/// Prevents the device from going above this volume.
-		/// </summary>
-		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_SAFETY_MAX, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_SAFETY_MAX)]
-		float? VolumeSafetyMax { get; set; }
-
-		/// <summary>
-		/// The volume the device is set to when powered.
-		/// </summary>
-		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_DEFAULT, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_DEFAULT)]
-		float? VolumeDefault { get; set; }
-
-		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME_CONTROL_AVAILABLE, DisplayWithAudioApi.HELP_PROPERTY_VOLUME_CONTROL_AVAILABLE)]
@@ -97,10 +77,10 @@ namespace ICD.Connect.Displays.Devices
 		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
-		/// <param name="raw"></param>
+		/// <param name="level"></param>
 		[ApiMethod(DisplayWithAudioApi.METHOD_SET_VOLUME, DisplayWithAudioApi.HELP_METHOD_SET_VOLUME)]
 		[MethodTelemetry(DisplayTelemetryNames.SET_VOLUME)]
-		void SetVolume(float raw);
+		void SetVolume(float level);
 
 		/// <summary>
 		/// Increments the volume once.
@@ -134,6 +114,21 @@ namespace ICD.Connect.Displays.Devices
 		[ApiMethod(DisplayWithAudioApi.METHOD_MUTE_TOGGLE, DisplayWithAudioApi.HELP_METHOD_MUTE_TOGGLE)]
 		void MuteToggle();
 
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_RAMP, DisplayWithAudioApi.HELP_METHOD_VOLUME_RAMP)]
+		void VolumeRamp(bool increment, long timeout);
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		[ApiMethod(DisplayWithAudioApi.METHOD_VOLUME_RAMP_STOP, DisplayWithAudioApi.HELP_METHOD_VOLUME_RAMP_STOP)]
+		void VolumeRampStop();
+
 		#endregion
 	}
 
@@ -143,65 +138,11 @@ namespace ICD.Connect.Displays.Devices
 	public static class DisplayWithAudioExtensions
 	{
 		/// <summary>
-		/// Returns the safety min if set, otherwise returns the device min.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		public static float GetVolumeSafetyOrDeviceMin(this IDisplayWithAudio extends)
-		{
-			return extends.VolumeSafetyMin ?? extends.VolumeDeviceMin;
-		}
-
-		/// <summary>
-		/// Returns the safety max if set, otherwise returns the device max.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		public static float GetVolumeSafetyOrDeviceMax(this IDisplayWithAudio extends)
-		{
-			return extends.VolumeSafetyMax ?? extends.VolumeDeviceMax;
-		}
-
-		/// <summary>
-		/// Sets the volume as a percentage 0.0 - 1.0.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <param name="percentage"></param>
-		public static void SetVolumeAsPercentage(this IDisplayWithAudio extends, float percentage)
-		{
-			float raw = MathUtils.MapRange(0.0f, 1.0f, extends.VolumeDeviceMin, extends.VolumeDeviceMax, percentage);
-			extends.SetVolume(raw);
-		}
-
-		/// <summary>
 		/// Gets the volume percentage of the device 0.0 - 1.0.
 		/// </summary>
 		public static float GetVolumeAsPercentage(this IDisplayWithAudio extends)
 		{
-			return GetVolumeAsPercentage(extends.Volume, extends.VolumeDeviceMin, extends.VolumeDeviceMax);
-		}
-
-		/// <summary>
-		/// Gets the volume percentage of the device 0.0 - 1.0, from safety min to safety max.
-		/// </summary>
-		/// <param name="extends"></param>
-		/// <returns></returns>
-		public static float GetVolumeAsSafetyPercentage(this IDisplayWithAudio extends)
-		{
-			return GetVolumeAsPercentage(extends.Volume, extends.GetVolumeSafetyOrDeviceMin(),
-			                             extends.GetVolumeSafetyOrDeviceMax());
-		}
-
-		/// <summary>
-		/// Gets the volume percentage of the device 0.0 - 1.0.
-		/// </summary>
-		public static float GetVolumeAsPercentage(float volume, float min, float max)
-		{
-			// Avoid divide by zero
-			if (min.Equals(max))
-				return 0.0f;
-
-			return MathUtils.MapRange(min, max, 0.0f, 1.0f, volume);
+			return MathUtils.ToPercent(extends.VolumeDeviceMin, extends.VolumeDeviceMax, extends.Volume);
 		}
 	}
 }

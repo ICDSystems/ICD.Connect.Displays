@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -68,6 +69,22 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		private int? m_RequestedInput;
 		private bool? m_RequestedMute;
 		private ePowerState? m_ExpectedPowerState;
+
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+					   eVolumeFeatures.MuteAssignment |
+					   eVolumeFeatures.MuteFeedback |
+					   eVolumeFeatures.Volume |
+					   eVolumeFeatures.VolumeAssignment |
+					   eVolumeFeatures.VolumeFeedback;
+			}
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -155,7 +172,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommandPriority(SharpDisplayCommands.POWER_ON_COMMAND, 0);
 		}
 
-		protected override void VolumeSetRawFinal(float raw)
+		protected override void SetVolumeFinal(float raw)
 		{
             if (!VolumeControlAvailable)
                 return;
@@ -185,6 +202,25 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommand(SharpDisplayCommands.VOLUME_DOWN, CommandComparer);
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);
 			SendCommand(SharpDisplayCommands.MUTE_QUERY, CommandComparer);
+		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
 		}
 
 		public override void SetActiveInput(int address)

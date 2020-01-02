@@ -5,10 +5,10 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
-using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -30,12 +30,14 @@ namespace ICD.Connect.Displays.Devices
 		private bool m_IsMuted;
 		private float m_Volume;
 
-		private float? m_VolumeSafetyMin;
-		private float? m_VolumeSafetyMax;
-		private float? m_VolumeDefault;
 		private bool m_VolumeControlAvailable;
 
 		#region Properties
+
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public abstract eVolumeFeatures SupportedVolumeFeatures { get; }
 
 		/// <summary>
 		/// Override if the display volume minimum is not 0.
@@ -60,29 +62,9 @@ namespace ICD.Connect.Displays.Devices
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
-
-				// If the volume went outside of safe limits clamp the volume to a safe value.
-				float safeVolume = MathUtils.Clamp(m_Volume, this.GetVolumeSafetyOrDeviceMin(), this.GetVolumeSafetyOrDeviceMax());
-				if (Math.Abs(m_Volume - safeVolume) > 0.01f)
-					SetVolume(safeVolume);
+				Log(eSeverity.Informational, "Raw volume set to {0:F2}", m_Volume);
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
-			}
-		}
-
-		/// <summary>
-		/// Gets the volume as a float represented from 0.0f (silent) to 1.0f (as loud as possible)
-		/// </summary>
-		public float VolumePercent
-		{
-			get
-			{
-				// Update the volume percentage
-				float min = this.GetVolumeSafetyOrDeviceMin();
-				float max = this.GetVolumeSafetyOrDeviceMax();
-
-				return Math.Abs(min - max) < 0.01f ? 1.0f : MathUtils.MapRange(min, max, 0.0f, 1.0f, Volume);
 			}
 		}
 
@@ -106,51 +88,6 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
-		/// Prevents the device from going below this volume.
-		/// </summary>
-		public float? VolumeSafetyMin
-		{
-			get { return m_VolumeSafetyMin; }
-			set
-			{
-				if (value != null)
-					value = Math.Max((float)value, VolumeDeviceMin);
-				m_VolumeSafetyMin = value;
-			}
-		}
-
-		/// <summary>
-		/// Prevents the device from going above this volume.
-		/// </summary>
-		public float? VolumeSafetyMax
-		{
-			get { return m_VolumeSafetyMax; }
-			set
-			{
-				if (value != null)
-					value = Math.Min((float)value, VolumeDeviceMax);
-				m_VolumeSafetyMax = value;
-			}
-		}
-
-		/// <summary>
-		/// The default volume to use when the display powers on.
-		/// </summary>
-		public float? VolumeDefault
-		{
-			get { return m_VolumeDefault; }
-			set
-			{
-				if (value != null)
-				{
-					value = MathUtils.Clamp((float)value, this.GetVolumeSafetyOrDeviceMin(),
-					                        this.GetVolumeSafetyOrDeviceMax());
-				}
-				m_VolumeDefault = value;
-			}
-		}
-
-		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
 		public bool VolumeControlAvailable
@@ -164,9 +101,6 @@ namespace ICD.Connect.Displays.Devices
 				m_VolumeControlAvailable = value;
 
 				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
-
-				if (VolumeControlAvailable && VolumeDefault != null)
-					SetVolume((float)VolumeDefault);
 			}
 		}
 
@@ -232,19 +166,30 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public abstract void VolumeRamp(bool increment, long timeout);
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public abstract void VolumeRampStop();
+
+		/// <summary>
 		/// Sets the raw volume.
 		/// </summary>
-		/// <param name="raw"></param>
-		public void SetVolume(float raw)
+		/// <param name="level"></param>
+		public void SetVolume(float level)
 		{
 			if (PowerState != ePowerState.PowerOn && PowerState != ePowerState.Warming)
 				return;
 
-			float min = this.GetVolumeSafetyOrDeviceMin();
-			float max = this.GetVolumeSafetyOrDeviceMax();
-			raw = MathUtils.Clamp(raw, min, max);
+			level = MathUtils.Clamp(level, VolumeDeviceMin, VolumeDeviceMax);
 
-			VolumeSetRawFinal(raw);
+			SetVolumeFinal(level);
 		}
 
 		/// <summary>
@@ -265,7 +210,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Sends the volume set command to the device after validation has been performed.
 		/// </summary>
 		/// <param name="raw"></param>
-		protected abstract void VolumeSetRawFinal(float raw);
+		protected abstract void SetVolumeFinal(float raw);
 
 		protected virtual bool GetVolumeControlAvailable()
 		{
@@ -275,49 +220,6 @@ namespace ICD.Connect.Displays.Devices
 		protected virtual void UpdateCachedVolumeControlAvailableState()
 		{
 			VolumeControlAvailable = GetVolumeControlAvailable();
-		}
-
-		#endregion
-
-		#region Settings
-
-		/// <summary>
-		/// Override to apply properties to the settings instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		protected override void CopySettingsFinal(T settings)
-		{
-			base.CopySettingsFinal(settings);
-
-			settings.VolumeDefault = VolumeDefault;
-			settings.VolumeSafetyMin = VolumeSafetyMin;
-			settings.VolumeSafetyMax = VolumeSafetyMax;
-		}
-
-		/// <summary>
-		/// Override to clear the instance settings.
-		/// </summary>
-		protected override void ClearSettingsFinal()
-		{
-			base.ClearSettingsFinal();
-
-			VolumeSafetyMin = null;
-			VolumeSafetyMax = null;
-			VolumeDefault = null;
-		}
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			VolumeSafetyMin = settings.VolumeSafetyMin;
-			VolumeSafetyMax = settings.VolumeSafetyMax;
-			VolumeDefault = settings.VolumeDefault;
 		}
 
 		#endregion
