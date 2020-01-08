@@ -14,11 +14,6 @@ namespace ICD.Connect.Displays.Devices
 		public override string Name { get { return string.Format("{0} Volume Control", Parent.Name); } }
 
 		/// <summary>
-		/// Returns the features that are supported by this volume control.
-		/// </summary>
-		public override eVolumeFeatures SupportedVolumeFeatures { get { return Parent.SupportedVolumeFeatures; } }
-
-		/// <summary>
 		/// Gets the minimum supported volume level.
 		/// </summary>
 		public override float VolumeLevelMin { get { return Parent.VolumeDeviceMin; } }
@@ -38,6 +33,7 @@ namespace ICD.Connect.Displays.Devices
 		public DisplayVolumeDeviceControl(IDisplayWithAudio parent, int id)
 			: base(parent, id)
 		{
+			SupportedVolumeFeatures = Parent.SupportedVolumeFeatures;
 		}
 
 		#region Methods
