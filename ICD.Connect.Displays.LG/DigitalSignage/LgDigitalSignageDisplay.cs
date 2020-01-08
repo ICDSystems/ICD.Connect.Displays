@@ -172,7 +172,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="raw"></param>
 		protected override void SetVolumeFinal(float raw)
 		{
-			int volumeInt = (int)MathUtils.Clamp(raw, VolumeDeviceMin, VolumeDeviceMax);
+			int volumeInt = (int)MathUtils.Clamp(Math.Round(raw), VolumeDeviceMin, VolumeDeviceMax);
 			string data = volumeInt.ToString("X2"); // 2 digit hex (00-64)
 
 			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_VOLUME, SetId, data);

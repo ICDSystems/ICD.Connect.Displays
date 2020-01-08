@@ -179,7 +179,9 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         {
             if (!VolumeControlAvailable)
                 return;
-            SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw), VolumeComparer);
+
+	        int volume = (int)Math.Round(raw);
+			SendNonFormattedCommand(string.Format(VOLUME_SET, volume), VolumeComparer);
         }
 
         /// <summary>

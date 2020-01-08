@@ -216,7 +216,9 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		{
 			if (!VolumeControlAvailable)
 				return;
-			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE, (ushort)raw), VolumeComparer);
+
+			ushort volume = (ushort)Math.Round(raw);
+			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE, volume), VolumeComparer);
 		}
 
 		/// <summary>

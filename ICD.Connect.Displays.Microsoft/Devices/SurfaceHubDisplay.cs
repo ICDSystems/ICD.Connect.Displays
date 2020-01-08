@@ -135,7 +135,9 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 	    {
 		    if (!VolumeControlAvailable)
 			    return;
-		    SendNonFormattedCommand(string.Format(VOLUME_SET, (int)raw));
+
+		    int volume = (int)Math.Round(raw);
+		    SendNonFormattedCommand(string.Format(VOLUME_SET, volume));
 	    }
 
 	    /// <summary>

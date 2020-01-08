@@ -239,7 +239,9 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		{
             if (!VolumeControlAvailable)
                 return;
-			string command = GetCommand(VOLUME, ((ushort)raw).ToString());
+
+			ushort volume = (ushort)Math.Round(raw);
+			string command = GetCommand(VOLUME, volume.ToString());
 
 			SendCommand(command, CommandComparer);
 			SendCommand(VOLUME_QUERY, CommandComparer);

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Displays round volume level instead of flooring
+
 ## [13.0.0] - 2019-12-12
 ### Added
  - AbstractProjector implements IProjector, supports lamp hours and expected warming/cooling durations

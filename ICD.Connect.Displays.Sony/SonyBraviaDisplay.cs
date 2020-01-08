@@ -127,7 +127,8 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="raw"></param>
 		protected override void SetVolumeFinal(float raw)
 		{
-			SonyBraviaCommand command = SonyBraviaCommand.Control(VOLUME_FUNCTION, ((uint)raw).ToString());
+			uint volume = (uint)Math.Round(raw);
+			SonyBraviaCommand command = SonyBraviaCommand.Control(VOLUME_FUNCTION, volume.ToString());
 			SendCommand(command, VolumeComparer);
 		}
 

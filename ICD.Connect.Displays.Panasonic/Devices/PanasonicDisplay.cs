@@ -213,7 +213,9 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         {
 			if (!VolumeControlAvailable)
 				return;
-            string setVolCommand = GenerateSetVolumeCommand((int)raw);
+
+	        int volume = (int)Math.Round(raw);
+            string setVolCommand = GenerateSetVolumeCommand(volume);
             SendNonFormattedCommand(setVolCommand);
         }
 

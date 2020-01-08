@@ -172,7 +172,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		protected override void SetVolumeFinal(float raw)
 		{
-			SendCommand(new SamsungProCommand(VOLUME, WallId, (byte)raw), CommandComparer);
+			byte volume = (byte)Math.Round(raw);
+
+			SendCommand(new SamsungProCommand(VOLUME, WallId, volume), CommandComparer);
 
 			// Display unmutes on volume change, if and only if its currently muted
 			if(IsMuted)

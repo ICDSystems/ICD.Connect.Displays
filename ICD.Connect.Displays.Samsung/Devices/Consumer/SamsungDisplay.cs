@@ -194,7 +194,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			if (!VolumeControlAvailable)
 				return;
 
-			SendNonFormattedCommand(VOLUME + (char)(byte)raw, VolumeComparer);
+			byte volume = (byte)Math.Round(raw);
+			SendNonFormattedCommand(VOLUME + (char)volume, VolumeComparer);
 		}
 
 		/// <summary>

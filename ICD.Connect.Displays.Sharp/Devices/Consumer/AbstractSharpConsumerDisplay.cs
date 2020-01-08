@@ -177,7 +177,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
             if (!VolumeControlAvailable)
                 return;
 
-			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, ((ushort)raw).ToString());
+			ushort volume = (ushort)Math.Round(raw);
+			string command = SharpDisplayCommands.GetCommand(SharpDisplayCommands.VOLUME, volume.ToString());
 
 			SendCommand(command, CommandComparer);
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY, CommandComparer);
