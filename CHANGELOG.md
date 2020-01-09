@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Changed
- - Displays round volume level instead of flooring
+ - Displays round volume level on assignment instead of flooring
+ - Reworked displays to fit new volume interfaces
 
 ## [13.0.0] - 2019-12-12
 ### Added
