@@ -103,9 +103,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 								expectedLength = NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString());
 							}
 
-							// If we get to this point, length is < 2, or expectedLength != null
-							// If expectedLength is null, we're down to length <2, so continue processing string
-							if (expectedLength == null)
+							// After clearing out the buffer, see if we now have a complete command.  If not, continue
+							if (!IsComplete(m_RxData.ToString()))
 								continue;
 						}
 
