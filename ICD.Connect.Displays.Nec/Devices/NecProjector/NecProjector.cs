@@ -509,7 +509,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		{
 			base.ConfigurePort(port);
 
-			ISerialBuffer buffer = new NecProjectorSerialBuffer();
+			ISerialBuffer buffer = new NecProjectorSerialBuffer(this);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);

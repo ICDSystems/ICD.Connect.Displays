@@ -4,6 +4,7 @@ using System.Text;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Displays.Nec.Devices.NecProjector
@@ -20,12 +21,16 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private readonly SafeCriticalSection m_QueueSection;
 		private readonly SafeCriticalSection m_ParseSection;
 
+		private readonly NecProjector m_Parent;
+
 		#endregion
 
 		#region Constructors
 
-		public NecProjectorSerialBuffer()
+		public NecProjectorSerialBuffer(NecProjector parent)
 		{
+			m_Parent = parent;
+
 			m_RxData = new StringBuilder();
 			m_Queue = new Queue<string>();
 
@@ -86,9 +91,10 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 							if (m_RxData.Length < NecProjectorCommand.MinimumResponseLength || NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString()).HasValue)
 								continue;
 
-
 							// If we get here, the command length is unknown when it should be known
 							// Likely have unexpected/junk in the buffer, let's try to remove it.
+							
+							m_Parent.Log(eSeverity.Warning, "Unknown response in buffer, scrubbing: {0}", StringUtils.ToHexLiteral(m_RxData.ToString()));
 
 							int? expectedLength = null;
 							while (m_RxData.Length >= NecProjectorCommand.MinimumResponseLength && expectedLength == null)
