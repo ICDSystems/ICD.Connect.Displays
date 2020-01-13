@@ -292,6 +292,9 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			//Empty response for power on command sets pre-warming state
 			if (string.IsNullOrEmpty(args.Response))
 			{
+				if (args.Data == null)
+					return;
+
 				ParseEmptyResponse(args.Data.Serialize().Trim());
 				return;
 			}
