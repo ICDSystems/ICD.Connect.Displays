@@ -21,6 +21,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 	{
 		#region Commands and Responses
 
+		private const int MINIMUM_RESPONSE_LENGTH = 2;
+
 		/// <summary>
 		/// Commands string formats for operations, minus checksums
 		/// </summary>
@@ -106,6 +108,11 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		public string[] CommandArgs { get; private set; }
 
+		/// <summary>
+		/// Minimum response length we need to process for expected length
+		/// </summary>
+		public static int MinimumResponseLength { get { return MINIMUM_RESPONSE_LENGTH; } }
+
 		#region Constructor
 
 		public NecProjectorCommand(eCommandType commandType, params string[] commandArgs)
@@ -140,13 +147,13 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		public static bool IsResponseSuccess(string response)
 		{
-			return response.Length >= 2 && s_ResponseSuccessHeader.ContainsValue(response.Substring(0, 2));
+			return response.Length >= MinimumResponseLength && s_ResponseSuccessHeader.ContainsValue(response.Substring(0, 2));
 		}
 
 		public static int? GetResponseLengthFromHeaders(string command)
 		{
-			// Need at least 2 characters to get expected length
-			if (command.Length < 2)
+			// Need at least MinimumResponseLength characters to get expected length
+			if (command.Length < MinimumResponseLength)
 				return null;
 
 			eCommandType commandType;

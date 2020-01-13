@@ -83,7 +83,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 						{
 							// If the length is < 2, or we have an expected length,
 							// just wait for the command
-							if (m_RxData.Length < 2 || NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString()).HasValue)
+							if (m_RxData.Length < NecProjectorCommand.MinimumResponseLength || NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString()).HasValue)
 								continue;
 
 
@@ -91,7 +91,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 							// Likely have unexpected/junk in the buffer, let's try to remove it.
 
 							int? expectedLength = null;
-							while (m_RxData.Length >= 2 && expectedLength == null)
+							while (m_RxData.Length >= NecProjectorCommand.MinimumResponseLength && expectedLength == null)
 							{
 								m_RxData.Remove(0, 1);
 								expectedLength = NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString());
