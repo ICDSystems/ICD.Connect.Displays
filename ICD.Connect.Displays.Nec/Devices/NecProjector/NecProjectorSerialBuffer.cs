@@ -79,9 +79,29 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 					{
 						m_RxData.Append(c);
 
-						//todo - if lentgh >= 2 and ExpectedLength is null, remove char from front of string
 						if (!IsComplete(m_RxData.ToString()))
-							continue;
+						{
+							// If the length is < 2, or we have an expected length,
+							// just wait for the command
+							if (m_RxData.Length < 2 || NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString()).HasValue)
+								continue;
+
+
+							// If we get here, the command length is unknown when it should be known
+							// Likely have unexpected/junk in the buffer, let's try to remove it.
+
+							int? expectedLength = null;
+							while (m_RxData.Length >= 2 && expectedLength == null)
+							{
+								m_RxData.Remove(0, 1);
+								expectedLength = NecProjectorCommand.GetResponseLengthFromHeaders(m_RxData.ToString());
+							}
+
+							// If we get to this point, length is < 2, or expectedLength != null
+							// If expectedLength is null, we're down to length <2, so continue processing string
+							if (expectedLength == null)
+								continue;
+						}
 
 						string output = m_RxData.Pop();
 						OnCompletedSerial.Raise(this, new StringEventArgs(output));
