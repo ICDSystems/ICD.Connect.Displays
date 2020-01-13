@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Displays round volume level on assignment instead of flooring
  - Reworked displays to fit new volume interfaces
  - NEC Projector now handles unknown responses without breaking
+ - Epson Project will now ignore unsolicited feedback
 
 ## [13.0.0] - 2019-12-12
 ### Added
