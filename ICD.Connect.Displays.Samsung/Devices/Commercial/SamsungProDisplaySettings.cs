@@ -10,7 +10,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 	/// Settings for the SamsungProDisplay device.
 	/// </summary>
 	[KrangSettings("SamsungProDisplay", typeof(SamsungProDisplay))]
-	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings
+	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings, ISamsungProDisplaySettings
 	{
 		private const string WALLID_ELEMENT = "WallId";
 
