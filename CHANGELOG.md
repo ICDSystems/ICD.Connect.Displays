@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.5.0] - 2020-02-03
+### Added
+ - Added SamsungProVideoWall display
+ 
+### Changed
+ - Created AbstractSamsungProDisplay to support both SamsungProDisplay and SamsungProVideoWallDisplay
+
 ## [11.4.2] - 2019-12-12
 ### Changed
  - Sharp Consumer and Prosumer - wait after setting display power states to poll, so the display returns the correct state
