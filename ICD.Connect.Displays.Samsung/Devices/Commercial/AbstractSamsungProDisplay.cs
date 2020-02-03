@@ -12,7 +12,8 @@ using ICD.Connect.Protocol.SerialQueues;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
-	public abstract class AbstractSamsungProDisplay<T> : AbstractDisplayWithAudio<T> where T : ISamsungProDisplaySettings, new()
+	public abstract class AbstractSamsungProDisplay<T> : AbstractDisplayWithAudio<T>, ISamsungProDisplay
+		where T : ISamsungProDisplaySettings, new()
 	{
 		private const byte POWER = 0x11;
 		private const byte VOLUME = 0x12;
@@ -71,8 +72,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			{5, INPUT_DVI_VIDEO}
 		};
 		// ReSharper restore StaticFieldInGenericType
-
-
 
 		#region Methods
 
@@ -382,7 +381,5 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		}
 
 		#endregion
-
-
 	}
 }

@@ -1,17 +1,15 @@
 ﻿using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
 	[KrangSettings("SamsungProVideoWallDisplay", typeof(SamsungProVideoWallDisplay))]
-	public sealed class SamsungProVideoWallDisplaySettings : AbstractDisplayWithAudioSettings, ISamsungProDisplaySettings
+	public sealed class SamsungProVideoWallDisplaySettings : AbstractSamsungProDisplaySettings
 	{
 		private const string INPUT_WALLID_ELEMENT = "InputWallId";
 		private const string VOLUME_WALLID_ELEMENT = "VolumeWallId";
-
 
 		[CrestronByteSettingsProperty]
 		public byte? InputWallId { get; set; }
@@ -31,7 +29,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 				writer.WriteElementString(INPUT_WALLID_ELEMENT, StringUtils.ToIpIdString(InputWallId.Value));
 			if (VolumeWallId.HasValue)
 				writer.WriteElementString(VOLUME_WALLID_ELEMENT, StringUtils.ToIpIdString(VolumeWallId.Value));
-
 		}
 
 		/// <summary>

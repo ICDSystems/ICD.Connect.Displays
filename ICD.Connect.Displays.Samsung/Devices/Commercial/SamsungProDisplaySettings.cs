@@ -1,6 +1,5 @@
 ﻿using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
-using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
@@ -10,7 +9,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 	/// Settings for the SamsungProDisplay device.
 	/// </summary>
 	[KrangSettings("SamsungProDisplay", typeof(SamsungProDisplay))]
-	public sealed class SamsungProDisplaySettings : AbstractDisplayWithAudioSettings, ISamsungProDisplaySettings
+	public sealed class SamsungProDisplaySettings : AbstractSamsungProDisplaySettings
 	{
 		private const string WALLID_ELEMENT = "WallId";
 
