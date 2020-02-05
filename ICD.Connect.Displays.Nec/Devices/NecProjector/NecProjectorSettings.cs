@@ -31,7 +31,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (comSpecProperties == null)
 				throw new ArgumentNullException("comSpecProperties");
 
-			comSpecProperties.ApplyDefaultValues(eComBaudRates.BaudRate9600, eComDataBits.DataBits8, eComParityType.None, eComStopBits.StopBits1, eComProtocolType.Rs232, eComHardwareHandshakeType.None, eComSoftwareHandshakeType.None, false);
+			comSpecProperties.ApplyDefaultValues(eComBaudRates.BaudRate38400, eComDataBits.DataBits8, eComParityType.None, eComStopBits.StopBits1, eComProtocolType.Rs232, eComHardwareHandshakeType.None, eComSoftwareHandshakeType.None, false);
 		}
 	}
 }
