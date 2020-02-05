@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Reworked displays to fit new volume interfaces
  - NEC Projector now handles unknown responses without breaking
  - Epson Project will now ignore unsolicited feedback
+ - Fixed default baud rate for NEC projectors
 
 ## [13.0.0] - 2019-12-12
 ### Added
