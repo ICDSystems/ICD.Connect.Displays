@@ -247,6 +247,26 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Queues the command to be sent to the device at the given priority.
+		/// Replaces an existing command if it matches the comparer.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="comparer"></param>
+		/// <param name="priority"></param>
+		[PublicAPI]
+		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer, int priority)
+			where TData : class, ISerialData
+		{
+			if (SerialQueue == null)
+			{
+				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				return;
+			}
+
+			SerialQueue.EnqueuePriority(command, comparer, priority, false);
+		}
+
+		/// <summary>
 		/// Powers the TV.
 		/// </summary>
 		public abstract void PowerOn();
