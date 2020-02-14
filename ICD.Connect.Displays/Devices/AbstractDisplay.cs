@@ -265,7 +265,7 @@ namespace ICD.Connect.Displays.Devices
 				return;
 			}
 
-			SerialQueue.EnqueuePriority(command, comparer, priority);
+			SerialQueue.EnqueuePriority(command, comparer, priority, false);
 		}
 
 		/// <summary>
