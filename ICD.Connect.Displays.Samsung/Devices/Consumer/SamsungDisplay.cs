@@ -101,7 +101,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			SamsungDisplaySerialBuffer buffer = new SamsungDisplaySerialBuffer();
 			buffer.OnJunkData += BufferOnJunkData;
 
-			RateLimitedQueue queue = new RateLimitedQueue(600);
+			SerialQueue queue = new SerialQueue
+			{
+				CommandDelayTime = 600,
+				Timeout = 2500,
+			};
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 2500; // 2.5 Second Timeout
