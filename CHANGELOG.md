@@ -62,6 +62,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.5.1] - 2020-02-14
+### Changed
+ - Using new SerialQueue with rate limiting
+
 ## [11.5.0] - 2020-02-03
 ### Added
  - Added SamsungProVideoWall display
