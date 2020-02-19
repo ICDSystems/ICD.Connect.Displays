@@ -41,7 +41,6 @@ namespace ICD.Connect.Displays.Devices
 		public DisplayRouteDestinationControl(IDisplay parent, int id)
 			: base(parent, id)
 		{
-			Subscribe(parent);
 		}
 
 		/// <summary>
@@ -53,8 +52,6 @@ namespace ICD.Connect.Displays.Devices
 			OnSourceDetectionStateChange = null;
 
 			base.DisposeFinal(disposing);
-
-			Unsubscribe(Parent);
 		}
 
 		#region Methods
@@ -131,8 +128,10 @@ namespace ICD.Connect.Displays.Devices
 		/// Subscribe to the parent events.
 		/// </summary>
 		/// <param name="parent"></param>
-		private void Subscribe(IDisplay parent)
+		protected override void Subscribe(IDisplay parent)
 		{
+			base.Subscribe(parent);
+
 			parent.OnActiveInputChanged += ParentOnActiveInputChanged;
 			parent.OnPowerStateChanged += ParentOnPowerStateChanged;
 		}
@@ -141,8 +140,10 @@ namespace ICD.Connect.Displays.Devices
 		/// Unsubscribe from the parent events.
 		/// </summary>
 		/// <param name="parent"></param>
-		private void Unsubscribe(IDisplay parent)
+		protected override void Unsubscribe(IDisplay parent)
 		{
+			base.Unsubscribe(parent);
+
 			parent.OnActiveInputChanged -= ParentOnActiveInputChanged;
 			parent.OnPowerStateChanged -= ParentOnPowerStateChanged;
 		}
