@@ -435,6 +435,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             switch (args.Response)
             {
                 case FAILURE_BUSY:
+					//todo: Retry commands sent when busy
                     Log(eSeverity.Error, "Error 401 Busy. Command {0} failed.",
                         StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
                     break;
