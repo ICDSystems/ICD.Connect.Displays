@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+ - PanasonicDisplay - fixed issue with parsing responses from polling that don't include the original command
 
 ## [11.5.1] - 2020-02-14
 ### Changed
