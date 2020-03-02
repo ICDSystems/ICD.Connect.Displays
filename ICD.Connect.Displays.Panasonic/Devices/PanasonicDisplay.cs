@@ -3,6 +3,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -316,40 +317,78 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         private void ParseSuccess(SerialResponseEventArgs args)
         {
 	        string response = args.Response;
-            string command = ExtractCommand(response);
-	        switch (command)
+	        if (response.Length >= 4)
 	        {
-		        case "PON":
-			        IsPowered = true;
-			        break;
-		        case "POF":
-			        IsPowered = false;
-			        break;
-		        case "AMT":
-			        string param = ExtractParameter(response, 1);
-			        IsMuted = param == "1";
-			        break;
-		        case "IIS":
-			        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
-			        break;
-		        case "VSE":
-			        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
-			        break;
-		        case "QAV":
-			        float newVol;
-			        var parameter = ExtractParameter(response, 3);
-			        if (StringUtils.TryParse(parameter, out newVol))
-				        Volume = newVol;
-			        else
-				        throw new InvalidOperationException(string.Format("Unable to parse {0} as volume float", parameter));
-			        break;
-		        default:
-			        Log(eSeverity.Error, "Failed to parse {0}", args.Response);
-			        break;
+		        string command = ExtractCommand(response);
+		        switch (command)
+		        {
+			        case "PON":
+				        IsPowered = true;
+				        return;
+			        case "POF":
+				        IsPowered = false;
+				        return;
+			        case "AMT":
+				        string param = ExtractParameter(response, 1);
+				        IsMuted = param == "1";
+				        return;
+			        case "IIS":
+				        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
+				        return;
+			        case "VSE":
+				        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
+				        return;
+			        case "QAV":
+				        float newVol;
+				        var parameter = ExtractParameter(response, 3);
+				        if (StringUtils.TryParse(parameter, out newVol))
+					        Volume = newVol;
+				        else
+					        throw new InvalidOperationException(string.Format("Unable to parse {0} as volume float", parameter));
+				        return;
+		        }
 	        }
+
+	        ParseQueryResponse(args);
         }
 
-        /// <summary>
+		/// <summary>
+		/// It seems on some Panasonic displays respond to queries with just the value queried
+		/// This code looks at the responses and at the commands they were paired with and tries to decode them
+		/// </summary>
+		/// <param name="args"></param>
+	    private void ParseQueryResponse(SerialResponseEventArgs args)
+		{
+		    if (args.Data == null)
+			    return;
+
+			string response = RemoveStxEtx(args.Response);
+
+		    try
+		    {
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "ParsingQueryResponse - Command:{0} - Response:{1}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()), StringUtils.ToMixedReadableHexLiteral(response));
+			    switch (args.Data.Serialize())
+			    {
+				    case QUERY_POWER:
+					    IsPowered = int.Parse(response) == 1;
+					    break;
+					case QUERY_INPUT:
+					    ActiveInput = response == "HD1" ? 1 : (int?)null;
+					    break;
+			    }
+		    }
+		    catch (Exception e)
+		    {
+				Log(eSeverity.Error, "Exception parsing unmatches response: {0}:{1} - {2}{3}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()), StringUtils.ToMixedReadableHexLiteral(response), e.GetType(), e.Message);
+		    }
+	    }
+
+	    private string RemoveStxEtx(string response)
+	    {
+		    return response.Substring(1, response.Length - 2);
+	    }
+
+	    /// <summary>
         /// Attempts to match a scaling mode to the listed scaling modes in the dictionary.
         /// </summary>
         /// <param name="parameterAsString"></param>
