@@ -366,7 +366,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		    try
 		    {
-				IcdConsole.PrintLine(eConsoleColor.Magenta, "ParsingQueryResponse - Command:{0} - Response:{1}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()), StringUtils.ToMixedReadableHexLiteral(response));
 			    switch (args.Data.Serialize())
 			    {
 				    case QUERY_POWER:
