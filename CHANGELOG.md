@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.5.2] - 2020-03-03
+### Changed
+ - PanasonicDisplay - fixed issue with parsing responses from polling that don't include the original command
+
 ## [11.5.1] - 2020-02-14
 ### Changed
  - Using new SerialQueue with rate limiting
