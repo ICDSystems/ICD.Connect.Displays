@@ -268,20 +268,30 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			foreach (IConsoleCommand command in base.GetConsoleCommands())
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
 			foreach (IConsoleCommand command in DisplayLiftDeviceConsole.GetConsoleCommands(this))
 				yield return command;
 		}
 
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
+
 		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
 		{
-			foreach (IConsoleNodeBase node in base.GetConsoleNodes())
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
 				yield return node;
 
 			foreach (IConsoleNodeBase node in DisplayLiftDeviceConsole.GetConsoleNodes(this))
 				yield return node;
+		}
+
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
