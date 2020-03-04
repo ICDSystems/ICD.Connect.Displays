@@ -1,6 +1,5 @@
 ﻿using System;
 using ICD.Connect.API.Attributes;
-using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.SPlus.EventArgs;
 using ICD.Connect.Displays.SPlus.Proxy;
 
