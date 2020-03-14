@@ -109,6 +109,44 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		{
 			// todo: Implement Trust Mode
 			//throw new NotImplementedException();
+
+			if (!Trust)
+				return;
+
+			PlanarQeCommand command = args.Data as PlanarQeCommand;
+
+			if (command == null)
+				return;
+
+			switch (command.CommandCode)
+			{
+				case COMMAND_POWER:
+					if (command.CommandOperator == eCommandOperator.Set)
+						HandlePowerResponse(command);
+					break;
+				case COMMAND_MUTE:
+					if (command.CommandOperator == eCommandOperator.Set)
+						HandleMuteResponse(command);
+					break;
+				case COMMAND_SOURCE:
+					if (command.CommandOperator == eCommandOperator.Set)
+						HandleSourceResponse(command);
+					break;
+				case COMMAND_VOLUME:
+					switch (command.CommandOperator)
+					{
+						case eCommandOperator.Set:
+							HandleVolumeResponse(command);
+							break;
+						case eCommandOperator.Increment:
+							Volume++;
+							break;
+						case eCommandOperator.Decrement:
+							Volume--;
+							break;
+					}
+					break;
+			}
 		}
 
 		/// <summary>
