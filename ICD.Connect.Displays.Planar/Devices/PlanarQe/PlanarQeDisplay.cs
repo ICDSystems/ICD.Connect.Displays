@@ -167,9 +167,14 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 				return;
 			}
 
-			if (response.CommandOperator == eCommandOperator.Response)
+			switch (response.CommandOperator)
 			{
-				HandleResponese(response);
+				case eCommandOperator.Response:
+					HandleResponese(response);
+					break;
+				case eCommandOperator.Err:
+					Log(eSeverity.Error, "Error Response:{0}", response.Serialize());
+					break;
 			}
 		}
 
