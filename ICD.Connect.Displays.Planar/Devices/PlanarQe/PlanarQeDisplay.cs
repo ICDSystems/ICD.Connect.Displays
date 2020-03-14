@@ -203,7 +203,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (command == null)
 				return;
 
-			
+			RetryCommand(command);
 		}
 
 		/// <summary>
