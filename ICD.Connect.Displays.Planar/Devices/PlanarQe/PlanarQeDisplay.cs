@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
@@ -13,6 +14,8 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 {
 	public sealed class PlanarQeDisplay : AbstractDisplayWithAudio<PlanarQeDisplaySettings>
 	{
+
+		private const int MAX_RETRIES = 50;
 
 		private const int PRIORITY_POWER_SET = 10;
 		private const int PRIORITY_POWER_POLL = 20;
@@ -60,6 +63,14 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			{6, OPERAND_INPUT_OPS },
 		};
 
+		private readonly Dictionary<string, int> m_CommandRetries;
+
+
+		public PlanarQeDisplay()
+		{
+			m_CommandRetries = new Dictionary<string, int>();
+		}
+
 
 		#region AbstractDisplayWithAudio Methods
 		/// <summary>
@@ -67,7 +78,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void PowerOn()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.Set, OPERAND_ON), PRIORITY_POWER_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.Set, OPERAND_ON));
 		}
 
 		/// <summary>
@@ -75,7 +86,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void PowerOff()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.Set, OPERAND_OFF), PRIORITY_POWER_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.Set, OPERAND_OFF));
 		}
 
 		/// <summary>
@@ -88,7 +99,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (!s_InputMap.TryGetValue(address, out operand))
 				throw new ArgumentOutOfRangeException("address", String.Format("{0} does not have an input at address {1}", this, address));
 
-			SendCommandPriority(new PlanarQeCommand(COMMAND_SOURCE, eCommandOperator.Set, operand), PRIORITY_INPUT_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_SOURCE, eCommandOperator.Set, operand));
 		}
 
 		/// <summary>
@@ -107,9 +118,6 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialTransmission(object sender, SerialTransmissionEventArgs args)
 		{
-			// todo: Implement Trust Mode
-			//throw new NotImplementedException();
-
 			if (!Trust)
 				return;
 
@@ -158,12 +166,9 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		{
 			PlanarQeCommand response = PlanarQeCommand.ParseResponse(args.Response);
 
-			if (response.CommandOperator == eCommandOperator.Err)
+			if (response == null)
 			{
-				if (args.Data != null)
-					Log(eSeverity.Error, "Error executing command: {0} - {1}", args.Data.Serialize(), args.Response);
-				else
-					Log(eSeverity.Error, "Error from device: {0}", args.Response);
+				Log(eSeverity.Error, "Unable to parse display response: {0}", args.Response);
 				return;
 			}
 
@@ -173,7 +178,13 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 					HandleResponese(response);
 					break;
 				case eCommandOperator.Err:
-					Log(eSeverity.Error, "Error Response:{0}", response.Serialize());
+					if (args.Data != null)
+					{
+						Log(eSeverity.Error, "Error executing command, retrying: {0} - {1}", args.Data.Serialize(), args.Response);
+						RetryCommand(args.Data as PlanarQeCommand);
+					}
+					else
+						Log(eSeverity.Error, "Error from device: {0}", args.Response);
 					break;
 			}
 		}
@@ -185,8 +196,14 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			//todo: Handled command timeouts
-			//throw new NotImplementedException();
+			Log(eSeverity.Informational, "Command timeout: {0}", args.Data.Serialize());
+
+			PlanarQeCommand command = args.Data as PlanarQeCommand;
+
+			if (command == null)
+				return;
+
+			
 		}
 
 		/// <summary>
@@ -194,7 +211,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void VolumeUpIncrement()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Increment), PRIORITY_VOLUME_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Increment));
 		}
 
 		/// <summary>
@@ -202,7 +219,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void VolumeDownIncrement()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Decrement), PRIORITY_VOLUME_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Decrement));
 		}
 
 		/// <summary>
@@ -211,7 +228,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// <param name="raw"></param>
 		protected override void VolumeSetRawFinal(float raw)
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Set, raw.ToString("0")), PRIORITY_VOLUME_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Set, raw.ToString("0")));
 		}
 
 		/// <summary>
@@ -219,7 +236,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void MuteOn()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.Set, OPERAND_ON),PRIORITY_VOLUME_SET );
+			SendCommand(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.Set, OPERAND_ON));
 		}
 
 		/// <summary>
@@ -227,7 +244,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// </summary>
 		public override void MuteOff()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.Set, OPERAND_OFF), PRIORITY_VOLUME_SET);
+			SendCommand(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.Set, OPERAND_OFF));
 		}
 		#endregion
 
@@ -252,28 +269,58 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 		private void QueryPower()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.GetName), PRIORITY_POWER_POLL );
+			SendCommand(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.GetName));
 		}
 
 		private void QuerySource()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_SOURCE, eCommandOperator.GetName), PRIORITY_INPUT_POLL );
+			SendCommand(new PlanarQeCommand(COMMAND_SOURCE, eCommandOperator.GetName));
 		}
 
 		private void QueryMute()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.GetName), PRIORITY_VOLUME_POLL);
+			SendCommand(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.GetName));
 		}
 
 		private void QueryVolume()
 		{
-			SendCommandPriority(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.GetName), PRIORITY_VOLUME_POLL);
+			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.GetName));
+		}
+
+		private void RetryCommand(PlanarQeCommand command)
+		{
+			if (command == null)
+				return;
+
+			int count;
+
+			if (!m_CommandRetries.TryGetValue(command.CommandCode, out count))
+				count = 0;
+
+			if (count >= MAX_RETRIES)
+			{
+				Log(eSeverity.Error, "Command hit timeout retry limit:{0}", command.Serialize());
+				return;
+			}
+
+			Log(eSeverity.Debug, "Retrying command try {0}: {1}", count, command.Serialize());
+
+			m_CommandRetries[command.CommandCode] = count + 1;
+
+			SendCommand(command);
+		}
+
+		private void ResetCommandRetry(PlanarQeCommand command)
+		{
+			if (m_CommandRetries.ContainsKey(command.CommandCode))
+				m_CommandRetries[command.CommandCode] = 0;
 		}
 
 		#region Response Handling
 
 		private void HandleResponese(PlanarQeCommand response)
 		{
+			ResetCommandRetry(response);
 			switch (response.CommandCode)
 			{
 				case COMMAND_POWER:
@@ -355,9 +402,15 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 		#region Device Communications
 
-		private void SendCommandPriority(PlanarQeCommand command, int priority)
+		[Obsolete("obsolete", true)]
+		private void SendCommand(PlanarQeCommand command, int priority)
 		{
-			SendCommand(command, PlanarQeCommand.CommandComparer, priority);
+			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
+		}
+
+		private void SendCommand(PlanarQeCommand command)
+		{
+			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
 		}
 
 		public override void ConfigurePort(ISerialPort port)
@@ -368,7 +421,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 			SerialQueue queue = new SerialQueue
 			{
-				Timeout = 2 * 1000
+				Timeout = 5 * 1000
 			};
 
 			queue.SetBuffer(buffer);
@@ -378,5 +431,57 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		}
 
 		#endregion
+
+		public static int GetPriorityForCommand(PlanarQeCommand command)
+		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
+			switch (command.CommandCode)
+			{
+				case COMMAND_POWER:
+					switch (command.CommandOperator)
+					{
+						case eCommandOperator.Set:
+						case eCommandOperator.Increment:
+						case eCommandOperator.Decrement:
+							return PRIORITY_POWER_SET;
+						case eCommandOperator.GetName:
+						case eCommandOperator.GetNumeric:
+							return PRIORITY_POWER_POLL;
+					}
+
+					break;
+				case COMMAND_SOURCE:
+					switch (command.CommandOperator)
+					{
+						case eCommandOperator.Set:
+						case eCommandOperator.Increment:
+						case eCommandOperator.Decrement:
+							return PRIORITY_INPUT_SET;
+						case eCommandOperator.GetName:
+						case eCommandOperator.GetNumeric:
+							return PRIORITY_INPUT_POLL;
+					}
+
+					break;
+				case COMMAND_MUTE:
+				case COMMAND_VOLUME:
+					switch (command.CommandOperator)
+					{
+						case eCommandOperator.Set:
+						case eCommandOperator.Increment:
+						case eCommandOperator.Decrement:
+							return PRIORITY_VOLUME_SET;
+						case eCommandOperator.GetName:
+						case eCommandOperator.GetNumeric:
+							return PRIORITY_VOLUME_POLL;
+					}
+
+					break;
+			}
+
+			return int.MaxValue;
+		}
 	}
 }
