@@ -15,6 +15,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		public static void BuildConsoleStatus(IDisplayLiftDevice device, AddStatusRowDelegate addRow)
 		{
+			addRow("Display", device.Display);
+
 			bool isBootDelaying = device.LiftState == eLiftState.BootDelay;
 			bool isCooling = device.LiftState == eLiftState.CooldownDelay;
 

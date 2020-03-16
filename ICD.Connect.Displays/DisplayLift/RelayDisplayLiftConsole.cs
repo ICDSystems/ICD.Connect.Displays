@@ -13,8 +13,8 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		public static void BuildConsoleStatus(RelayDisplayLiftDevice device, AddStatusRowDelegate addRow)
 		{
-			addRow("Extend Relay Id", device.ExtendRelay.Id);
-			addRow("Retract Relay Id", device.RetractRelay.Id);
+			addRow("Extend Relay", device.ExtendRelay);
+			addRow("Retract Relay", device.RetractRelay);
 			addRow("Extend Time", device.ExtendTime + "ms");
 			addRow("Retract Time", device.RetractTime + "ms");
 			addRow("Latch Mode", device.LatchRelay ? "Latch Mode" : "Unlatched Mode");
