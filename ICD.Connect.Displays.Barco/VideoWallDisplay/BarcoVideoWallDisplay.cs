@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -442,6 +443,18 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 			settings.WallDeviceId = WallDeviceId;
 			settings.WallInputControlDevice = WallInputControlDevice;
+		}
+
+		#endregion
+
+		#region Console
+
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Wall Device ID", WallDeviceId);
+			addRow("Wall Input Control Device", WallInputControlDevice);
 		}
 
 		#endregion

@@ -58,6 +58,30 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		private readonly SafeTimer m_PowerTransientTimer;
 		private readonly SafeTimer m_PowerEquilibriumTimer;
 
+		/// <summary>
+		/// Gets the powered state.
+		/// </summary>
+		public override ePowerState PowerState { get { return base.PowerState; }
+			protected set
+			{
+				base.PowerState = value;
+
+				switch (value)
+				{
+					case ePowerState.Cooling:
+					case ePowerState.Warming:
+						StopPowerEquilibriumTimer();
+						RestartPowerTransientTimer();
+						break;
+					case ePowerState.PowerOff:
+					case ePowerState.PowerOn:
+						StopPowerTransientTimer();
+						RestartPowerEquilibriumTimer();
+						break;
+				}
+			}
+		}
+
 		public NecProjector()
 		{
 			m_PowerTransientTimer = SafeTimer.Stopped(PowerTransientTimerCallback);
@@ -101,30 +125,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		#endregion
 
 		#region IDisplay
-
-		/// <summary>
-		/// Gets the powered state.
-		/// </summary>
-		public override ePowerState PowerState { get { return base.PowerState; }
-			protected set
-			{
-				base.PowerState = value;
-
-				switch (value)
-				{
-					case ePowerState.Cooling:
-					case ePowerState.Warming:
-						StopPowerEquilibriumTimer();
-						RestartPowerTransientTimer();
-						break;
-					case ePowerState.PowerOff:
-					case ePowerState.PowerOn:
-						StopPowerTransientTimer();
-						RestartPowerEquilibriumTimer();
-						break;
-				}
-			}
-		}
 
 		/// <summary>
 		/// Powers the TV.

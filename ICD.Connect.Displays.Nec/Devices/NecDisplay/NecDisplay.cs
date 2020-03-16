@@ -428,6 +428,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 
 		#endregion
 
+		#region Console
+
 		/// <summary>
 		/// Calls the delegate for each console status item.
 		/// </summary>
@@ -438,5 +440,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 
 			addRow("Monitor ID", MonitorId);
 		}
+
+		#endregion
 	}
 }

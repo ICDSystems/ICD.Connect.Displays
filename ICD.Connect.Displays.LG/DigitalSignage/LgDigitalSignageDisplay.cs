@@ -75,6 +75,22 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 		public int SetId { get; set; }
 
+		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+				       eVolumeFeatures.MuteAssignment |
+				       eVolumeFeatures.MuteFeedback |
+				       eVolumeFeatures.Volume |
+				       eVolumeFeatures.VolumeAssignment |
+				       eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
 		#endregion
 
 		public override void ConfigurePort(ISerialPort port)
@@ -132,22 +148,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_SCALE, SetId, data);
 			SendCommand(command);
-		}
-
-		/// <summary>
-		/// Returns the features that are supported by this display.
-		/// </summary>
-		public override eVolumeFeatures SupportedVolumeFeatures
-		{
-			get
-			{
-				return eVolumeFeatures.Mute |
-					   eVolumeFeatures.MuteAssignment |
-					   eVolumeFeatures.MuteFeedback |
-					   eVolumeFeatures.Volume |
-					   eVolumeFeatures.VolumeAssignment |
-					   eVolumeFeatures.VolumeFeedback;
-			}
 		}
 
 		/// <summary>
