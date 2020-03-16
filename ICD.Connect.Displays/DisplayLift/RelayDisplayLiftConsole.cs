@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using ICD.Common.Utils;
-using ICD.Common.Utils.Services;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
@@ -9,8 +7,6 @@ namespace ICD.Connect.Displays.DisplayLift
 {
 	public static class RelayDisplayLiftConsole
 	{
-		private static ILoggerService Logger { get { return ServiceProvider.GetService<ILoggerService>(); } }
-
 		public static void BuildConsoleStatus(RelayDisplayLiftDevice device, AddStatusRowDelegate addRow)
 		{
 			addRow("Extend Relay", device.ExtendRelay);
@@ -39,28 +35,26 @@ namespace ICD.Connect.Displays.DisplayLift
 			device.LatchRelay = enable;
 		}
 
-		private static void SetExtendTime(RelayDisplayLiftDevice device, string[] parameters)
+		private static string SetExtendTime(RelayDisplayLiftDevice device, string[] parameters)
 		{
 			int delayLength;
 			if (parameters.Length == 0 || !StringUtils.TryParse(parameters[0], out delayLength) || delayLength < 0)
-			{
-				Logger.AddEntry(eSeverity.Warning, "Could not set extend time. Please specify a valid time in ms.");
-				return;
-			}
+				return "Could not set extend time. Please specify a valid time in ms.";
 
 			device.ExtendTime = delayLength;
+
+			return "Extend time set to " + delayLength;
 		}
 
-		private static void SetRetractTime(RelayDisplayLiftDevice device, string[] parameters)
+		private static string SetRetractTime(RelayDisplayLiftDevice device, string[] parameters)
 		{
 			int delayLength;
 			if (parameters.Length == 0 || !StringUtils.TryParse(parameters[0], out delayLength) || delayLength < 0)
-			{
-				Logger.AddEntry(eSeverity.Warning, "Could not set retract time. Please specify a valid time in ms.");
-				return;
-			}
+				return "Could not set retract time. Please specify a valid time in ms.";
 
 			device.RetractTime = delayLength;
+
+			return "Retract time set to " + delayLength;
 		}
 	}
 }
