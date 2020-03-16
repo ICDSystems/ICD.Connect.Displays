@@ -15,7 +15,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		private const bool DISPLAY_OFF_KEY = false;
 		private const bool DISPLAY_ON_KEY = true;
 
-
 		#region fields
 
 		private bool m_RelayLatch;
@@ -84,6 +83,8 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			m_ResetTimer = SafeTimer.Stopped(OpenAllRelays);
 		}
 
+		#region Private Methods
+
 		/// <summary>
 		/// Gets the current online status of the device.
 		/// </summary>
@@ -101,7 +102,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			return true;
 		}
 
-		
 		/// <summary>
 		/// This is called when the reset timer expires - this opens all relays.
 		/// </summary>
@@ -146,6 +146,8 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		{
 			m_RelayHoldTime = holdTime;
 		}
+
+		#endregion
 
 		#region Display Subscritpion/Callback
 
@@ -268,8 +270,11 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
+
 			addRow("Latch Relay", RelayLatch);
 			addRow("Relay Hold Time", RelayHoldTime);
+			addRow("Display Off Relay", DisplayOffRelay);
+			addRow("Display On Relay", DisplayOnRelay);
 		}
 
 		/// <summary>

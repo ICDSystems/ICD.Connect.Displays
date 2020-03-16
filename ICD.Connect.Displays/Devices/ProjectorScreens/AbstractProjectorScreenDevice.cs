@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
@@ -195,7 +196,17 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			base.CopySettingsFinal(settings);
 
 			settings.Display = m_Display == null ? null : (int?)m_Display.Id;
+		}
 
+		#endregion
+
+		#region Console
+
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Display", Display);
 		}
 
 		#endregion
