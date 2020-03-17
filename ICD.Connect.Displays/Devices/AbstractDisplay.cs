@@ -527,6 +527,9 @@ namespace ICD.Connect.Displays.Devices
 
 			foreach (IConsoleNodeBase node in DisplayConsole.GetConsoleNodes(this))
 				yield return node;
+
+			if (m_ConnectionStateManager != null)
+				yield return m_ConnectionStateManager.Port;
 		}
 
 		/// <summary>
