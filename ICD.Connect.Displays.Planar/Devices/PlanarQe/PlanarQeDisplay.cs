@@ -126,34 +126,24 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (command == null)
 				return;
 
-			switch (command.CommandCode)
+			if (command.CommandOperator == eCommandOperator.Set)
 			{
-				case COMMAND_POWER:
-					if (command.CommandOperator == eCommandOperator.Set)
-						HandlePowerResponse(command);
-					break;
-				case COMMAND_MUTE:
-					if (command.CommandOperator == eCommandOperator.Set)
-						HandleMuteResponse(command);
-					break;
-				case COMMAND_SOURCE:
-					if (command.CommandOperator == eCommandOperator.Set)
-						HandleSourceResponse(command);
-					break;
-				case COMMAND_VOLUME:
-					switch (command.CommandOperator)
-					{
-						case eCommandOperator.Set:
-							HandleVolumeResponse(command);
-							break;
-						case eCommandOperator.Increment:
-							Volume++;
-							break;
-						case eCommandOperator.Decrement:
-							Volume--;
-							break;
-					}
-					break;
+				HandleResponese(command);
+				return;
+			}
+
+			// Handle volume increment/decrement
+			if (command.CommandCode != COMMAND_VOLUME)
+				return;
+
+			switch (command.CommandOperator)
+			{
+				case eCommandOperator.Increment:
+					Volume++;
+					return;
+				case eCommandOperator.Decrement:
+					Volume--;
+					return;
 			}
 		}
 
@@ -164,7 +154,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			PlanarQeCommand response = PlanarQeCommand.ParseResponse(args.Response);
+			PlanarQeCommand response = PlanarQeCommand.ParseCommand(args.Response);
 
 			if (response == null)
 			{
@@ -385,33 +375,11 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			Volume = volume;
 		}
 
-		private bool GetBoolOperands(string[] operands)
-		{
-			if (operands == null)
-				throw new ArgumentNullException("operands");
-
-			if (operands.Length < 1)
-				throw  new ArgumentOutOfRangeException("operands");
-
-			return string.Equals(operands[0], OPERAND_ON, StringComparison.InvariantCultureIgnoreCase);
-		}
-
 		#endregion
 
 		#endregion
 
 		#region Device Communications
-
-		[Obsolete("obsolete", true)]
-		private void SendCommand(PlanarQeCommand command, int priority)
-		{
-			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
-		}
-
-		private void SendCommand(PlanarQeCommand command)
-		{
-			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
-		}
 
 		public override void ConfigurePort(ISerialPort port)
 		{
@@ -482,6 +450,23 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 
 			return int.MaxValue;
+		}
+
+		/// <summary>
+		/// Parses ON/OFF operand into a bool
+		/// </summary>
+		/// <param name="operands"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static bool GetBoolOperands([NotNull] IList<string> operands)
+		{
+			if (operands == null)
+				throw new ArgumentNullException("operands");
+
+			if (operands.Count < 1)
+				throw  new ArgumentOutOfRangeException("operands");
+
+			return string.Equals(operands[0], OPERAND_ON, StringComparison.InvariantCultureIgnoreCase);
 		}
 	}
 }
