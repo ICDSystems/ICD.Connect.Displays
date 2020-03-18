@@ -7,6 +7,11 @@ using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 {
+	/// <summary>
+	/// CommandOperator options for the PlanarQe Command
+	/// Includes both operators to send to the display,
+	/// and operators returned from the display.
+	/// </summary>
 	public enum eCommandOperator
 	{
 		Set,
@@ -14,10 +19,10 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		GetNumeric,
 		Increment,
 		Decrement,
-		Response,
-		Ack,
-		Nak,
-		Err
+		Response, //Response Only
+		Ack, //Response Only
+		Nak, //Response Only
+		Err //Response Only
 	}
 
 	public sealed class PlanarQeCommand : ISerialData
@@ -27,34 +32,45 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 		private static readonly Regex s_ResponseMatcher = new Regex(@"([^:\(@\^\!]+)(\([^\)]+\))*([:\@\^\!])(.*)");
 
+		[PublicAPI]
 		public string CommandCode { get; private set; }
 
+		[PublicAPI]
 		public string[] Modifiers { get; private set; }
 
+		[PublicAPI]
 		public eCommandOperator? CommandOperator { get; private set; }
 
+		[PublicAPI]
 		public string[] Operands { get; private set; }
 
-		public PlanarQeCommand(string commandCode, string[] modifiers, eCommandOperator? commandOperator,
-		                       string[] operands)
+		[PublicAPI]
+		public PlanarQeCommand([NotNull] string commandCode, [CanBeNull] string[] modifiers, [CanBeNull] eCommandOperator? commandOperator,
+							   [CanBeNull] string[] operands)
 		{
+			if (commandCode == null)
+				throw new ArgumentNullException("commandCode");
+
 			CommandCode = commandCode;
 			Modifiers = modifiers;
 			CommandOperator = commandOperator;
 			Operands = operands;
 		}
 
-		public PlanarQeCommand(string commandCode) : 
+		[PublicAPI]
+		public PlanarQeCommand([NotNull] string commandCode) : 
 			this(commandCode, null, null, null)
 		{
 		}
 
-		public PlanarQeCommand(string commandCode, eCommandOperator commandOperator) :
+		[PublicAPI]
+		public PlanarQeCommand([NotNull] string commandCode, eCommandOperator commandOperator) :
 			this(commandCode, null, commandOperator, null)
 		{
 		}
 
-		public PlanarQeCommand(string commandCode, eCommandOperator commandOperator, string operand) :
+		[PublicAPI]
+		public PlanarQeCommand([NotNull] string commandCode, eCommandOperator commandOperator, [CanBeNull] string operand) :
 			this(commandCode, null, commandOperator,new[] {operand} )
 		{
 		}
@@ -75,6 +91,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (Modifiers != null)
 				command.AppendFormat("({0})", string.Join(SEPARATOR, Modifiers));
 
+			//If no operator, return string now without operands
 			if (!CommandOperator.HasValue)
 			{
 				command.Append(TERMINATOR);
@@ -90,7 +107,13 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			return command.ToString();
 		}
 
-		private static char GetOperatorCode(eCommandOperator commandOperator)
+		/// <summary>
+		/// Gets the operator code char for the given operator
+		/// Only accepts operators we can send to the display
+		/// </summary>
+		/// <param name="commandOperator"></param>
+		/// <returns></returns>
+		public static char GetOperatorCode(eCommandOperator commandOperator)
 		{
 			switch (commandOperator)
 			{
@@ -109,7 +132,13 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 		}
 
-		private static eCommandOperator GetOperatorFromCode(char operatorCode)
+		/// <summary>
+		/// Returns the operator for a given character
+		/// Works for send and response operators
+		/// </summary>
+		/// <param name="operatorCode"></param>
+		/// <returns></returns>
+		public static eCommandOperator GetOperatorFromCode(char operatorCode)
 		{
 			switch (operatorCode)
 			{
@@ -136,6 +165,15 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 		}
 
+		/// <summary>
+		/// Compares commands
+		/// To match, commands must have the same CommandCode,
+		/// the same modifiers, and equivalent operators
+		/// Set, Increment, Decrement are considered equivalent operators
+		/// </summary>
+		/// <param name="commandA"></param>
+		/// <param name="commandB"></param>
+		/// <returns></returns>
 		public static bool CommandComparer([NotNull] PlanarQeCommand commandA, [NotNull] PlanarQeCommand commandB)
 		{
 			if (commandA == null)
@@ -147,6 +185,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (commandA.CommandCode != commandB.CommandCode)
 				return false;
 
+			// Is null must be the same for both
 			if (commandA.Modifiers == null ^ commandB.Modifiers == null)
 				return false;
 
@@ -156,42 +195,57 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 					return false;
 			}
 
-			// different value are false
-			if (commandA.CommandOperator.HasValue  ^ commandB.CommandOperator.HasValue)
-				return false;
 			
-			// No value to compare = true
-			if (!commandA.CommandOperator.HasValue && !commandB.CommandOperator.HasValue)
-				return true;
 			
 			// ReSharper disable PossibleInvalidOperationException
 			return CommandOperatorComparer(commandA.CommandOperator.Value, commandB.CommandOperator.Value);
 			// ReSharper restore PossibleInvalidOperationException
 		}
 
-		private static bool CommandOperatorComparer(eCommandOperator commandOperatorA, eCommandOperator commandOperatorB)
+		/// <summary>
+		/// Compares operators
+		/// Set, Increment, Decrement are considered equivalent operators
+		/// </summary>
+		/// <param name="commandOperatorA"></param>
+		/// <param name="commandOperatorB"></param>
+		/// <returns></returns>
+		public static bool CommandOperatorComparer(eCommandOperator? commandOperatorA, eCommandOperator? commandOperatorB)
 		{
-			if (commandOperatorA == commandOperatorB)
+			// HasValue must be the same for both
+			if (commandOperatorA.HasValue ^ commandOperatorB.HasValue)
+				return false;
+
+			// No value to compare = true
+			if (!commandOperatorA.HasValue)
+				return true;
+
+			if (commandOperatorA.Value == commandOperatorB.Value)
 				return true;
 
 			// Set, Increment, Decrement are the same command
-
-			if ((commandOperatorA == eCommandOperator.Set || commandOperatorA == eCommandOperator.Increment ||
-			     commandOperatorA == eCommandOperator.Decrement) &&
-			    (commandOperatorB == eCommandOperator.Set || commandOperatorB == eCommandOperator.Increment ||
-			     commandOperatorB == eCommandOperator.Decrement))
+			if ((commandOperatorA.Value == eCommandOperator.Set || commandOperatorA.Value == eCommandOperator.Increment ||
+			     commandOperatorA.Value == eCommandOperator.Decrement) &&
+			    (commandOperatorB.Value == eCommandOperator.Set || commandOperatorB.Value == eCommandOperator.Increment ||
+			     commandOperatorB.Value == eCommandOperator.Decrement))
 				return true;
 
 			return false;
 		}
 
-		public static PlanarQeCommand ParseResponse(string response)
+		/// <summary>
+		/// Attempts to parse the given string as a PlanarQeCommand
+		/// This will parse both responses and commands being sent
+		/// Will return null if unable to parse the string
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns>Command, or null if unable to parse</returns>
+		[CanBeNull]
+		public static PlanarQeCommand ParseCommand([CanBeNull] string command)
 		{
-			if (string.IsNullOrEmpty(response))
+			if (string.IsNullOrEmpty(command))
 				return null;
-			//Regex for response: ([^:\(@\^]+)(\([^\)]+\))*([:\@\^])(.*)
 
-			var match = s_ResponseMatcher.Match(response);
+			Match match = s_ResponseMatcher.Match(command);
 			if (!match.Success)
 				return null;
 
@@ -212,12 +266,21 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			return new PlanarQeCommand(commandCode, modifiers,commandOperator,operands);
 		}
 
-		public static string[] ParseModifiers(string modifiers)
+		/// <summary>
+		/// Parses the modifiers string of a command
+		/// If string is empty, returns null
+		/// </summary>
+		/// <param name="modifiers"></param>
+		/// <returns>array of modifiers, or null if no modifiers</returns>
+		[CanBeNull]
+		public static string[] ParseModifiers([NotNull] string modifiers)
 		{
 			if (modifiers == null)
 				throw new ArgumentNullException("modifiers");
 
-			return modifiers.Trim(new [] { ' ', '(', ')' }).Split(' ');
+			modifiers = modifiers.Trim(new[] {' ', '(', ')'});
+
+			return string.IsNullOrEmpty(modifiers) ? null : modifiers.Split(' ');
 		}
 	}
 }
