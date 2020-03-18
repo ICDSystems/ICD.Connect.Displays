@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
@@ -63,9 +64,14 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			{6, OPERAND_INPUT_OPS },
 		};
 
+		/// <summary>
+		/// Keeps track of command retry counts
+		/// </summary>
 		private readonly Dictionary<string, int> m_CommandRetries;
 
-
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		public PlanarQeDisplay()
 		{
 			m_CommandRetries = new Dictionary<string, int>();
@@ -241,6 +247,20 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		#region PrivateMethods
 
 		/// <summary>
+		/// Sends the given command
+		/// Uses the command comparer to collapse commands
+		/// Uses the appropriate priority for the command
+		/// </summary>
+		/// <param name="command"></param>
+		private void SendCommand([NotNull] PlanarQeCommand command)
+		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
+			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
+		}
+
+		/// <summary>
 		/// Polls the physical device for the current state.
 		/// </summary>
 		protected override void QueryState()
@@ -257,27 +277,43 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			QueryVolume();
 		}
 
+		/// <summary>
+		/// Polls the power state of the display
+		/// </summary>
 		private void QueryPower()
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_POWER, eCommandOperator.GetName));
 		}
 
+		/// <summary>
+		/// Polls the source state of the display
+		/// </summary>
 		private void QuerySource()
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_SOURCE, eCommandOperator.GetName));
 		}
 
+		/// <summary>
+		/// Polls the mute state of the display
+		/// </summary>
 		private void QueryMute()
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.GetName));
 		}
 
+		/// <summary>
+		/// Polls the volume state of the display
+		/// </summary>
 		private void QueryVolume()
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.GetName));
 		}
 
-		private void RetryCommand(PlanarQeCommand command)
+		/// <summary>
+		/// Retries the command if it's been sent less than the retry limit
+		/// </summary>
+		/// <param name="command"></param>
+		private void RetryCommand([CanBeNull] PlanarQeCommand command)
 		{
 			if (command == null)
 				return;
@@ -300,16 +336,30 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			SendCommand(command);
 		}
 
-		private void ResetCommandRetry(PlanarQeCommand command)
+		/// <summary>
+		/// Resets the retry counter to 0 for the given command
+		/// </summary>
+		/// <param name="command"></param>
+		private void ResetCommandRetry([NotNull] PlanarQeCommand command)
 		{
+			if (command == null)
+				throw new ArgumentNullException("command");
 			if (m_CommandRetries.ContainsKey(command.CommandCode))
 				m_CommandRetries[command.CommandCode] = 0;
 		}
 
 		#region Response Handling
 
-		private void HandleResponese(PlanarQeCommand response)
+		/// <summary>
+		/// Handle commands from the display with the response operator
+		/// Also handles set commands sent to the display when in Trust mode
+		/// </summary>
+		/// <param name="response"></param>
+		private void HandleResponese([NotNull] PlanarQeCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			ResetCommandRetry(response);
 			switch (response.CommandCode)
 			{
@@ -328,13 +378,29 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 		}
 
-		private void HandlePowerResponse(PlanarQeCommand response)
+		/// <summary>
+		/// Handles power responses, and sets the power state appropriately
+		/// Also handles set commands sent to the display when in Trust mode
+		/// </summary>
+		/// <param name="response"></param>
+		private void HandlePowerResponse([NotNull] PlanarQeCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			PowerState = GetBoolOperands(response.Operands) ? ePowerState.PowerOn : ePowerState.PowerOff;
 		}
 
-		private void HandleSourceResponse(PlanarQeCommand response)
+		/// <summary>
+		/// Handles source select responses, and sets the active input appropriately
+		/// Also handles set commands sent to the display when in Trust mode
+		/// </summary>
+		/// <param name="response"></param>
+		private void HandleSourceResponse([NotNull] PlanarQeCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			if (response.Operands == null)
 				throw new InvalidOperationException("Source response has no operands");
 
@@ -348,13 +414,29 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 				ActiveInput = null;
 		}
 
-		private void HandleMuteResponse(PlanarQeCommand response)
+		/// <summary>
+		/// Handles mute responses, and sets the IsMuted state appropriately
+		/// Also handles set commands sent to the display when in Trust mode
+		/// </summary>
+		/// <param name="response"></param>
+		private void HandleMuteResponse([NotNull] PlanarQeCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			IsMuted = GetBoolOperands(response.Operands);
 		}
 
-		private void HandleVolumeResponse(PlanarQeCommand response)
+		/// <summary>
+		/// Handles volume responses, and sets the volume level appropriately
+		/// Also handles set commands sent to the display when in Trust mode
+		/// </summary>
+		/// <param name="response"></param>
+		private void HandleVolumeResponse([NotNull] PlanarQeCommand response)
 		{
+			if (response == null)
+				throw new ArgumentNullException("response");
+
 			if (response.Operands == null)
 				throw new InvalidOperationException("Volume response has no operands");
 
@@ -400,7 +482,14 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 		#endregion
 
-		public static int GetPriorityForCommand(PlanarQeCommand command)
+		/// <summary>
+		/// Gets the correct priority for the given command
+		/// Based on the Command Code and Command Operator
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
+		[PublicAPI]
+		public static int GetPriorityForCommand([NotNull] PlanarQeCommand command)
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");
