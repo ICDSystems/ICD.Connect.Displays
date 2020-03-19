@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -15,7 +16,6 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 {
 	public sealed class PlanarQeDisplay : AbstractDisplayWithAudio<PlanarQeDisplaySettings>
 	{
-
 		private const int MAX_RETRIES = 50;
 
 		private const int PRIORITY_POWER_SET = 10;
@@ -51,8 +51,8 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		// ReSharper restore IdentifierTypo
 
 		#endregion
-		#endregion
 
+		#endregion
 
 		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
@@ -70,6 +70,22 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		private readonly Dictionary<string, int> m_CommandRetries;
 
 		/// <summary>
+		/// Returns the features that are supported by this display.
+		/// </summary>
+		public override eVolumeFeatures SupportedVolumeFeatures
+		{
+			get
+			{
+				return eVolumeFeatures.Mute |
+				       eVolumeFeatures.MuteAssignment |
+				       eVolumeFeatures.MuteFeedback |
+				       eVolumeFeatures.Volume |
+				       eVolumeFeatures.VolumeAssignment |
+				       eVolumeFeatures.VolumeFeedback;
+			}
+		}
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public PlanarQeDisplay()
@@ -77,8 +93,8 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			m_CommandRetries = new Dictionary<string, int>();
 		}
 
-
 		#region AbstractDisplayWithAudio Methods
+
 		/// <summary>
 		/// Powers the TV.
 		/// </summary>
@@ -222,7 +238,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// Sends the volume set command to the device after validation has been performed.
 		/// </summary>
 		/// <param name="raw"></param>
-		protected override void VolumeSetRawFinal(float raw)
+		protected override void SetVolumeFinal(float raw)
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_VOLUME, eCommandOperator.Set, raw.ToString("0")));
 		}
@@ -242,6 +258,26 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		{
 			SendCommand(new PlanarQeCommand(COMMAND_MUTE, eCommandOperator.Set, OPERAND_OFF));
 		}
+
+		/// <summary>
+		/// Starts ramping the volume, and continues until stop is called or the timeout is reached.
+		/// If already ramping the current timeout is updated to the new timeout duration.
+		/// </summary>
+		/// <param name="increment">Increments the volume if true, otherwise decrements.</param>
+		/// <param name="timeout"></param>
+		public override void VolumeRamp(bool increment, long timeout)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// Stops any current ramp up/down in progress.
+		/// </summary>
+		public override void VolumeRampStop()
+		{
+			throw new NotSupportedException();
+		}
+
 		#endregion
 
 		#region PrivateMethods
