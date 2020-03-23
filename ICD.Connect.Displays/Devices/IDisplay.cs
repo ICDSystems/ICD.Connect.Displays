@@ -30,13 +30,6 @@ namespace ICD.Connect.Displays.Devices
 		[EventTelemetry(DisplayTelemetryNames.ACTIVE_INPUT_STATE_CHANGED)]
 		event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
-		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		[ApiEvent(DisplayApi.EVENT_SCALING_MODE, DisplayApi.HELP_EVENT_SCALING_MODE)]
-		[EventTelemetry(DisplayTelemetryNames.SCALING_MODE_STATE_CHANGED)]
-		event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
 		#endregion
 
 		#region Properties
@@ -60,13 +53,6 @@ namespace ICD.Connect.Displays.Devices
 		[ApiProperty(DisplayApi.PROPERTY_ACTIVE_INPUT, DisplayApi.HELP_PROPERTY_ACTIVE_INPUT)]
 		[DynamicPropertyTelemetry(DisplayTelemetryNames.ACTIVE_INPUT_STATE, DisplayTelemetryNames.ACTIVE_INPUT_STATE_CHANGED)]
 		int? ActiveInput { get; }
-
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		[ApiProperty(DisplayApi.PROPERTY_SCALING_MODE, DisplayApi.HELP_PROPERTY_SCALING_MODE)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.SCALING_MODE_STATE, DisplayTelemetryNames.SCALING_MODE_STATE_CHANGED)]
-		eScalingMode ScalingMode { get; }
 
 		#endregion
 
@@ -93,14 +79,6 @@ namespace ICD.Connect.Displays.Devices
 		[ApiMethod(DisplayApi.METHOD_SET_ACTIVE_INPUT, DisplayApi.HELP_METHOD_SET_ACTIVE_INPUT)]
 		[MethodTelemetry(DisplayTelemetryNames.SET_ACTIVE_INPUT)]
 		void SetActiveInput(int address);
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		[ApiMethod(DisplayApi.METHOD_SET_SCALING_MODE, DisplayApi.HELP_METHOD_SET_SCALING_MODE)]
-		[MethodTelemetry(DisplayTelemetryNames.SET_SCALING_MODE)]
-		void SetScalingMode(eScalingMode mode);
 
 		#endregion
 	}
