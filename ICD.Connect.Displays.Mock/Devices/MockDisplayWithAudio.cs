@@ -31,11 +31,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
-		/// <summary>
 		/// Raised when the mute state changes.
 		/// </summary>
 		public event EventHandler<DisplayMuteApiEventArgs> OnMuteStateChanged;
@@ -52,7 +47,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 
 		private long m_WarmingTime;
 		private long m_CoolingTime;
@@ -66,7 +60,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		private bool m_VolumeControlAvailable;
 
 		private int? m_RequestedInput;
-		private eScalingMode? m_RequestedScalingMode;
 		private bool? m_RequestedMute;
 		private float? m_RequestedVolume;
 
@@ -115,8 +108,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 							else
 								MuteOff();
 						}
-						if (m_RequestedScalingMode.HasValue)
-							SetScalingMode(m_RequestedScalingMode.Value);
 						if (m_RequestedVolume.HasValue)
 							SetVolume(m_RequestedVolume.Value);
 						break;
@@ -147,25 +138,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				if (m_ActiveInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
-			}
-		}
-
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			private set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 
@@ -279,7 +251,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 		{
 			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
-			OnScalingModeChanged = null;
 			OnMuteStateChanged = null;
 			OnVolumeChanged = null;
 			OnVolumeControlAvailableChanged = null;
@@ -348,20 +319,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 				return;
 
 			ActiveInput = address;
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public void SetScalingMode(eScalingMode mode)
-		{
-			m_RequestedScalingMode = mode;
-
-			if (PowerState != ePowerState.PowerOn)
-				return;
-
-			ScalingMode = mode;
 		}
 
 		/// <summary>

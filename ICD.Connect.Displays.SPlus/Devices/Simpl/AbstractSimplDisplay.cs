@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -27,21 +26,14 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		/// </summary>
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
-		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
 		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 
 		#region Callbacks
 
 		public event EventHandler<SetPowerApiEventArgs> OnSetPower;
 
 		public event EventHandler<SetActiveInputApiEventArgs> OnSetActiveInput;
-		public event EventHandler<SetScalingModeEventArgs> OnSetScalingMode;
 		
 		public void SetPowerFeedback(bool isPowered)
 		{
@@ -51,11 +43,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		public void SetActiveInputFeedback(int? address)
 		{
 			ActiveInput = address;
-		}
-
-		public void SetScalingModeFeedback(eScalingMode mode)
-		{
-			ScalingMode = mode;
 		}
 
 		#endregion
@@ -110,25 +97,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			}
 		}
 
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			private set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
-			}
-		}
-
 		#endregion
 
 		/// <summary>
@@ -147,7 +115,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
-			OnScalingModeChanged = null;
 
 			base.DisposeFinal(disposing);
 		}
@@ -186,18 +153,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 			if (Trust)
 				ActiveInput = address;
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public void SetScalingMode(eScalingMode mode)
-		{
-			OnSetScalingMode.Raise(this, new SetScalingModeEventArgs(mode));
-
-			if (Trust)
-				ScalingMode = mode;
 		}
 
 		#endregion

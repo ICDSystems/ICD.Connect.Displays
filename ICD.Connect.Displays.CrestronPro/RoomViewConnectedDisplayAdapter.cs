@@ -35,11 +35,6 @@ namespace ICD.Connect.Displays.CrestronPro
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
 		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
-		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
 		public event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
@@ -112,11 +107,6 @@ namespace ICD.Connect.Displays.CrestronPro
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
 			}
 		}
-
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode { get { return eScalingMode.Unknown; } }
 
 		/// <summary>
 		/// Returns the features that are supported by this display.
@@ -215,7 +205,6 @@ namespace ICD.Connect.Displays.CrestronPro
 		{
 			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
-			OnScalingModeChanged = null;
 			OnVolumeChanged = null;
 			OnMuteStateChanged = null;
 
@@ -295,15 +284,6 @@ namespace ICD.Connect.Displays.CrestronPro
 #else
 			throw new NotSupportedException();
 #endif
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public void SetScalingMode(eScalingMode mode)
-		{
-			throw new NotSupportedException();
 		}
 
 		/// <summary>

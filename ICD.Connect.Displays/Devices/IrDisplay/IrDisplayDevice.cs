@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
@@ -27,11 +26,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		/// </summary>
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
-		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
 		private readonly IrDriverProperties m_IrDriverProperties;
 
 		/// <summary>
@@ -44,7 +38,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		private IIrPort m_Port;
 		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 
 		#region Properties
 
@@ -88,25 +81,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				if (m_ActiveInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
-			}
-		}
-
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			private set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 
@@ -201,36 +175,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 			if (result)
 				ActiveInput = address;
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public void SetScalingMode(eScalingMode mode)
-		{
-			bool result;
-
-			switch (mode)
-			{
-				case eScalingMode.Wide16X9:
-					result = PressAndRelease(m_Commands.CommandWide);
-					break;
-				case eScalingMode.Square4X3:
-					result = PressAndRelease(m_Commands.CommandSquare);
-					break;
-				case eScalingMode.NoScale:
-					result = PressAndRelease(m_Commands.CommandNoScale);
-					break;
-				case eScalingMode.Zoom:
-					result = PressAndRelease(m_Commands.CommandZoom);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException("mode");
-			}
-
-			if (result)
-				ScalingMode = mode;
 		}
 
 		#endregion

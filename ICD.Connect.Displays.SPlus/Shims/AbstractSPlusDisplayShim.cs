@@ -1,7 +1,6 @@
 ﻿using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices.SPlusShims;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
 using ICD.Connect.Displays.SPlus.EventArgs;
 
@@ -12,8 +11,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 	public delegate void SPlusDisplayShimPowerOffCallback();
 
 	public delegate void SPlusDisplayShimSetActiveInputCallback(ushort activeInput);
-
-	public delegate void SPlusDisplayShimSetScalingModeCallback(ushort scalingMode);
 
 	public abstract class AbstractSPlusDisplayShim<TOriginator> : AbstractSPlusDeviceShim<TOriginator>
 		where TOriginator : class, ISimplDisplay
@@ -29,9 +26,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 
 		[PublicAPI("S+")]
 		public SPlusDisplayShimSetActiveInputCallback SetActiveInputCallback { get; set; }
-
-		[PublicAPI("S+")]
-		public SPlusDisplayShimSetScalingModeCallback SetScalingModeCallback { get; set; }
 
 		#endregion
 
@@ -67,19 +61,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 				originator.SetActiveInputFeedback(input);
 		}
 
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		[PublicAPI("S+")]
-		public void SetScalingModeFeedback(ushort scalingMode)
-		{
-				TOriginator originator = Originator;
-				if (originator == null)
-					return;
-
-				originator.SetScalingModeFeedback((eScalingMode)scalingMode);
-		}
-
 		#endregion
 
 		#region Originator Callbacks
@@ -97,7 +78,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 
 			originator.OnSetPower += OriginatorOnSetPower;
 			originator.OnSetActiveInput += OriginatorOnSetActiveInput;
-			originator.OnSetScalingMode += OriginatorOnSetScalingMode;
 		}
 
 		/// <summary>
@@ -113,7 +93,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 
 			originator.OnSetPower -= OriginatorOnSetPower;
 			originator.OnSetActiveInput -= OriginatorOnSetActiveInput;
-			originator.OnSetScalingMode -= OriginatorOnSetScalingMode;
 		}
 
 		private void OriginatorOnSetPower(object sender, SetPowerApiEventArgs args)
@@ -137,13 +116,6 @@ namespace ICD.Connect.Displays.SPlus.Shims
 		private void OriginatorOnSetActiveInput(object sender, SetActiveInputApiEventArgs args)
 		{
 			SPlusDisplayShimSetActiveInputCallback callback = SetActiveInputCallback;
-			if (callback != null)
-				callback((ushort)args.Data);
-		}
-
-		private void OriginatorOnSetScalingMode(object sender, SetScalingModeEventArgs args)
-		{
-			SPlusDisplayShimSetScalingModeCallback callback = SetScalingModeCallback;
 			if (callback != null)
 				callback((ushort)args.Data);
 		}

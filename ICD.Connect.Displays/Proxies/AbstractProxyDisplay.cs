@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API;
@@ -28,15 +27,9 @@ namespace ICD.Connect.Displays.Proxies
 		/// </summary>
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
-		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
 		private bool m_Trust;
 		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 
 		#region Properties
 
@@ -90,25 +83,6 @@ namespace ICD.Connect.Displays.Proxies
 			}
 		}
 
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			[UsedImplicitly] private set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Logger.AddEntry(eSeverity.Informational, "{0} - Scaling mode set to {1}", this, StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
-			}
-		}
-
 		#endregion
 
 		#region Methods
@@ -138,15 +112,6 @@ namespace ICD.Connect.Displays.Proxies
 			CallMethod(DisplayApi.METHOD_SET_ACTIVE_INPUT, address);
 		}
 
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public void SetScalingMode(eScalingMode mode)
-		{
-			CallMethod(DisplayApi.METHOD_SET_SCALING_MODE, mode);
-		}
-
 		#endregion
 
 		#region API
@@ -162,11 +127,9 @@ namespace ICD.Connect.Displays.Proxies
 			ApiCommandBuilder.UpdateCommand(command)
 			                 .SubscribeEvent(DisplayApi.EVENT_POWER_STATE)
 			                 .SubscribeEvent(DisplayApi.EVENT_ACTIVE_INPUT)
-			                 .SubscribeEvent(DisplayApi.EVENT_SCALING_MODE)
 							 .GetProperty(DisplayApi.PROPERTY_TRUST)
 			                 .GetProperty(DisplayApi.PROPERTY_POWER_STATE)
 			                 .GetProperty(DisplayApi.PROPERTY_ACTIVE_INPUT)
-			                 .GetProperty(DisplayApi.PROPERTY_SCALING_MODE)
 			                 .Complete();
 		}
 
@@ -192,10 +155,6 @@ namespace ICD.Connect.Displays.Proxies
 					else if (state.Input == ActiveInput)
 						ActiveInput = null;
 					break;
-
-				case DisplayApi.EVENT_SCALING_MODE:
-					ScalingMode = result.GetValue<eScalingMode>();
-					break;
 			}
 		}
 
@@ -220,10 +179,6 @@ namespace ICD.Connect.Displays.Proxies
 
 				case DisplayApi.PROPERTY_ACTIVE_INPUT:
 					ActiveInput = result.GetValue<int?>();
-					break;
-
-				case DisplayApi.PROPERTY_SCALING_MODE:
-					ScalingMode = result.GetValue<eScalingMode>();
 					break;
 			}
 		}
