@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -43,11 +42,6 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		public event EventHandler<DisplayInputApiEventArgs> OnActiveInputChanged;
 
-		/// <summary>
-		/// Raised when the scaling mode changes.
-		/// </summary>
-		public event EventHandler<DisplayScalingModeApiEventArgs> OnScalingModeChanged;
-
 		private readonly ComSpecProperties m_ComSpecProperties;
 		private readonly SecureNetworkProperties m_NetworkProperties;
 
@@ -55,7 +49,6 @@ namespace ICD.Connect.Displays.Devices
 
 		private ePowerState m_PowerState;
 		private int? m_ActiveInput;
-		private eScalingMode m_ScalingMode;
 
 		#region Properties
 
@@ -129,25 +122,6 @@ namespace ICD.Connect.Displays.Devices
 
 				if (m_ActiveInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(m_ActiveInput.Value, true));
-			}
-		}
-
-		/// <summary>
-		/// Gets the scaling mode.
-		/// </summary>
-		public eScalingMode ScalingMode
-		{
-			get { return m_ScalingMode; }
-			protected set
-			{
-				if (value == m_ScalingMode)
-					return;
-
-				m_ScalingMode = value;
-
-				Log(eSeverity.Informational, "Scaling mode set to {0}", StringUtils.NiceName(m_ScalingMode));
-
-				OnScalingModeChanged.Raise(this, new DisplayScalingModeApiEventArgs(m_ScalingMode));
 			}
 		}
 
@@ -285,19 +259,12 @@ namespace ICD.Connect.Displays.Devices
 		public abstract void SetActiveInput(int address);
 
 		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public abstract void SetScalingMode(eScalingMode mode);
-
-		/// <summary>
 		/// Clears resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
 		{
 			OnPowerStateChanged = null;
 			OnActiveInputChanged = null;
-			OnScalingModeChanged = null;
 
 			base.DisposeFinal(disposing);
 

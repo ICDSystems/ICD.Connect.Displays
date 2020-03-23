@@ -5,7 +5,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -31,15 +30,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         private const string INPUT_RESPONSE = "input=";
         private const string INPUT_GET = "get input";
 
-        private const string ASPECT_REAL = "set aspectratio=real";
-        private const string ASPECT_NORMAL = "set aspectratio=normal";
-        private const string ASPECT_FULL = "set aspectratio=full";
-        private const string ASPECT_WIDE = "set aspectratio=wide";
-        private const string ASPECT_DYNAMIC = "set aspectratio=dynamic";
-        private const string ASPECT_ZOOM = "set aspectratio=zoom";
-        private const string ASPECT_RESPONSE = "aspectratio=";
-        private const string ASPECT_GET = "get aspectratio";
-
         private const string VOLUME_UP = "set volume+1";
         private const string VOLUME_DOWN = "set volume-1";
         private const string VOLUME_SET = "set volume={0}";
@@ -54,18 +44,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         private const char CARR_RETURN = (char)0x0D;
 
         #endregion
-
-        /// <summary>
-        /// Maps scaling mode to command.
-        /// </summary>
-        private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, ASPECT_WIDE},
-				{eScalingMode.Square4X3, ASPECT_NORMAL},
-				{eScalingMode.NoScale, ASPECT_REAL},
-				{eScalingMode.Zoom, ASPECT_ZOOM},
-			};
 
         /// <summary>
         /// Maps index to an input command.
@@ -124,7 +102,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
                 return;
 
             SendNonFormattedCommand(INPUT_GET);
-            SendNonFormattedCommand(ASPECT_GET);
             SendNonFormattedCommand(VOLUME_GET);
             SendNonFormattedCommand(MUTE_GET);
         }
@@ -143,12 +120,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         {
 	        if (s_InputMap.ContainsKey(address))
 		        SendNonFormattedCommand(s_InputMap.GetValue(address));
-        }
-
-        public override void SetScalingMode(eScalingMode mode)
-        {
-	        if (s_ScalingModeMap.ContainsKey(mode))
-		        SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
         }
 
 	    /// <summary>
@@ -269,12 +240,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
 			    return;
 		    }
 
-		    if (s_ScalingModeMap.ContainsValue(command))
-		    {
-			    ScalingMode = s_ScalingModeMap.GetKey(command);
-			    return;
-		    }
-
 			// Volume set "set volume={0}"
 		    if (command.StartsWith("set volume="))
 		    {
@@ -297,7 +262,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
                 return;
             }
             if (response.StartsWith(POWER_RESPONSE) ||
-                response.StartsWith(ASPECT_RESPONSE) ||
                 response.StartsWith(INPUT_RESPONSE) ||
                 response.StartsWith(VOLUME_RESPONSE) ||
                 response.StartsWith(MUTE_RESPONSE))
@@ -360,10 +324,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
             {
                 ParsePowerResponse(response);
             }
-            else if (response.StartsWith(ASPECT_RESPONSE))
-            {
-                ParseAspectResponse(response);
-            }
             else if (response.StartsWith(INPUT_RESPONSE))
             {
                 ParseInputResponse(response);
@@ -390,38 +350,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
                     break;
                 case "off":
                     PowerState = ePowerState.PowerOff;
-                    break;
-                default:
-                    LogUnexpectedResponse(response);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Handles responses for aspect states
-        /// </summary>
-        /// <param name="response"></param>
-        private void ParseAspectResponse(string response)
-        {
-            switch (response.Substring(ASPECT_RESPONSE.Length).ToLower())
-            {
-                case "real":
-                    LookupAspectAndSetScalingMode(ASPECT_REAL);
-                    break;
-                case "normal":
-                    LookupAspectAndSetScalingMode(ASPECT_NORMAL);
-                    break;
-                case "full":
-                    LookupAspectAndSetScalingMode(ASPECT_FULL);
-                    break;
-                case "wide":
-                    LookupAspectAndSetScalingMode(ASPECT_WIDE);
-                    break;
-                case "dynamic":
-                    LookupAspectAndSetScalingMode(ASPECT_DYNAMIC);
-                    break;
-                case "zoom":
-                    LookupAspectAndSetScalingMode(ASPECT_ZOOM);
                     break;
                 default:
                     LogUnexpectedResponse(response);
@@ -470,17 +398,6 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         private void ParseMuteResponse(string response)
         {
             IsMuted = response.Substring(MUTE_RESPONSE.Length).ToLower() == "on";
-        }
-
-        /// <summary>
-        /// Digs through the scaling mode dictionary for the correct aspect, and sets the scaling mode to the appropriate eScalingMode
-        /// </summary>
-        /// <param name="aspect">The matching aspect string in the dictionary to search for</param>
-        private void LookupAspectAndSetScalingMode(string aspect)
-        {
-            ScalingMode = s_ScalingModeMap.ContainsValue(aspect)
-                        ? s_ScalingModeMap.GetKey(aspect)
-                        : eScalingMode.Unknown;
         }
 
         /// <summary>

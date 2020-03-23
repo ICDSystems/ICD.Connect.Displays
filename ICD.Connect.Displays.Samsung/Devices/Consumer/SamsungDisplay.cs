@@ -8,7 +8,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -51,30 +50,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		private const string INPUT_HDMI_3 = INPUT_PREFIX + "\x02";
 		private const string INPUT_HDMI_4 = INPUT_PREFIX + "\x03";
 
-		private const string ASPECT_PREFIX     = COMMAND_PREFIX + "\x0B\x0A\x01";
-		private const string ASPECT_16_X9      = ASPECT_PREFIX + "\x00";
-		private const string ASPECT_ZOOM_1     = ASPECT_PREFIX + "\x01";
-		private const string ASPECT_4_X3       = ASPECT_PREFIX + "\x04";
-		private const string ASPECT_SCREEN_FIT = ASPECT_PREFIX + "\x05";
-
 		private const int PRIORITY_POWER_RETRY = 1;
 		private const int PRIORITY_POWER_INITIAL = 2;
 		private const int PRIORITY_INPUT_RETRY = 3;
 		private const int PRIORITY_INPUT_INITIAL = 4;
 		private const int PRIORITY_DEFAULT = int.MaxValue;
-
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, ASPECT_16_X9},
-				{eScalingMode.Square4X3, ASPECT_4_X3},
-				{eScalingMode.NoScale, ASPECT_SCREEN_FIT},
-				{eScalingMode.Zoom, ASPECT_ZOOM_1}
-			};
 
 		/// <summary>
 		/// Maps index to an input command.
@@ -235,15 +215,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		}
 
 		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"/>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode), CommandComparer);
-		}
-
-		/// <summary>
 		/// Calculates the checksum for the data.
 		/// </summary>
 		/// <param name="data"></param>
@@ -367,12 +338,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				ActiveInput = s_InputMap.GetKey(command);
 				return;
 			}
-
-			if (s_ScalingModeMap.ContainsValue(command))
-			{
-				ScalingMode = s_ScalingModeMap.GetKey(command);
-				return;
-			}
 		}
 
 		/// <summary>
@@ -455,14 +420,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				return;
 			}
 
-			// Scaling Mode
-			if (s_ScalingModeMap.Values.Contains(command))
-			{
-				PowerState = ePowerState.PowerOn;
-				ScalingMode = s_ScalingModeMap.GetKey(command);
-				return;
-			}
-
 			// Volume
 			if (command.StartsWith(VOLUME, StringComparison.Ordinal))
 			{
@@ -524,9 +481,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				return true;
 
 			if (commandA.StartsWith(INPUT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(INPUT_PREFIX, StringComparison.Ordinal))
-				return true;
-
-			if (commandA.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal) && commandB.StartsWith(ASPECT_PREFIX, StringComparison.Ordinal))
 				return true;
 
 			return false;

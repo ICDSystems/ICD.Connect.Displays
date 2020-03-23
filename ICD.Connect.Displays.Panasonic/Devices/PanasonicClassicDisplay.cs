@@ -7,7 +7,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports;
@@ -219,12 +218,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 				return;
 			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
 			m_TargetInput = address;
-		}
-
-		[PublicAPI]
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			//This device does not support scaling modes. Do Nothing.
 		}
 
 		[PublicAPI]

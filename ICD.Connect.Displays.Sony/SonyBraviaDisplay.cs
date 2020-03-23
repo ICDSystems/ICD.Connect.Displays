@@ -5,7 +5,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -86,15 +85,6 @@ namespace ICD.Connect.Displays.Sony
 			SonyBraviaCommand command = SonyBraviaCommand.Control(INPUT_FUNCTION, parameter);
 
 			SendCommand(command);
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			throw new NotSupportedException();
 		}
 
 		/// <summary>

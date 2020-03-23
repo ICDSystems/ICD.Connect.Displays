@@ -8,7 +8,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -19,9 +18,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 {
 	public sealed class NecDisplay : AbstractDisplayWithAudio<NecDisplaySettings>
 	{
-		private const byte ASPECT_PAGE = 0x02;
-		private const byte ASPECT_CODE = 0x70;
-
 		private const byte VOLUME_PAGE = 0x00;
 		private const byte VOLUME_CODE = 0x62;
 
@@ -30,11 +26,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 
 		private const byte INPUT_PAGE = 0x00;
 		private const byte INPUT_CODE = 0x60;
-
-		private const ushort ASPECT_16_X9 = 0x03;
-		private const ushort ASPECT_4_X3 = 0x01;
-		private const ushort ASPECT_OFF = 0x07;
-		private const ushort ASPECT_ZOOM = 0x04;
 
 		private const ushort UNMUTE = 0x00;
 		private const ushort MUTE = 0x01;
@@ -50,18 +41,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		private static readonly byte[] s_PowerOff = {0x30, 0x30, 0x30, 0x34};
 
 		private const ushort VOLUME_INCREMENT = 1;
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly Dictionary<eScalingMode, ushort> s_ScalingModeMap =
-			new Dictionary<eScalingMode, ushort>
-			{
-				{eScalingMode.Wide16X9, ASPECT_16_X9},
-				{eScalingMode.Square4X3, ASPECT_4_X3},
-				{eScalingMode.NoScale, ASPECT_OFF},
-				{eScalingMode.Zoom, ASPECT_ZOOM}
-			};
 
 		/// <summary>
 		/// Maps index to an input command.
@@ -146,15 +125,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE, s_InputMap[address]));
 		}
 
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendCommand(NecDisplayCommand.SetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE, s_ScalingModeMap[mode]));
-		}
-
 		public override void VolumeUpIncrement()
 		{
 			if (!VolumeControlAvailable)
@@ -236,7 +206,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 
 			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, VOLUME_PAGE, VOLUME_CODE));
 			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, INPUT_PAGE, INPUT_CODE));
-			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, ASPECT_PAGE, ASPECT_CODE));
 			SendCommand(NecDisplayCommand.GetParameterCommand(MonitorId, MUTE_PAGE, MUTE_CODE));
 		}
 
@@ -359,14 +328,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 					if (page == MUTE_PAGE && code == MUTE_CODE)
 					{
 						IsMuted = value == 1;
-						break;
-					}
-
-					if (page == ASPECT_PAGE && code == ASPECT_CODE)
-					{
-						ScalingMode = s_ScalingModeMap.ContainsValue(value)
-							              ? s_ScalingModeMap.GetKey(value)
-							              : eScalingMode.Unknown;
 						break;
 					}
 

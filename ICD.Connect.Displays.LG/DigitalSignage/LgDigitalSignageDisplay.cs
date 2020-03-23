@@ -6,7 +6,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -22,7 +21,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 		private const string COMMAND_POWER = "ka";
 		private const string COMMAND_INPUT = "xb";
-		private const string COMMAND_SCALE = "kc";
 		private const string COMMAND_VOLUME = "kf";
 		private const string COMMAND_MUTE = "ke";
 
@@ -57,18 +55,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 				{1, DATA_INPUT_HDMI1_PC},
 				{2, DATA_INPUT_HDMI2_OPS_PC},
 				{3, DATA_INPUT_HDMI3_DVI_D_PC},
-			};
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, "02"},
-				{eScalingMode.Square4X3, "01"},
-				{eScalingMode.NoScale, "09"},
-				{eScalingMode.Zoom, "04"}
 			};
 
 		#region Properties
@@ -135,18 +121,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 			string data = s_InputMap.GetValue(address);
 
 			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_INPUT, SetId, data);
-			SendCommand(command);
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			string data = s_ScalingModeMap.GetValue(mode);
-
-			LgDigitalSignageTransmission command = new LgDigitalSignageTransmission(COMMAND_SCALE, SetId, data);
 			SendCommand(command);
 		}
 
@@ -281,11 +255,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 					ActiveInput = s_InputMap.TryGetKey(data.Data, out input) ? input : (int?)null;
 					break;
 
-				case COMMAND_SCALE:
-					eScalingMode mode;
-					ScalingMode = s_ScalingModeMap.TryGetKey(data.Data, out mode) ? mode : eScalingMode.Unknown;
-					break;
-
 				case COMMAND_VOLUME:
 					Volume = int.Parse(data.Data, System.Globalization.NumberStyles.HexNumber);
 					break;
@@ -330,7 +299,6 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 			SendCommand(new LgDigitalSignageTransmission(COMMAND_VOLUME, SetId, DATA_QUERY));
 			SendCommand(new LgDigitalSignageTransmission(COMMAND_INPUT, SetId, DATA_QUERY));
-			SendCommand(new LgDigitalSignageTransmission(COMMAND_SCALE, SetId, DATA_QUERY));
 			SendCommand(new LgDigitalSignageTransmission(COMMAND_MUTE, SetId, DATA_QUERY));
 		}
 

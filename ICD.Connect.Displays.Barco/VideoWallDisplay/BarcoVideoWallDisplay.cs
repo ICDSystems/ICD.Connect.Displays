@@ -6,7 +6,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -112,16 +111,6 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			};
 
 			SendCommand(command);
-		}
-
-		/// <summary>
-		/// Sets scaling mode
-		/// Not supported for Barco UniSee
-		/// Does nothing
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
 		}
 
 		#endregion

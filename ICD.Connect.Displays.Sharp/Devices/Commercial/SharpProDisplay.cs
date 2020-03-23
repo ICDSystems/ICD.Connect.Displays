@@ -9,7 +9,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -37,7 +36,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		private const string MUTE = "MUTE";
 		private const string VOLUME = "VOLM";
 		private const string INPUT = "INPS";
-		private const string WIDE = "WIDE";
 		private const string QUERY = "????";
 
 		private const string POWER_OFF = POWER + "0000" + RETURN;
@@ -57,39 +55,9 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 		private const string VOLUME_QUERY = VOLUME + QUERY + RETURN;
 
-		private const string SCALING_MODE_16_X9 = WIDE + "0001" + RETURN; // Wide
-		private const string SCALING_MODE_4_X3 = WIDE + "0004" + RETURN; // Normal
-		private const string SCALING_MODE_NO_SCALE = WIDE + "0005" + RETURN; // Dot by dot
-		private const string SCALING_MODE_ZOOM = WIDE + "0002" + RETURN; // Zoom 1
-		private const string SCALING_MODE_QUERY = WIDE + QUERY + RETURN;
-
 		private const ushort VOLUME_INCREMENT = 1;
 
 		private const int MAX_RETRY_ATTEMPTS = 20;
-
-		/// <summary>
-		/// Maps the Sharp view mode to the command.
-		/// </summary>
-		private static readonly BiDictionary<int, string> s_ViewModeMap =
-			new BiDictionary<int, string>
-			{
-				{2, SCALING_MODE_4_X3},
-				{3, SCALING_MODE_ZOOM},
-				{4, SCALING_MODE_16_X9},
-				{8, SCALING_MODE_NO_SCALE}
-			};
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, SCALING_MODE_16_X9},
-				{eScalingMode.Square4X3, SCALING_MODE_4_X3},
-				{eScalingMode.NoScale, SCALING_MODE_NO_SCALE},
-				{eScalingMode.Zoom, SCALING_MODE_ZOOM}
-			};
 
 		/// <summary>
 		/// Maps index to an input command.
@@ -297,16 +265,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			return prefix + parameters.PadLeft(4, '0') + RETURN;
 		}
 
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"/>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendCommand(s_ScalingModeMap.GetValue(mode));
-			SendCommand(SCALING_MODE_QUERY);
-		}
-
 		#endregion
 
 		#region Private Methods
@@ -345,7 +303,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 
 			SendCommand(INPUT_HDMI_QUERY);
 			SendCommand(MUTE_QUERY);
-			SendCommand(SCALING_MODE_QUERY);
 			SendCommand(VOLUME_QUERY);
 		}
 
@@ -418,16 +375,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 					ActiveInput = s_ResponseToInputMap.ContainsKey(responseValue)
 						            ? s_ResponseToInputMap.GetValue(responseValue)
 						            : (int?)null;
-					break;
-
-				case SCALING_MODE_QUERY:
-					if (s_ViewModeMap.ContainsKey(responseValue))
-					{
-						string command = s_ViewModeMap.GetValue(responseValue);
-						ScalingMode = s_ScalingModeMap.GetKey(command);
-					}
-					else
-						ScalingMode = eScalingMode.Unknown;
 					break;
 			}
 		}

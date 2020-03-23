@@ -6,7 +6,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Network.Ports;
@@ -208,16 +207,6 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				throw new ArgumentException(string.Format("{0} Has no input at address {1}", this, address));
 
 			SendCommandPriority(string.Format(INPUT_COMMAND_FORMAT, inputCode),PRIORITY_INPUT);
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			//Not Impemented
-			//Todo: Investigate Implementation
 		}
 
 		public override void ConfigurePort(ISerialPort port)

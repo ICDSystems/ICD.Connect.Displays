@@ -5,7 +5,6 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -34,19 +33,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 		private const string INPUT_HDMI_2 = COMMAND_HEADER + "\x6E\xD6\x01\x00\x00\x20\x0D\x00";
 		private const string INPUT_QUERY = COMMAND_HEADER + "\xCD\xD2\x02\x00\x00\x20\x00\x00";
 
-		private const string ASPECT_NORMAL = COMMAND_HEADER + "\x5E\xDD\x01\x00\x08\x20\x10\x00";
-		private const string ASPECT_16_X9 = COMMAND_HEADER + "\x0E\xD1\x01\x00\x08\x20\x01\x00";
-		private const string ASPECT_4_X3 = COMMAND_HEADER + "\x9E\xD0\x01\x00\x08\x20\x00\x00";
-		private const string ASPECT_QUERY = COMMAND_HEADER + "\xAD\xD0\x02\x00\x08\x20\x00\x00";
-
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, ASPECT_16_X9},
-				{eScalingMode.Square4X3, ASPECT_4_X3},
-				{eScalingMode.NoScale, ASPECT_NORMAL}
-			};
-
 		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, INPUT_HDMI_1},
@@ -66,7 +52,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 		private ePowerState? m_RequestedPowerStatus;
 		private int? m_RequestedInput;
-		private eScalingMode? m_RequestedAspect;
 
 		#region Methods
 
@@ -102,11 +87,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 			SendCommand(s_InputMap.GetValue(address));
 		}
 
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendCommand(s_ScalingModeMap.GetValue(mode));
-		}
-
 		private void SendCommand(string data)
 		{
 			SendCommand(new SerialData(data));
@@ -137,12 +117,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 			if (s_InputMap.ContainsValue(command))
 			{
 				ActiveInput = s_InputMap.GetKey(command);
-				return;
-			}
-
-			if (s_ScalingModeMap.ContainsValue(command))
-			{
-				ScalingMode = s_ScalingModeMap.GetKey(command);
 				return;
 			}
 		}
@@ -208,10 +182,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 			if (s_InputMap.Values.Contains(data))
 				SendCommandPriority(new SerialData(INPUT_QUERY), 0);
 
-			// Scaling Mode
-			else if (s_ScalingModeMap.Values.Contains(data))
-				SendCommandPriority(new SerialData(ASPECT_QUERY), 0);
-
 			else
 			{
 				switch (data)
@@ -250,9 +220,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 				case POWER_QUERY:
 					PowerQueryResponse(args.Response);
 					break;
-				case ASPECT_QUERY:
-					AspectQueryResponse(args.Response);
-					break;
 				case INPUT_QUERY:
 					InputQueryResponse(args.Response);
 					break;
@@ -273,31 +240,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 				if (m_RequestedInput == responseInput || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
 				{
 					ActiveInput = responseInput;
-					ResetRetryCount(command);
-				}
-				else
-				{
-					IncrementRetryCount(command);
-					SendCommandPriority(new SerialData(command), 0);
-				}
-			}
-		}
-
-		private void AspectQueryResponse(string response)
-		{
-			eScalingMode responseScalingMode =
-				s_ScalingModeMap.Where(p => p.Value[11] == response[1]).Select(p => p.Key).FirstOrDefault();
-			if (m_RequestedAspect == null)
-			{
-				ScalingMode = responseScalingMode;
-				ResetRetryCount(ASPECT_QUERY);
-			}
-			else
-			{
-				string command = s_ScalingModeMap.GetValue(m_RequestedAspect.Value);
-				if (m_RequestedAspect == responseScalingMode || GetRetryCount(command) > MAX_RETRY_ATTEMPTS)
-				{
-					ScalingMode = responseScalingMode;
 					ResetRetryCount(command);
 				}
 				else
@@ -400,7 +342,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 				return;
 
 			SendCommand(INPUT_QUERY);
-			SendCommand(ASPECT_QUERY);
 		}
 
 		#endregion

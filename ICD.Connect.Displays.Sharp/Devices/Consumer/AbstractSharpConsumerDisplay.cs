@@ -8,7 +8,6 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -28,32 +27,9 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		private const int MAX_RETRY_ATTEMPTS = 500;
 
 		/// <summary>
-		/// Maps the Sharp view mode to the command.
-		/// </summary>
-		private static readonly BiDictionary<int, string> s_ViewModeMap =
-			new BiDictionary<int, string>
-			{
-				{2, SharpDisplayCommands.SCALING_MODE_4_X3},
-				{3, SharpDisplayCommands.SCALING_MODE_ZOOM},
-				{4, SharpDisplayCommands.SCALING_MODE_16_X9},
-				{8, SharpDisplayCommands.SCALING_MODE_NO_SCALE}
-			};
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, SharpDisplayCommands.SCALING_MODE_16_X9},
-				{eScalingMode.Square4X3, SharpDisplayCommands.SCALING_MODE_4_X3},
-				{eScalingMode.NoScale, SharpDisplayCommands.SCALING_MODE_NO_SCALE},
-				{eScalingMode.Zoom, SharpDisplayCommands.SCALING_MODE_ZOOM}
-			};
-
-		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
+		// ReSharper disable once StaticFieldInGenericType
 		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, SharpDisplayCommands.INPUT_HDMI_1},
@@ -230,16 +206,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 		}
 
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode" />
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendCommand(s_ScalingModeMap.GetValue(mode));
-			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
-		}
-
 		public void SendCommand(string data)
 		{
 			SendCommand(new SerialData(data));
@@ -308,7 +274,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 			SendCommand(SharpDisplayCommands.POWER_QUERY);
 			SendCommand(SharpDisplayCommands.INPUT_HDMI_QUERY);
 			SendCommand(SharpDisplayCommands.MUTE_QUERY);
-			SendCommand(SharpDisplayCommands.SCALING_MODE_QUERY);
 			SendCommand(SharpDisplayCommands.VOLUME_QUERY);
 		}
 
@@ -410,16 +375,6 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 						}
 						else
 							m_RequestedInput = null;
-					break;
-
-				case SharpDisplayCommands.SCALING_MODE_QUERY:
-					if (s_ViewModeMap.ContainsKey(responseValue))
-					{
-						string command = s_ViewModeMap.GetValue(responseValue);
-						ScalingMode = s_ScalingModeMap.GetKey(command);
-					}
-					else
-						ScalingMode = eScalingMode.Unknown;
 					break;
 			}
 		}

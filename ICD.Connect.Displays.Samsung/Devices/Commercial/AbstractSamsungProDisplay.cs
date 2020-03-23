@@ -5,7 +5,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -20,7 +19,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		private const byte VOLUME = 0x12;
 		private const byte MUTE = 0x13;
 		private const byte INPUT = 0x14;
-		private const byte SCREEN_MODE = 0x15;
 
 		private const byte INPUT_HDMI_1 = 0x21;
 		private const byte INPUT_HDMI_1_PC = 0x22;
@@ -32,26 +30,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		private const byte INPUT_DVI = 0x18;
 		private const byte INPUT_DVI_VIDEO = 0x1F;
 
-		private const byte ASPECT_16_X9 = 0x01;
-		private const byte ASPECT_WIDE = 0x04;
-		private const byte ASPECT_4_X3 = 0x0B;
-		private const byte ASPECT_WIDE_FIT = 0x0C;
-
 		private const ushort VOLUME_INCREMENT = 1;
 
 		// ReSharper disable StaticFieldInGenericType
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, byte> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, byte>
-			{
-				{eScalingMode.Wide16X9, ASPECT_16_X9},
-				{eScalingMode.Square4X3, ASPECT_4_X3},
-				{eScalingMode.NoScale, ASPECT_WIDE_FIT},
-				{eScalingMode.Zoom, ASPECT_WIDE}
-			};
-
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
@@ -100,8 +81,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		protected abstract byte GetWallIdForInputCommand();
 
 		protected abstract byte GetWallIdForVolumeCommand();
- 
-		protected abstract byte GetWallIdForScalingCommand();
 
 		/// <summary>
 		/// Configures the given port for communication with the device.
@@ -136,11 +115,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		public override void SetActiveInput(int address)
 		{
 			SendCommand(new SamsungProCommand(INPUT, GetWallIdForInputCommand(), s_InputMap.GetValue(address)));
-		}
-
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			SendCommand(new SamsungProCommand(SCREEN_MODE, GetWallIdForScalingCommand(), s_ScalingModeMap.GetValue(mode)));
 		}
 
 		public override void MuteOn()
@@ -237,7 +211,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 			SendCommandPriority(new SamsungProCommand(VOLUME, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(INPUT, GetWallIdForInputCommand(), 0).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(SCREEN_MODE, GetWallIdForScalingCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(MUTE, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
 		}
 
@@ -271,10 +244,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 				case INPUT:
 					ActiveInput = s_InputMap.GetKey(command.Data);
-					return;
-
-				case SCREEN_MODE:
-					ScalingMode = s_ScalingModeMap.GetKey(command.Data);
 					return;
 			}
 		}
@@ -383,14 +352,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 									: s_InputPcMap.ContainsValue(inputCode)
 										  ? s_InputPcMap.GetKey(inputCode)
 										  : (int?)null;
-					break;
-
-				case SCREEN_MODE:
-					if (response.Id != GetWallIdForScalingCommand())
-						return;
-					ScalingMode = s_ScalingModeMap.ContainsValue(response.Values[0])
-									  ? s_ScalingModeMap.GetKey(response.Values[0])
-									  : eScalingMode.Unknown;
 					break;
 			}
 		}

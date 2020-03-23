@@ -28,11 +28,6 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			return VolumeWallId ?? ALL_DISPLAYS_WALL_ID;
 		}
 
-		protected override byte GetWallIdForScalingCommand()
-		{
-			return ALL_DISPLAYS_WALL_ID;
-		}
-
 		#region Settings
 
 		/// <summary>

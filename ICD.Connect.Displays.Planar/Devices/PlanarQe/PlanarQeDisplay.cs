@@ -125,15 +125,6 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		}
 
 		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
-			//This is no longer used, and will be removed from IDisplay soon(tm)
-		}
-
-		/// <summary>
 		/// Called when a command is sent to the physical display.
 		/// </summary>
 		/// <param name="sender"></param>

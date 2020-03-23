@@ -35,12 +35,6 @@
 		public const string VOLUME_UP = REMOTE_CONTROL_BUTTONS + "33  " + RETURN;
 		public const string VOLUME_QUERY = VOLUME + QUERY + RETURN;
 
-		public const string SCALING_MODE_16_X9 = WIDE + "40  " + RETURN; // Stretch
-		public const string SCALING_MODE_4_X3 = WIDE + "20  " + RETURN; // S. Stretch
-		public const string SCALING_MODE_NO_SCALE = WIDE + "80  " + RETURN; // Dot by dot
-		public const string SCALING_MODE_ZOOM = WIDE + "30  " + RETURN; // Zoom AV
-		public const string SCALING_MODE_QUERY = WIDE + QUERY + RETURN;
-
 		/// <summary>
 		/// Builds the string for the command.
 		/// </summary>

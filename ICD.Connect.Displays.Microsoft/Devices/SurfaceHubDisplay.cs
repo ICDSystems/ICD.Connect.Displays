@@ -102,11 +102,6 @@ namespace ICD.Connect.Displays.Microsoft.Devices
             SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
 
-        public override void SetScalingMode(eScalingMode mode)
-        {
-            //Do Nothing, Scaling Not Supported On Device
-        }
-
 	    /// <summary>
 	    /// Increments the raw volume.
 	    /// </summary>

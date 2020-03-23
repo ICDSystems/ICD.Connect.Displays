@@ -8,7 +8,6 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -154,10 +153,6 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			if (!Trust)
 				SendCommand(string.Format(INPUT, QUERY));
-		}
-
-		public override void SetScalingMode(eScalingMode mode)
-		{
 		}
 
 		#endregion

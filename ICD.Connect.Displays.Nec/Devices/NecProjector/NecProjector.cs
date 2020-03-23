@@ -7,7 +7,6 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -153,14 +152,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 				throw new ArgumentException(string.Format("{0} Has no input at address {1}", this, address));
 
 			SendCommand(eCommandType.InputSwitch, inputCode);
-		}
-
-		/// <summary>
-		/// Sets the scaling mode.
-		/// </summary>
-		/// <param name="mode"></param>
-		public override void SetScalingMode(eScalingMode mode)
-		{
 		}
 
 		/// <summary>

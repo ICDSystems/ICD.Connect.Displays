@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
@@ -7,7 +6,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -58,31 +56,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		//ASCII = QIN
 		private const string QUERY_INPUT = START_MESSAGE + COMMAND_PREFIX + "\x51\x49\x4e" + END_MESSAGE;
 
-		//ASCII = VSE:0
-		private const string ASPECT_AUTO = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x30" + END_MESSAGE;
-		//ASCII = VSE:1
-		private const string ASPECT_4_X3 = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x31" + END_MESSAGE;
-		//ASCII = VSE:2
-		private const string ASPECT_16_X9 = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x32" + END_MESSAGE;
-		//ASCII = VSE:5
-		private const string ASPECT_NATIVE = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x35" + END_MESSAGE;
-		//ASCII = VSE:6
-		private const string ASPECT_FULL = START_MESSAGE + COMMAND_PREFIX + "\x56\x53\x45\x3a\x36" + END_MESSAGE;
-		//ASCII = QSE
-		private const string QUERY_ASPECT = START_MESSAGE + COMMAND_PREFIX + "\x51\x53\x45" + END_MESSAGE;
 		#endregion
-
-		/// <summary>
-		/// Maps scaling mode to command.
-		/// </summary>
-		private static readonly BiDictionary<eScalingMode, string> s_ScalingModeMap =
-			new BiDictionary<eScalingMode, string>
-			{
-				{eScalingMode.Wide16X9, ASPECT_16_X9},
-				{eScalingMode.Square4X3, ASPECT_4_X3},
-				{eScalingMode.NoScale, ASPECT_NATIVE},
-				{eScalingMode.Zoom, ASPECT_AUTO}
-			};
 
         /// <summary>
         /// Maps index to an input command.
@@ -143,7 +117,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			SendNonFormattedCommand(QUERY_VOLUME);
 			SendNonFormattedCommand(QUERY_INPUT);
-		    SendNonFormattedCommand(QUERY_ASPECT);
 		}
 
 	    /// <summary>
@@ -224,15 +197,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             SendNonFormattedCommand(s_InputMap.GetValue(address));
         }
 
-	    /// <summary>
-	    /// Sets the scaling mode.
-	    /// </summary>
-	    /// <param name="mode"></param>
-	    public override void SetScalingMode(eScalingMode mode)
-        {
-            SendNonFormattedCommand(s_ScalingModeMap.GetValue(mode));
-        }
-
         /// <summary>
         /// Returns the 3 character command
         /// </summary>
@@ -289,12 +253,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		    if (s_InputMap.ContainsValue(command))
 		    {
 			    ActiveInput = s_InputMap.GetKey(command);
-			    return;
-		    }
-
-		    if (s_ScalingModeMap.ContainsValue(command))
-		    {
-			    ScalingMode = s_ScalingModeMap.GetKey(command);
 			    return;
 		    }
 
@@ -368,9 +326,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			        case "IIS":
 				        ActiveInput = ExtractParameter(response, 3) == "HD1" ? 1 : (int?)null;
 				        return;
-			        case "VSE":
-				        ScalingMode = GetScalingMode(ExtractParameter(response, 1));
-				        return;
 			        case "QAV":
 				        float newVol;
 				        var parameter = ExtractParameter(response, 3);
@@ -419,39 +374,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	    {
 		    return response.Substring(1, response.Length - 2);
 	    }
-
-	    /// <summary>
-        /// Attempts to match a scaling mode to the listed scaling modes in the dictionary.
-        /// </summary>
-        /// <param name="parameterAsString"></param>
-        /// <returns></returns>
-        private static eScalingMode GetScalingMode(string parameterAsString)
-        {
-            switch (parameterAsString)
-            {
-                case "0":
-                    if (s_ScalingModeMap.ContainsValue(ASPECT_AUTO))
-                        return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_AUTO);
-                    break;
-                case "1":
-                    if (s_ScalingModeMap.ContainsValue(ASPECT_4_X3))
-						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_4_X3);
-                    break;
-                case "2":
-                    if (s_ScalingModeMap.ContainsValue(ASPECT_16_X9))
-						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_16_X9);
-                    break;
-                case "5":
-                    if (s_ScalingModeMap.ContainsValue(ASPECT_NATIVE))
-						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_NATIVE);
-                    break;
-                case "6":
-                    if (s_ScalingModeMap.ContainsValue(ASPECT_FULL))
-						return s_ScalingModeMap.Keys.First(k => s_ScalingModeMap.GetValue(k) == ASPECT_FULL);
-                    break;
-            }
-            return eScalingMode.Unknown;
-        }
 
         private static string GenerateSetVolumeCommand(int volumePercent)
         {
