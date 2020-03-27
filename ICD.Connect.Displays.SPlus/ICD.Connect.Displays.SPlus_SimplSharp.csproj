@@ -79,7 +79,6 @@
     <Compile Include="EventArgs\SetMuteApiEventArgs.cs" />
     <Compile Include="EventArgs\SetMuteToggleApiEventArgs.cs" />
     <Compile Include="EventArgs\SetPowerApiEventArgs.cs" />
-    <Compile Include="EventArgs\SetScalingModeEventArgs.cs" />
     <Compile Include="EventArgs\SetVolumeApiEventArgs.cs" />
     <Compile Include="EventArgs\SetVolumeIncrementApiEventArgs.cs" />
     <Compile Include="KrangPlugin.cs" />
