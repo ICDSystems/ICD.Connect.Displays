@@ -49,7 +49,7 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the muted state.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED, DisplayWithAudioApi.HELP_PROPERTY_IS_MUTED)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.MUTE_STATE, DisplayTelemetryNames.MUTE_STATE_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayTelemetryNames.MUTE_STATE, null, DisplayTelemetryNames.MUTE_STATE_CHANGED)] //TODO: figure out what to do about value + on separate off pattern
 		bool IsMuted { get; }
 
 		/// <summary>

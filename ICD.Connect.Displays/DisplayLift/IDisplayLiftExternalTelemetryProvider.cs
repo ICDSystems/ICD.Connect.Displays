@@ -16,13 +16,13 @@ namespace ICD.Connect.Displays.DisplayLift
 		[EventTelemetry(DisplayLiftTelemetryNames.COOL_DELAY_CHANGED)]
 		event EventHandler<StringEventArgs> OnCoolingDelayChanged;
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.LIFT_STATE, DisplayLiftTelemetryNames.LIFT_STATE_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.LIFT_STATE, null, DisplayLiftTelemetryNames.LIFT_STATE_CHANGED)]
 		string LiftState { get; }
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.BOOT_DELAY, DisplayLiftTelemetryNames.BOOT_DELAY_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.BOOT_DELAY, null, DisplayLiftTelemetryNames.BOOT_DELAY_CHANGED)]
 		string BootDelay { get; }
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.COOL_DELAY, DisplayLiftTelemetryNames.COOL_DELAY_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.COOL_DELAY, null, DisplayLiftTelemetryNames.COOL_DELAY_CHANGED)]
 		string CoolingDelay { get; }
 	}
 }

@@ -44,14 +44,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the powered state.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_POWER_STATE, DisplayApi.HELP_PROPERTY_POWER_STATE)]
-		[DynamicPropertyTelemetry(DeviceTelemetryNames.POWER_STATE, DeviceTelemetryNames.POWER_STATE_CHANGED)]
+		[DynamicPropertyTelemetry(DeviceTelemetryNames.POWER_STATE, null, DeviceTelemetryNames.POWER_STATE_CHANGED)] // TODO: Resolve poweron/off vs setpower(bool) issue
 		ePowerState PowerState { get; }
 
 		/// <summary>
 		/// Gets the active input.
 		/// </summary>
 		[ApiProperty(DisplayApi.PROPERTY_ACTIVE_INPUT, DisplayApi.HELP_PROPERTY_ACTIVE_INPUT)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.ACTIVE_INPUT_STATE, DisplayTelemetryNames.ACTIVE_INPUT_STATE_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayTelemetryNames.ACTIVE_INPUT_STATE, DisplayTelemetryNames.SET_ACTIVE_INPUT, DisplayTelemetryNames.ACTIVE_INPUT_STATE_CHANGED)]
 		int? ActiveInput { get; }
 
 		#endregion

@@ -16,13 +16,13 @@ namespace ICD.Connect.Displays.DisplayLift
 		[EventTelemetry(DisplayLiftTelemetryNames.RETRACT_TIME_CHANGED)]
 		event EventHandler<StringEventArgs> OnRetractTimeChanged;
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.LATCH_MODE, DisplayLiftTelemetryNames.LATCH_MODE_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.LATCH_MODE, null, DisplayLiftTelemetryNames.LATCH_MODE_CHANGED)]
 		bool LatchMode { get; }
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.EXTEND_TIME, DisplayLiftTelemetryNames.EXTEND_TIME_CHANGED)]
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.EXTEND_TIME, null, DisplayLiftTelemetryNames.EXTEND_TIME_CHANGED)]
 		string ExtendTime { get; }
 
-		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.RETRACT_TIME,
+		[DynamicPropertyTelemetry(DisplayLiftTelemetryNames.RETRACT_TIME, null,
 			DisplayLiftTelemetryNames.RETRACT_TIME_CHANGED)]
 		string RetractTime { get; }
 	}
