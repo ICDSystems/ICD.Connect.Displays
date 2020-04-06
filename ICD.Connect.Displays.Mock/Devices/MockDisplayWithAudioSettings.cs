@@ -1,5 +1,6 @@
 ﻿using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Mock;
 using ICD.Connect.Settings.Attributes;
 
 namespace ICD.Connect.Displays.Mock.Devices
@@ -8,7 +9,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 	/// Settings for the MockDisplayWithAudio device.
 	/// </summary>
 	[KrangSettings("MockDisplayWithAudio", typeof(MockDisplayWithAudio))]
-	public sealed class MockDisplayWithAudioSettings : AbstractDeviceSettings
+	public sealed class MockDisplayWithAudioSettings : AbstractMockDeviceSettings
 	{
 		private const string WARMING_TIME_ELEMENT = "WarmingTime";
 		private const string COOLING_TIME_ELEMENT = "CoolingTime";

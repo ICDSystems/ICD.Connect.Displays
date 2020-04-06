@@ -7,8 +7,8 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
-using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Mock;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Settings;
@@ -18,7 +18,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 	/// <summary>
 	/// Mock display device for testing control systems.
 	/// </summary>
-	public sealed class MockDisplayWithAudio : AbstractDevice<MockDisplayWithAudioSettings>, IDisplayWithAudio
+	public sealed class MockDisplayWithAudio : AbstractMockDevice<MockDisplayWithAudioSettings>, IDisplayWithAudio
 	{
 		/// <summary>
 		/// Raised when the power state changes.
@@ -256,15 +256,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 			OnVolumeControlAvailableChanged = null;
 
 			base.DisposeFinal(disposing);
-		}
-
-		/// <summary>
-		/// Gets the current online status of the device.
-		/// </summary>
-		/// <returns></returns>
-		protected override bool GetIsOnlineStatus()
-		{
-			return true;
 		}
 
 		#region Methods
