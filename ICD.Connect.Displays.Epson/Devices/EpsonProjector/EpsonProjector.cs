@@ -295,14 +295,14 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 
 			if (args.Response == ERROR_RESPONSE)
 			{
-				Log(eSeverity.Warning, "Error for command: {0}", args.Data);
+				Logger.Log(eSeverity.Warning, "Error for command: {0}", args.Data);
 				return;
 			}
 
 			if (args.Response == INITIAL_IP_RESPONSE)
 				return;
 
-			Log(eSeverity.Warning, "Unknown Response:{0}",args.Response);
+			Logger.Log(eSeverity.Warning, "Unknown Response:{0}", args.Response);
 		}
 
 		/// <summary>
@@ -352,7 +352,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				EpsonPowerState = state;
 			}
 			else
-				Log(eSeverity.Error, "Unknown Power State: {0}", args);
+				Logger.Log(eSeverity.Error, "Unknown Power State: {0}", args);
 		}
 
 		private void ParseInputResponse(string args)
@@ -363,7 +363,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			else
 			{
 				ActiveInput = null;
-				Log(eSeverity.Error, "Unknown Input Address: {0}" , args);
+				Logger.Log(eSeverity.Error, "Unknown Input Address: {0}", args);
 			}
 		}
 
@@ -375,7 +375,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			}
 			catch (FormatException)
 			{
-				Log(eSeverity.Error, "Unable to parse lamp hours string: {0}", args);
+				Logger.Log(eSeverity.Error, "Unable to parse lamp hours string: {0}", args);
 			}
 		}
 
@@ -389,7 +389,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 				if (s_EpsonPowerEventValues.TryGetValue(parts[1], out state))
 					EpsonPowerState = state;
 				else
-					Log(eSeverity.Error, "Unknown Power State: {0}", args);
+					Logger.Log(eSeverity.Error, "Unknown Power State: {0}", args);
 			}
 		}
 
@@ -400,7 +400,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Warning, "Command timed out, retrying:{0}", args.Data);
+			Logger.Log(eSeverity.Warning, "Command timed out, retrying:{0}", args.Data);
 
 			SendCommandPriority(args.Data, PRIORITY_RETRY);
 		}

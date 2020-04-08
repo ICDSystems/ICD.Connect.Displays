@@ -75,7 +75,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 				m_ChristiePowerState = value;
 
-				Log(eSeverity.Informational, "PowerState set to {0}", m_ChristiePowerState);
+				Logger.Set("Christie Power State", eSeverity.Informational, m_ChristiePowerState);
 
 				PowerState = ChristiePowerStateToPowerState(m_ChristiePowerState);
 
@@ -193,7 +193,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize());
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize());
 		}
 
 		/// <summary>
@@ -268,9 +268,9 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 			string message = match.Groups[2].Value;
 
 			if (args.Data == null)
-				Log(eSeverity.Error, "Error {0} - {1}", code, message);
+				Logger.Log(eSeverity.Error, "Error {0} - {1}", code, message);
 			else
-				Log(eSeverity.Error, "Invalid command sent: {0} - Error {1} - {2}", args.Data.Serialize(), code, message);
+				Logger.Log(eSeverity.Error, "Invalid command sent: {0} - Error {1} - {2}", args.Data.Serialize(), code, message);
 		}
 
 		private void InputQueryResponse(string response)

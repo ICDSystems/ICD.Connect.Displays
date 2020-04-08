@@ -305,7 +305,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
 			RetryCommand(args.Data.Serialize());
 		}
 
@@ -405,14 +405,14 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		private void RetryCommand(string command)
 		{
-			Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
+			Logger.Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
 			IncrementRetryCount(command);
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
 				SendCommandPriority(new SerialData(command), 0);
 			else
 			{
-				Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
-					StringUtils.ToMixedReadableHexLiteral(command));
+				Logger.Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
+				           StringUtils.ToMixedReadableHexLiteral(command));
 				ResetRetryCount(command);
 			}
 		}

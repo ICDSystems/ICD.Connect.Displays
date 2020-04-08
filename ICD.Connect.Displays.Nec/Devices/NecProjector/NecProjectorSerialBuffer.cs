@@ -94,7 +94,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 							// If we get here, the command length is unknown when it should be known
 							// Likely have unexpected/junk in the buffer, let's try to remove it.
 							
-							m_Parent.Log(eSeverity.Warning, "Unknown response in buffer, scrubbing: {0}", StringUtils.ToHexLiteral(m_RxData.ToString()));
+							m_Parent.Logger.Log(eSeverity.Warning, "Unknown response in buffer, scrubbing: {0}", StringUtils.ToHexLiteral(m_RxData.ToString()));
 
 							int? expectedLength = null;
 							while (m_RxData.Length >= NecProjectorCommand.MinimumResponseLength && expectedLength == null)

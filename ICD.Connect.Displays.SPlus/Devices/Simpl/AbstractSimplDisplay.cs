@@ -67,7 +67,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
@@ -87,7 +87,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput);
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));

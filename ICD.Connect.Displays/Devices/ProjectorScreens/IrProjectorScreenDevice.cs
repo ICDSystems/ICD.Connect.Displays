@@ -94,7 +94,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		{
 			if (IrPort == null)
 			{
-				Log(eSeverity.Error, "Tried to send power command, but IR port is not set");
+				Logger.Log(eSeverity.Error, "Tried to send power command, but IR port is not set");
 				return;
 			}
 
@@ -129,7 +129,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No IrPort with id {0}", settings.IrPort);
+					Logger.Log(eSeverity.Error, "No IrPort with id {0}", settings.IrPort);
 				}
 			}
 			SetIrPort(irPort);

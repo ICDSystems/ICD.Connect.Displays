@@ -167,7 +167,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 			if (settings.Display == null)
 			{
-				Log(eSeverity.Error, "No display id set for {0}", this);
+				Logger.Log(eSeverity.Error, "No display id set for {0}", this);
 				return;
 			}
 
@@ -181,7 +181,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No display with id {0}", settings.Display);
+					Logger.Log(eSeverity.Error, "No display with id {0}", settings.Display);
 				}
 			}
 			SetDisplay(display);

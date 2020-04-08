@@ -97,7 +97,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (!s_InputMap.ContainsKey(address))
 			{
-				Log(eSeverity.Error, "No input at address {0}", address);
+				Logger.Log(eSeverity.Error, "No input at address {0}", address);
 				return;
 			}
 
@@ -143,11 +143,11 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			BarcoVideoWallCommand command = args.Data as BarcoVideoWallCommand;
 			if (command == null)
 			{
-				Log(eSeverity.Error, "Unknown Command Timed Out: {1}", args.Data);
+				Logger.Log(eSeverity.Error, "Unknown Command Timed Out: {1}", args.Data);
 				return;
 			}
 
-			Log(eSeverity.Debug, "Command Timeout: {0}", command.Serialize());
+			Logger.Log(eSeverity.Debug, "Command Timeout: {0}", command.Serialize());
 		}
 
 		/// <summary>
@@ -170,7 +170,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 
 			if (String.IsNullOrEmpty(responseParts[0]))
 			{
-				Log(eSeverity.Error, "Empty response: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Empty response: {0}", args.Response);
 				return;
 			}
 			if (RESPONSE_CONNECTED.Equals(responseParts[0], StringComparison.OrdinalIgnoreCase))
@@ -189,7 +189,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 				return;
 			}
 
-			Log(eSeverity.Warning, "Unmatched response: {0}", args.Response);
+			Logger.Log(eSeverity.Warning, "Unmatched response: {0}", args.Response);
 		}
 
 
@@ -255,7 +255,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length < 3)
 			{
-				Log(eSeverity.Error, "Too short of a response to parse: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Too short of a response to parse: {0}", args.Response);
 				return;
 			}
 
@@ -266,14 +266,14 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			// Parse command
 			if (String.IsNullOrEmpty(responseParts[3]))
 			{
-				Log(eSeverity.Error, "Unable to get command for response: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Unable to get command for response: {0}", args.Response);
 				return;
 			}
 
 			eCommand command;
 			if (!EnumUtils.TryParse(responseParts[3], true, out command))
 			{
-				Log(eSeverity.Error, "Unable to parse command: {0}", responseParts[3]);
+				Logger.Log(eSeverity.Error, "Unable to parse command: {0}", responseParts[3]);
 				return;
 			}
 
@@ -297,7 +297,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length <= 5)
 			{
-				Log(eSeverity.Error, "Input response has too few parts: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Input response has too few parts: {0}", args.Response);
 				return;
 			}
 
@@ -312,7 +312,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			}
 			catch (InvalidOperationException)
 			{
-				Log(eSeverity.Error, "Unable to parse input: {0}", responseParts[5]);
+				Logger.Log(eSeverity.Error, "Unable to parse input: {0}", responseParts[5]);
 				return;
 			}
 
@@ -329,7 +329,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length <= 5)
 			{
-				Log(eSeverity.Error, "Power response has too few parts: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Power response has too few parts: {0}", args.Response);
 				return;
 			}
 
@@ -348,38 +348,37 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		{
 			if (responseParts.Length < 2)
 			{
-				Log(eSeverity.Error, "Error response has too few parts: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Error response has too few parts: {0}", args.Response);
 				return;
 			}
 
 			if (responseParts[2].Equals("system_busy", StringComparison.OrdinalIgnoreCase))
 			{
-				Log(eSeverity.Debug, "System Busy, resending command: {0}", args.Response);
+				Logger.Log(eSeverity.Debug, "System Busy, resending command: {0}", args.Response);
 				SendCommandPriority(args.Data, 1);
 				return;
 			}
 
 			if (responseParts[2].Equals("incomplete_action", StringComparison.OrdinalIgnoreCase))
 			{
-				Log(eSeverity.Debug, "Incomplete Action, resending command: {0}", args.Response);
+				Logger.Log(eSeverity.Debug, "Incomplete Action, resending command: {0}", args.Response);
 				SendCommandPriority(args.Data, 1);
 				return;
 			}
 
 			if (responseParts[2].Equals("syntax_error", StringComparison.OrdinalIgnoreCase))
 			{
-				Log(eSeverity.Error, "Syntax Error: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Syntax Error: {0}", args.Response);
 				return;
 			}
 
 			if (responseParts[2].Equals("not_supported", StringComparison.OrdinalIgnoreCase))
 			{
-				Log(eSeverity.Error, "Command Not Supported: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Command Not Supported: {0}", args.Response);
 				return;
 			}
 
-			Log(eSeverity.Error, "Unknown Error: {0}", args.Response);
-		
+			Logger.Log(eSeverity.Error, "Unknown Error: {0}", args.Response);
 		}
 
 		/// <summary>
@@ -408,7 +407,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 			WallInputControlDevice = settings.WallInputControlDevice;
 
 			if (String.IsNullOrEmpty(WallDeviceId))
-				Log(eSeverity.Error, "Barco UniSee must have WallDeviceId defined");
+				Logger.Log(eSeverity.Error, "Barco UniSee must have WallDeviceId defined");
 		}
 
 		/// <summary>

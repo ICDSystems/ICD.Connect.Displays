@@ -201,7 +201,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (command == null)
 			{
-				Log(eSeverity.Error, "TrustMode - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
+				Logger.Log(eSeverity.Error, "TrustMode - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
 				return;
 			}
 
@@ -231,9 +231,9 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (command == null)
 			{
 				if (args.Data != null)
-					Log(eSeverity.Error, "Queue Response - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
+					Logger.Log(eSeverity.Error, "Queue Response - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
 				else
-					Log(eSeverity.Warning, "Unsolicited serial message: {0}", args.Response);
+					Logger.Log(eSeverity.Warning, "Unsolicited serial message: {0}", args.Response);
 				return;
 			}
 
@@ -254,7 +254,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 			if (command == null)
 			{
-				Log(eSeverity.Error, "Queue Timeout - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
+				Logger.Log(eSeverity.Error, "Queue Timeout - unable to cast to NecProjectorCommand - {0:x}", args.Data.Serialize());
 				return;
 			}
 
@@ -308,7 +308,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (s_InputAddressMap.TryGetKey(command.CommandArgs[0], out address))
 				ActiveInput = address;
 			else
-				Log(eSeverity.Error, "Unable to find address for input {0:x}", command.CommandArgs[0]);
+				Logger.Log(eSeverity.Error, "Unable to find address for input {0:x}", command.CommandArgs[0]);
 		}
 
 		private void ParseInputPoll(string argsResponse)
@@ -318,7 +318,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			if (s_InputResponseAddressMap.TryGetKey(responseAddress, out address))
 				ActiveInput = address;
 			else
-				Log(eSeverity.Warning, "Unable to find input at address {0:x}", responseAddress);
+				Logger.Log(eSeverity.Warning, "Unable to find input at address {0:x}", responseAddress);
 		}
 
 		private void ParsePowerPoll(string argsResponse)
@@ -393,69 +393,69 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			switch (errorCode)
 			{
 				case "\x00\x00":
-					Log(eSeverity.Warning, "Command Error - Not Recognized: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Not Recognized: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x00\x01":
-					Log(eSeverity.Warning, "Command Error - Not Supported by Model: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Not Supported by Model: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x00":
-					Log(eSeverity.Warning, "Command Error - Value Invalid: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Value Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x01":
-					Log(eSeverity.Warning, "Command Error - Input Terminal Invalid: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Input Terminal Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x01\x02":
-					Log(eSeverity.Warning, "Command Error - Language Invalid: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Language Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x00":
-					Log(eSeverity.Warning, "Command Error - Memory Allocation Error: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Memory Allocation Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x02":
-					Log(eSeverity.Warning, "Command Error - Memory In Use: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Memory In Use: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x03":
-					Log(eSeverity.Warning, "Command Error - Value Cannot Be Set: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Value Cannot Be Set: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x04":
-					Log(eSeverity.Warning, "Command Error - Forced Onscreen Mute On: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Forced Onscreen Mute On: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x06":
-					Log(eSeverity.Warning, "Command Error - Viewer Error: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Viewer Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x07":
-					Log(eSeverity.Warning, "Command Error -No Signal: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error -No Signal: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x08":
-					Log(eSeverity.Warning, "Command Error - Test Pattern or Filter Displayed: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Test Pattern or Filter Displayed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x09":
-					Log(eSeverity.Warning, "Command Error - No PC Card Inserted: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - No PC Card Inserted: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0A":
-					Log(eSeverity.Warning, "Command Error - Memory Operation Error: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Memory Operation Error: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0C":
-					Log(eSeverity.Warning, "Command Error - Entry List is Displayed: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Entry List is Displayed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0D":
-					Log(eSeverity.Warning, "Command Error - Command cannot be accepted because power is off: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Command cannot be accepted because power is off: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x02\x0E":
-					Log(eSeverity.Warning, "Command Error - Command execution failed (retrying): {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Command execution failed (retrying): {0}:{1}", command.CommandType, commandArgs);
 					// Retry
 					SendCommandCollapse(command, GetPriorityForCommand(command.CommandType));
 					break;
 				case "\x02\x0F":
-					Log(eSeverity.Warning, "Command Error - No Authority: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - No Authority: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x00":
-					Log(eSeverity.Warning, "Command Error - Specified Gain Number Incorrect: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Specified Gain Number Incorrect: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x01":
-					Log(eSeverity.Warning, "Command Error - Specified Gain Invalid: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Specified Gain Invalid: {0}:{1}", command.CommandType, commandArgs);
 					break;
 				case "\x03\x02":
-					Log(eSeverity.Warning, "Command Error - Adjustment Failed: {0}:{1}", command.CommandType, commandArgs);
+					Logger.Log(eSeverity.Warning, "Command Error - Adjustment Failed: {0}:{1}", command.CommandType, commandArgs);
 					break;
 			}
 		}

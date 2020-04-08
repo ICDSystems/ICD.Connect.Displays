@@ -207,7 +207,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOffRelay);
+					Logger.Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOffRelay);
 				}
 				
 			}
@@ -223,7 +223,7 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOnRelay);
+					Logger.Log(eSeverity.Error, "No relay with id {0}", settings.DisplayOnRelay);
 				}
 			}
 			SetDisplayOnRelay(displayOnRelay);

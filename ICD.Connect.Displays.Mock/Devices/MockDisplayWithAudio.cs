@@ -83,7 +83,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				UpdateCachedVolumeControlAvailableState();
 
@@ -131,7 +131,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -170,7 +170,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0:F2}", m_Volume);
+				Logger.Set("Volume", eSeverity.Informational, m_Volume.ToString("F2"));
 
 				// If the volume went outside of safe limits clamp the volume to a safe value.
 				float safeVolume = MathUtils.Clamp(m_Volume, VolumeDeviceMin, VolumeDeviceMax);
@@ -194,7 +194,7 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 				m_IsMuted = value;
 
-				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
+				Logger.Set("Muted", eSeverity.Informational, m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}

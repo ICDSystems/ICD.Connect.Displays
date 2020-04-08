@@ -91,7 +91,7 @@ namespace ICD.Connect.Displays.Devices
 
 				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				//todo: Fix this section?
 				if (m_PowerState == ePowerState.PowerOn)
@@ -115,7 +115,7 @@ namespace ICD.Connect.Displays.Devices
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -179,7 +179,7 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (SerialQueue == null)
 			{
-				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
 				return;
 			}
 
@@ -196,7 +196,7 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (SerialQueue == null)
 			{
-				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
 				return;
 			}
 
@@ -215,7 +215,7 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (SerialQueue == null)
 			{
-				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
 				return;
 			}
 
@@ -235,7 +235,7 @@ namespace ICD.Connect.Displays.Devices
 		{
 			if (SerialQueue == null)
 			{
-				Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
 				return;
 			}
 
@@ -469,7 +469,7 @@ namespace ICD.Connect.Displays.Devices
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
+					Logger.Log(eSeverity.Error, "No Serial Port with id {0}", settings.Port);
 				}
 			}
 

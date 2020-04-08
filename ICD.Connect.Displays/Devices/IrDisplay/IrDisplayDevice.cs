@@ -54,7 +54,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 
 				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
@@ -74,7 +74,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Hdmi input set to {0}", m_ActiveInput);
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -185,7 +185,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		{
 			if (m_Port == null)
 			{
-				Log(eSeverity.Error, "Unable to send command - port is null.");
+				Logger.Log(eSeverity.Error, "Unable to send command - port is null.");
 				return false;
 			}
 
@@ -246,7 +246,7 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No IR port with id {0}", settings.Port);
+					Logger.Log(eSeverity.Error, "No IR port with id {0}", settings.Port);
 				}
 			}
 

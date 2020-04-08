@@ -302,7 +302,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
 
 			// Keep sending power query until fully powered on
 			if (SerialQueue != null && SerialQueue.TimeoutCount < 10)
@@ -362,7 +362,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
 		}
 
 		#endregion

@@ -5,7 +5,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -207,7 +206,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
         /// <param name="args"></param>
         protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
         {
-            Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+            Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
         }
 
 	    /// <summary>
@@ -300,7 +299,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
 				    }
 				    else
 				    {
-					    Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
+						Logger.Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
 				    }
 				    break;
 		    }
@@ -312,7 +311,7 @@ namespace ICD.Connect.Displays.Microsoft.Devices
         /// <param name="args"></param>
         private void ParseError(SerialResponseEventArgs args)
         {
-            Log(eSeverity.Error,"Unexpected response: " + args.Response);
+			Logger.Log(eSeverity.Error, "Unexpected response: " + args.Response);
         }
 
 	    #endregion

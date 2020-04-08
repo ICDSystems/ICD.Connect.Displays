@@ -423,8 +423,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 				SerialQueue.EnqueuePriority(new SerialData(command));
 			else
 			{
-				Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
-				    StringUtils.ToMixedReadableHexLiteral(command));
+				Logger.Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
+				           StringUtils.ToMixedReadableHexLiteral(command));
 				ResetRetryCount(command);
 			}
 		}

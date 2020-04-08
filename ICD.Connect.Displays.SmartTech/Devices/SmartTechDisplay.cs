@@ -197,7 +197,7 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// <param name="args"></param>
         protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
         {
-            Log(eSeverity.Alert, "Command Timed Out: " + args.Data.Serialize());
+			Logger.Log(eSeverity.Alert, "Command Timed Out: " + args.Data.Serialize());
         }
 
 	    /// <summary>
@@ -405,14 +405,13 @@ namespace ICD.Connect.Displays.SmartTech.Devices
         /// </summary>
         private void ParseError(string response)
         {
-            Log(eSeverity.Error, response);
+			Logger.Log(eSeverity.Error, response);
         }
 
         private void LogUnexpectedResponse(string response)
         {
-            Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
+			Logger.Log(eSeverity.Notice, "Unexpected reponse was returned: {0}", response);
         }
-
 
         #endregion
     }

@@ -115,7 +115,7 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			if (m_ExtendRelay == null && m_RetractRelay == null)
 			{
-				Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
+				Logger.Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
 				return;
 			}
 
@@ -130,7 +130,7 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			if (m_ExtendRelay == null || m_RetractRelay == null)
 			{
-				Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
+				Logger.Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
 				return;
 			}
 
@@ -144,7 +144,7 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			if (m_ExtendRelay == null && m_RetractRelay == null)
 			{
-				Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
+				Logger.Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
 				return;
 			}
 
@@ -159,7 +159,7 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			if (m_ExtendRelay == null || m_RetractRelay == null)
 			{
-				Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
+				Logger.Log(eSeverity.Error, "Cannot Extend Display Lift, relays are null.");
 				return;
 			}
 
@@ -212,7 +212,7 @@ namespace ICD.Connect.Displays.DisplayLift
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayExtendRelay);
+					Logger.Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayExtendRelay);
 				}
 			}
 
@@ -227,14 +227,14 @@ namespace ICD.Connect.Displays.DisplayLift
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayRetractRelay);
+					Logger.Log(eSeverity.Error, "No Relay Port with id {0}", settings.DisplayRetractRelay);
 				}
 			}
 
 			m_RetractRelay = retractRelay;
 
 			if (!m_LatchRelay && (m_ExtendRelay == null || m_RetractRelay == null))
-				Log(eSeverity.Error, "When latching mode is not enabled, both relay ports must be defined.");
+				Logger.Log(eSeverity.Error, "When latching mode is not enabled, both relay ports must be defined.");
 
 			m_ExtendTime = settings.ExtendTime;
 			m_RetractTime = settings.RetractTime;

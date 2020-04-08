@@ -298,7 +298,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         /// <param name="args"></param>
         protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
         {
-            Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		    }
 		    catch (Exception e)
 		    {
-				Log(eSeverity.Error, "Exception parsing unmatches response: {0}:{1} - {2}{3}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()), StringUtils.ToMixedReadableHexLiteral(response), e.GetType(), e.Message);
+				Logger.Log(eSeverity.Error, "Exception parsing unmatches response: {0}:{1} - {2}{3}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()), StringUtils.ToMixedReadableHexLiteral(response), e.GetType(), e.Message);
 		    }
 	    }
 
@@ -391,15 +391,15 @@ namespace ICD.Connect.Displays.Panasonic.Devices
             {
                 case FAILURE_BUSY:
 					//todo: Retry commands sent when busy
-                    Log(eSeverity.Error, "Error 401 Busy. Command {0} failed.",
+					Logger.Log(eSeverity.Error, "Error 401 Busy. Command {0} failed.",
                         StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
                     break;
                 case FAILURE_PARAMETER:
-                    Log(eSeverity.Error, "Error 402 Invalid Parameter. Command {0} failed.",
+					Logger.Log(eSeverity.Error, "Error 402 Invalid Parameter. Command {0} failed.",
                         StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
                     break;
                 default:
-                    Log(eSeverity.Error, "Error Unknown. Command {0} failed.",
+					Logger.Log(eSeverity.Error, "Error Unknown. Command {0} failed.",
                         StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
                     break;
             }

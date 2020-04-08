@@ -263,7 +263,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize().Replace("\r", "\\r"));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", args.Data.Serialize().Replace("\r", "\\r"));
 		}
 
 		/// <summary>
@@ -347,7 +347,7 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		/// <param name="args"></param>
 		private void ParseError(NecDisplayCommand args)
 		{
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToHexLiteral(args.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToHexLiteral(args.Serialize()));
 		}
 
 		#endregion

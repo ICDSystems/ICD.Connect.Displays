@@ -398,7 +398,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 			}
 			else
 			{
-				Log(eSeverity.Error, "Command {0} hit the retry limit.", StringUtils.ToMixedReadableHexLiteral(command));
+				Logger.Log(eSeverity.Error, "Command {0} hit the retry limit.", StringUtils.ToMixedReadableHexLiteral(command));
 				ResetRetryCount(command);
 			}
 		}

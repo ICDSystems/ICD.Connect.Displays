@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -92,7 +91,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0}", StringUtils.NiceName(m_Volume));
+				Logger.Set("Volume", eSeverity.Informational, m_Volume.ToString("F2"));
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
@@ -113,7 +112,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_IsMuted = value;
 
-				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
+				Logger.Set("Muted", eSeverity.Informational, m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}

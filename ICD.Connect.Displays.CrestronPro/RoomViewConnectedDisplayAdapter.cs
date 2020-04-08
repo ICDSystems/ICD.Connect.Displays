@@ -76,7 +76,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_PowerState = value;
 
-				Log(eSeverity.Informational, "Power set to {0}", m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 
@@ -98,7 +98,7 @@ namespace ICD.Connect.Displays.CrestronPro
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Log(eSeverity.Informational, "Active input set to {0}", m_ActiveInput == null ? "NULL" : m_ActiveInput.ToString());
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -137,7 +137,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_Volume = value;
 
-				Log(eSeverity.Informational, "Raw volume set to {0}", m_Volume);
+				Logger.Set("Volume", eSeverity.Informational, m_Volume);
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
@@ -156,7 +156,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_IsMuted = value;
 
-				Log(eSeverity.Informational, "Mute set to {0}", m_IsMuted);
+				Logger.Set("Muted", eSeverity.Informational, m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
@@ -233,7 +233,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 			eDeviceRegistrationUnRegistrationResponse result;
 			if (m_Display != null && !GenericBaseUtils.SetUp(m_Display, this, out result))
-				Log(eSeverity.Error, "Unable to register {0} - {1}", m_Display.GetType().Name, result);
+				Logger.Log(eSeverity.Error, "Unable to register {0} - {1}", m_Display.GetType().Name, result);
 
 			Subscribe(m_Display);
 			UpdateCachedOnlineStatus();

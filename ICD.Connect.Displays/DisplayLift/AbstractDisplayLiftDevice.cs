@@ -46,7 +46,7 @@ namespace ICD.Connect.Displays.DisplayLift
 
 				m_LiftState = value;
 
-				Log(eSeverity.Debug, "Lift State: {0}", m_LiftState);
+				Logger.Set("Lift State", eSeverity.Informational, m_LiftState);
 
 				OnLiftStateChanged.Raise(this, new LiftStateChangedEventArgs(m_LiftState));
 
@@ -103,7 +103,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			// Keep the callback for when we have finished extending and boot delay has elapsed
 			m_PostExtend = postExtend;
 
-			Log(eSeverity.Debug, "Extend Lift");
+			Logger.Log(eSeverity.Debug, "Extend Lift");
 			switch (LiftState)
 			{
 				case eLiftState.Extended:
@@ -133,7 +133,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			if (preRetract != null)
 				preRetract();
 
-			Log(eSeverity.Debug, "Retract Lift");
+			Logger.Log(eSeverity.Debug, "Retract Lift");
 			switch (LiftState)
 			{
 				case eLiftState.Retracted:
@@ -159,7 +159,7 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		private void BootDelayTimerOnElapsed(object sender, EventArgs e)
 		{
-			Log(eSeverity.Debug, "Boot Delay Elapsed");
+			Logger.Log(eSeverity.Debug, "Boot Delay Elapsed");
 			ResetTimers();
 			LiftState = eLiftState.Extended;
 
@@ -169,7 +169,7 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		private void CooldownDelayTimerOnElapsed(object sender, EventArgs e)
 		{
-			Log(eSeverity.Debug, "Cooldown Delay Elapsed");
+			Logger.Log(eSeverity.Debug, "Cooldown Delay Elapsed");
 			Retract();
 		}
 
@@ -200,7 +200,7 @@ namespace ICD.Connect.Displays.DisplayLift
 				}
 				catch (KeyNotFoundException)
 				{
-					Log(eSeverity.Error, "No Display with id {0}", settings.Display);
+					Logger.Log(eSeverity.Error, "No Display with id {0}", settings.Display);
 				}
 			}
 

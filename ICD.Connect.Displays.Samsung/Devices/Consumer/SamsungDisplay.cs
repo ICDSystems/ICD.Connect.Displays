@@ -127,7 +127,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			if(SerialQueue == null)
 				return;
-			Log(eSeverity.Debug, "Display Power Off while {0} commands were enqueued. Commands dropped.", SerialQueue.CommandCount);
+			Logger.Log(eSeverity.Debug, "Display Power Off while {0} commands were enqueued. Commands dropped.", SerialQueue.CommandCount);
 			SerialQueue.Clear();
 
 			SendNonFormattedCommand(POWER_OFF, CommandComparer, PRIORITY_POWER_INITIAL);
@@ -361,7 +361,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
 			var command = RemoveCheckSum(args.Data.Serialize());
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(command));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(command));
 
 
 			if (SerialQueue == null)
@@ -373,7 +373,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				m_PowerRetries++;
 				if (m_PowerRetries > MAX_RETRIES)
 				{
-					Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
+					Logger.Log(eSeverity.Error, "Power On Command for Samsung Display Reached Max Retries, aborting.");
 					m_PowerRetries = 0;
 					return;
 				}
@@ -391,7 +391,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 				if (m_InputRetries > MAX_RETRIES)
 				{
-					Log(eSeverity.Error, "Input Command for Samsung Display Reached Max Retries, aborting.");
+					Logger.Log(eSeverity.Error, "Input Command for Samsung Display Reached Max Retries, aborting.");
 					m_InputRetries = 0;
 					return;
 				}
@@ -458,7 +458,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			string command = StringUtils.ToHexLiteral(args.Data.Serialize());
 
-			Log(eSeverity.Error, "Command {0} failed.", command);
+			Logger.Log(eSeverity.Error, "Command {0} failed.", command);
 		}
 
 		private void BufferOnJunkData(object sender, EventArgs eventArgs)

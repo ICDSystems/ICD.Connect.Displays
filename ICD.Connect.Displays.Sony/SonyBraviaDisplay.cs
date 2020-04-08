@@ -315,9 +315,9 @@ namespace ICD.Connect.Displays.Sony
 			SonyBraviaCommand command = args.Data as SonyBraviaCommand;
 
 			if (command == null)
-				Log(eSeverity.Error, "Error - {0}", StringUtils.ToMixedReadableHexLiteral(args.Response));
+				Logger.Log(eSeverity.Error, "Error - {0}", StringUtils.ToMixedReadableHexLiteral(args.Response));
 			else
-				Log(eSeverity.Error, "Command failed - {0}", StringUtils.ToMixedReadableHexLiteral(command.Serialize()));
+				Logger.Log(eSeverity.Error, "Command failed - {0}", StringUtils.ToMixedReadableHexLiteral(command.Serialize()));
 		}
 
 		/// <summary>
@@ -327,7 +327,7 @@ namespace ICD.Connect.Displays.Sony
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command timed out - {0}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command timed out - {0}", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
 		}
 	}
 }

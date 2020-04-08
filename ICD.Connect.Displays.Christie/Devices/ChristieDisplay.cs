@@ -206,7 +206,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 
 		private void ParseBadCommand(SerialResponseEventArgs args)
 		{
-			Log(eSeverity.Error, "Invalid command sent: {0}", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Invalid command sent: {0}", StringUtils.ToHexLiteral(args.Data.Serialize()));
 		}
 
 		private void ParseDataReply(SerialResponseEventArgs args)
@@ -284,7 +284,7 @@ namespace ICD.Connect.Displays.Christie.Devices
 			}
 			else
 			{
-				Log(eSeverity.Error, "Command {0} hit the retry limit.", StringUtils.ToMixedReadableHexLiteral(command));
+				Logger.Log(eSeverity.Error, "Command {0} hit the retry limit.", StringUtils.ToMixedReadableHexLiteral(command));
 				ResetRetryCount(command);
 			}
 		}

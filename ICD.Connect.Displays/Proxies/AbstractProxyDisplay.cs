@@ -52,7 +52,7 @@ namespace ICD.Connect.Displays.Proxies
 
 				m_PowerState = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Power set to {1}", this, m_PowerState);
+				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
@@ -73,7 +73,7 @@ namespace ICD.Connect.Displays.Proxies
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Logger.AddEntry(eSeverity.Informational, "{0} - Hdmi input set to {1}", this, m_ActiveInput);
+				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));

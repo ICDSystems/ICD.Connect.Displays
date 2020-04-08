@@ -267,7 +267,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 		private void ParseError(ISerialData data)
 		{
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(data.Serialize()));
 		}
 
 		/// <summary>
@@ -277,7 +277,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
 		}
 
 		#endregion
