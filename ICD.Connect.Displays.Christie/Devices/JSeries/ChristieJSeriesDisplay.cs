@@ -331,7 +331,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 			SendCommand(string.Format(POWER, QUERY));
 
-			if (base.PowerState != ePowerState.PowerOn)
+			if (PowerState != ePowerState.PowerOn)
 				return;
 
 			SendCommand(string.Format(INPUT, QUERY));

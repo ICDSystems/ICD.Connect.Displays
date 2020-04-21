@@ -69,7 +69,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// Power Response Codes to EpsonPowerState
 		/// </summary>
 		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerStateValues =
-			new Dictionary<string, eEpsonPowerState>()
+			new Dictionary<string, eEpsonPowerState>
 			{
 				{"00", eEpsonPowerState.StandbyNetworkOff},
 				{"01", eEpsonPowerState.LampOn},
@@ -81,7 +81,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 			};
 
 		private static readonly Dictionary<string, eEpsonPowerState> s_EpsonPowerEventValues =
-			new Dictionary<string, eEpsonPowerState>()
+			new Dictionary<string, eEpsonPowerState>
 			{
 				{"01", eEpsonPowerState.StandbyNetworkOn},
 				{"02", eEpsonPowerState.Warmup},
@@ -94,7 +94,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// Mapping of EpsonPowerState to PowerState
 		/// </summary>
 		private static readonly Dictionary<eEpsonPowerState, ePowerState> s_PowerStateMap =
-			new Dictionary<eEpsonPowerState, ePowerState>()
+			new Dictionary<eEpsonPowerState, ePowerState>
 			{
 				{eEpsonPowerState.StandbyNetworkOff, ePowerState.PowerOff},
 				{eEpsonPowerState.LampOn, ePowerState.PowerOn},
@@ -111,7 +111,7 @@ namespace ICD.Connect.Displays.Epson.Devices.EpsonProjector
 		/// Input address to protocol codes
 		/// Todo: Add additional input addresses as necessary
 		/// </summary>
-		private static readonly BiDictionary<int, string> s_InputAddressValues = new BiDictionary<int, string>()
+		private static readonly BiDictionary<int, string> s_InputAddressValues = new BiDictionary<int, string>
 		{
 			{1, "11"},
 			{2, "21"},

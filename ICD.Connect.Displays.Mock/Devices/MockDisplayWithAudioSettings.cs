@@ -1,5 +1,4 @@
 ﻿using ICD.Common.Utils.Xml;
-using ICD.Connect.Devices;
 using ICD.Connect.Devices.Mock;
 using ICD.Connect.Settings.Attributes;
 
