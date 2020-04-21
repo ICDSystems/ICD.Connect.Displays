@@ -9,21 +9,21 @@ namespace ICD.Connect.Displays.SPlus.Proxy
 		/// <summary>
 		/// Gets/sets the manufacturer for this device.
 		/// </summary>
-		string IDeviceBaseSettings.Manufacturer { get; set; }
+		string IDeviceSettings.Manufacturer { get; set; }
 
 		/// <summary>
 		/// Gets/sets the model number for this device.
 		/// </summary>
-		string IDeviceBaseSettings.Model { get; set; }
+		string IDeviceSettings.Model { get; set; }
 
 		/// <summary>
 		/// Gets/sets the serial number for this device.
 		/// </summary>
-		string IDeviceBaseSettings.SerialNumber { get; set; }
+		string IDeviceSettings.SerialNumber { get; set; }
 
 		/// <summary>
 		/// Gets/sets the purchase date for this device.
 		/// </summary>
-		DateTime IDeviceBaseSettings.PurchaseDate { get; set; }
+		DateTime IDeviceSettings.PurchaseDate { get; set; }
 	}
 }
