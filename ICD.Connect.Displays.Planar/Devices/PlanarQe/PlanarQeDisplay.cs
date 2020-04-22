@@ -6,7 +6,6 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -171,7 +170,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 			if (response == null)
 			{
-				Log(eSeverity.Error, "Unable to parse display response: {0}", args.Response);
+				Logger.Log(eSeverity.Error, "Unable to parse display response: {0}", args.Response);
 				return;
 			}
 
@@ -183,11 +182,11 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 				case eCommandOperator.Err:
 					if (args.Data != null)
 					{
-						Log(eSeverity.Error, "Error executing command, retrying: {0} - {1}", args.Data.Serialize(), args.Response);
+						Logger.Log(eSeverity.Error, "Error executing command, retrying: {0} - {1}", args.Data.Serialize(), args.Response);
 						RetryCommand(args.Data as PlanarQeCommand);
 					}
 					else
-						Log(eSeverity.Error, "Error from device: {0}", args.Response);
+						Logger.Log(eSeverity.Error, "Error from device: {0}", args.Response);
 					break;
 			}
 		}
@@ -199,7 +198,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Informational, "Command timeout: {0}", args.Data.Serialize());
+			Logger.Log(eSeverity.Informational, "Command timeout: {0}", args.Data.Serialize());
 
 			PlanarQeCommand command = args.Data as PlanarQeCommand;
 
@@ -352,11 +351,11 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 			if (count >= MAX_RETRIES)
 			{
-				Log(eSeverity.Error, "Command hit timeout retry limit:{0}", command.Serialize());
+				Logger.Log(eSeverity.Error, "Command hit timeout retry limit:{0}", command.Serialize());
 				return;
 			}
 
-			Log(eSeverity.Debug, "Retrying command try {0}: {1}", count, command.Serialize());
+			Logger.Log(eSeverity.Debug, "Retrying command try {0}: {1}", count, command.Serialize());
 
 			m_CommandRetries[command.CommandCode] = count + 1;
 
@@ -477,7 +476,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 			catch (FormatException e)
 			{
-				Log(eSeverity.Error, "Could not parse volume response as int: {0}-{1}", response.Operands[0], e.Message);
+				Logger.Log(eSeverity.Error, "Could not parse volume response as int: {0}-{1}", response.Operands[0], e.Message);
 				return;
 			}
 
