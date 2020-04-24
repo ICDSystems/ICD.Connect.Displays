@@ -489,7 +489,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 
 		#region Device Communications
 
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
@@ -501,7 +501,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			};
 
 			queue.SetBuffer(buffer);
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			
 			SetSerialQueue(queue);
 		}

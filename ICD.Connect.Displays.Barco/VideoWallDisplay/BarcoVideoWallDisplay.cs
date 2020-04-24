@@ -120,13 +120,13 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new MultiDelimiterSerialBuffer(TERMINATOR.ToCharArray());
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 

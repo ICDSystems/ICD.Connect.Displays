@@ -112,19 +112,20 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 		/// Configures the given port for communication with the device.
 		/// </summary>
 		/// <param name="port"></param>
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new ChristieJSeriesDisplayBuffer();
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 
 			SetSerialQueue(queue);
 
-			if (port != null && port.IsConnected)
+			ISerialPort serialPort = port as ISerialPort;
+			if (serialPort != null && serialPort.IsConnected)
 				QueryState();
 		}
 

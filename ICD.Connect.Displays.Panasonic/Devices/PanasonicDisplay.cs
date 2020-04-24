@@ -92,13 +92,13 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// Configures the given port for communication with the device.
 		/// </summary>
 		/// <param name="port"></param>
-        public override void ConfigurePort(ISerialPort port)
+        public override void ConfigurePort(IPort port)
         {
 			base.ConfigurePort(port);
 
             ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
             SerialQueue queue = new SerialQueue();
-            queue.SetPort(port);
+            queue.SetPort(port as ISerialPort);
             queue.SetBuffer(buffer);
             queue.Timeout = 10 * 1000;
 

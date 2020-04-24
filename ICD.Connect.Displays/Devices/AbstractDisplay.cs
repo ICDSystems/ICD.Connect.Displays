@@ -146,7 +146,7 @@ namespace ICD.Connect.Displays.Devices
 			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
-		public virtual void ConfigurePort(ISerialPort port)
+		public virtual void ConfigurePort(IPort port)
 		{
 			// Com
 			if (port is IComPort)

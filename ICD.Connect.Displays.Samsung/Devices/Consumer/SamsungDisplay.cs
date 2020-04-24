@@ -91,7 +91,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
@@ -103,7 +103,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				CommandDelayTime = 600,
 				Timeout = 2500,
 			};
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 2500; // 2.5 Second Timeout
 

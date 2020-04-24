@@ -95,7 +95,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
@@ -107,7 +107,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			ISerialBuffer buffer = new BoundedSerialBuffer(STX, ETX);
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 

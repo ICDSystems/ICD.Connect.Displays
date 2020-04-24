@@ -79,13 +79,13 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 
 		#endregion
 
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new LgDigitalSignageSerialBuffer();
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 10 * 1000;
 

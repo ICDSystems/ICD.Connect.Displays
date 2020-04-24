@@ -41,19 +41,20 @@ namespace ICD.Connect.Displays.Sony
 		/// <summary>
 		/// Sets and configures the port for communication with the physical display.
 		/// </summary>
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new DelimiterSerialBuffer(SonyBraviaCommand.FOOTER);
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 20 * 1000;
 
 			SetSerialQueue(queue);
 
-			if (port != null && port.IsConnected)
+			ISerialPort serialPort = port as ISerialPort;
+			if (serialPort != null && serialPort.IsConnected)
 				QueryState();
 		}
 

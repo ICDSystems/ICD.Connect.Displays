@@ -496,19 +496,20 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			SendCommand(command, NecProjectorCommand.CommandComparer, priority);
 		}
 
-		public override void ConfigurePort(ISerialPort port)
+		public override void ConfigurePort(IPort port)
 		{
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new NecProjectorSerialBuffer(this);
 			SerialQueue queue = new SerialQueue();
-			queue.SetPort(port);
+			queue.SetPort(port as ISerialPort);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 15 * 1000;
 
 			SetSerialQueue(queue);
 
-			if (port != null && port.IsConnected)
+			ISerialPort serialPort = port as ISerialPort;
+			if (serialPort != null && serialPort.IsConnected)
 				QueryState();
 		}
 
