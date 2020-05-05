@@ -9,13 +9,13 @@ using ICD.Connect.Telemetry.Attributes;
 namespace ICD.Connect.Displays.Devices
 {
 	[ApiClass(typeof(ProxyDisplayWithAudio), typeof(IDisplay))]
-	[ExternalTelemetry("Display With Audio Telemetry", typeof(DisplayWithAudioExternalTelemetryProvider))]
 	public interface IDisplayWithAudio : IDisplay
 	{
 		/// <summary>
 		/// Raised when the volume changes.
 		/// </summary>
 		[ApiEvent(DisplayWithAudioApi.EVENT_VOLUME, DisplayWithAudioApi.HELP_EVENT_VOLUME)]
+		[EventTelemetry(DisplayTelemetryNames.VOLUME_PERCENT_CHANGED)]
 		event EventHandler<DisplayVolumeApiEventArgs> OnVolumeChanged;
 
 		/// <summary>
@@ -43,13 +43,14 @@ namespace ICD.Connect.Displays.Devices
 		/// Gets the current volume.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_VOLUME, DisplayWithAudioApi.HELP_PROPERTY_VOLUME)]
+		[PropertyTelemetry(DisplayTelemetryNames.VOLUME_PERCENT, DisplayTelemetryNames.SET_VOLUME, DisplayTelemetryNames.VOLUME_PERCENT_CHANGED)]
 		float Volume { get; }
 
 		/// <summary>
 		/// Gets the muted state.
 		/// </summary>
 		[ApiProperty(DisplayWithAudioApi.PROPERTY_IS_MUTED, DisplayWithAudioApi.HELP_PROPERTY_IS_MUTED)]
-		[DynamicPropertyTelemetry(DisplayTelemetryNames.MUTE_STATE, null, DisplayTelemetryNames.MUTE_STATE_CHANGED)] //TODO: figure out what to do about value + on separate off pattern
+		[PropertyTelemetry(DisplayTelemetryNames.MUTE_STATE, null, DisplayTelemetryNames.MUTE_STATE_CHANGED)] //TODO: figure out what to do about value + on separate off pattern
 		bool IsMuted { get; }
 
 		/// <summary>

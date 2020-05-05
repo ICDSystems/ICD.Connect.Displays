@@ -75,8 +75,6 @@
     <Compile Include="Devices\DisplayConsole.cs" />
     <Compile Include="Devices\DisplayPowerDeviceControl.cs" />
     <Compile Include="Devices\DisplayRouteDestinationControl.cs" />
-    <Compile Include="Devices\DisplayWithAudioExternalTelemetryProvider.cs" />
-    <Compile Include="Devices\IDisplayWithAudioExternalTelemetryProvider.cs" />
     <Compile Include="Devices\ProjectorScreens\AbstractProjectorScreenDevice.cs" />
     <Compile Include="Devices\ProjectorScreens\AbstractProjectorScreenDeviceSettings.cs" />
     <Compile Include="Devices\ProjectorScreens\IrProjectorScreenDevice.cs" />
