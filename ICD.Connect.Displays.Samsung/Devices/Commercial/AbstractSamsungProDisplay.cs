@@ -165,8 +165,14 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="commandA"></param>
 		/// <param name="commandB"></param>
 		/// <returns></returns>
-		private static bool CommandComparer(AbstractSamsungProCommand commandA, AbstractSamsungProCommand commandB)
+		private static bool CommandComparer([CanBeNull] AbstractSamsungProCommand commandA, [CanBeNull] AbstractSamsungProCommand commandB)
 		{
+			// Check for null
+			if (commandA == null && commandB == null)
+				return true;
+			if (commandA == null ^ commandB == null)
+				return false;
+
 			// If one is a query and the other is not, the commands are different.
 			if (commandA.GetType() != commandB.GetType())
 				return false;
