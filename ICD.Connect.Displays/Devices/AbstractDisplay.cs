@@ -175,8 +175,11 @@ namespace ICD.Connect.Displays.Devices
 		/// </summary>
 		/// <param name="command"></param>
 		[PublicAPI]
-		public void SendCommand(ISerialData command)
+		public void SendCommand([NotNull] ISerialData command)
 		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
 			if (SerialQueue == null)
 			{
 				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
@@ -192,8 +195,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="command"></param>
 		/// <param name="priority"></param>
 		[PublicAPI]
-		public void SendCommandPriority(ISerialData command, int priority)
+		public void SendCommandPriority([NotNull] ISerialData command, int priority)
 		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
 			if (SerialQueue == null)
 			{
 				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
@@ -210,9 +216,14 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="command"></param>
 		/// <param name="comparer"></param>
 		[PublicAPI]
-		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer)
+		public void SendCommand<TData>([NotNull] TData command, [NotNull] Func<TData, TData, bool> comparer)
 			where TData : class, ISerialData
 		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+			if (comparer == null)
+				throw new ArgumentNullException("comparer");
+
 			if (SerialQueue == null)
 			{
 				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
@@ -230,9 +241,14 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="comparer"></param>
 		/// <param name="priority"></param>
 		[PublicAPI]
-		public void SendCommand<TData>(TData command, Func<TData, TData, bool> comparer, int priority)
+		public void SendCommand<TData>([NotNull] TData command, [NotNull] Func<TData, TData, bool> comparer, int priority)
 			where TData : class, ISerialData
 		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+			if (comparer == null)
+				throw new ArgumentNullException("comparer");
+
 			if (SerialQueue == null)
 			{
 				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");

@@ -1,4 +1,5 @@
 ﻿using System;
+﻿using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
@@ -151,11 +152,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			byte volume = (byte)Math.Round(raw);
 
-			SendCommand(new SamsungProCommand(VOLUME, GetWallIdForVolumeCommand(), volume), CommandComparer);
+			SendCommand<ISamsungProCommand>(new SamsungProCommand(VOLUME, GetWallIdForVolumeCommand(), volume), CommandComparer);
 
 			// Display unmutes on volume change, if and only if its currently muted
 			if (IsMuted)
-				SendCommand(new SamsungProCommand(MUTE, GetWallIdForVolumeCommand(), 0).ToQuery(), CommandComparer);
+				SendCommand<ISamsungProCommand>(new SamsungProCommand(MUTE, GetWallIdForVolumeCommand(), 0).ToQuery(), CommandComparer);
 		}
 
 		/// <summary>
@@ -164,8 +165,12 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="commandA"></param>
 		/// <param name="commandB"></param>
 		/// <returns></returns>
-		private static bool CommandComparer(AbstractSamsungProCommand commandA, AbstractSamsungProCommand commandB)
+		private static bool CommandComparer([CanBeNull] ISamsungProCommand commandA,
+		                                    [CanBeNull] ISamsungProCommand commandB)
 		{
+			if (commandA == null || commandB == null)
+				return false;
+
 			// If one is a query and the other is not, the commands are different.
 			if (commandA.GetType() != commandB.GetType())
 				return false;
