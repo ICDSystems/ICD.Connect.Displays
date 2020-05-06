@@ -4,7 +4,7 @@ using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
-	public abstract class AbstractSamsungProCommand : ISerialData
+	public abstract class AbstractSamsungProCommand : ISamsungProCommand
 	{
 		public const byte ID_ALL = 0xFE;
 		public const byte HEADER = 0xAA;

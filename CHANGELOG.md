@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MockDisplayWithAudio no longer inheriting from serial display implementations
 
+## [11.6.0] - 2020-05-06
+### Added
+ - Added ISamsungProCommand to handle commands and queries
+ 
+### Changed
+ - AbstractSamsungProDisplay - fixed issue with generics in SendCommand and comparer
+ - AbstractSamsungProDisplay - fixed null ref in command comparer
+
 ## [11.5.2] - 2020-03-03
 ### Changed
  - PanasonicDisplay - fixed issue with parsing responses from polling that don't include the original command
