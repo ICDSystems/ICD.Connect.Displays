@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+ - AbstractSamsungProDisplay - fixed issue with generics in SendCommand and comparer
  - AbstractSamsungProDisplay - fixed null ref in command comparer
 
 ## [11.5.2] - 2020-03-03
