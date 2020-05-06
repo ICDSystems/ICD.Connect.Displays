@@ -5,6 +5,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -126,11 +127,14 @@ namespace ICD.Connect.Displays.Sony
 		/// <summary>
 		/// Prevents multiple volume commands from being queued.
 		/// </summary>
-		/// <param name="commandA"></param>
-		/// <param name="commandB"></param>
+		/// <param name="dataA"></param>
+		/// <param name="dataB"></param>
 		/// <returns></returns>
-		private static bool VolumeComparer(SonyBraviaCommand commandA, SonyBraviaCommand commandB)
+		private static bool VolumeComparer(ISerialData dataA, ISerialData dataB)
 		{
+			SonyBraviaCommand commandA = (SonyBraviaCommand)dataA;
+			SonyBraviaCommand commandB = (SonyBraviaCommand)dataB;
+
 			return commandA.Function == commandB.Function &&
 				   commandA.Type == commandB.Type &&
 				   commandA.Parameter == commandB.Parameter;

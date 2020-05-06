@@ -8,6 +8,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
@@ -216,11 +217,14 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		/// <param name="commandA"></param>
 		/// <param name="commandB"></param>
 		/// <returns></returns>
-		private static bool VolumeComparer(NecDisplayCommand commandA, NecDisplayCommand commandB)
+		private static bool VolumeComparer(ISerialData commandA, ISerialData commandB)
 		{
-			return commandA.MessageType == commandB.MessageType &&
-			       commandA.OpCodePage == commandB.OpCodePage &&
-			       commandA.OpCode == commandB.OpCode;
+			NecDisplayCommand necA = (NecDisplayCommand)commandA;
+			NecDisplayCommand necB = (NecDisplayCommand)commandB;
+
+			return necA.MessageType == necB.MessageType &&
+				   necA.OpCodePage == necB.OpCodePage &&
+				   necA.OpCode == necB.OpCode;
 		}
 
 		/// <summary>

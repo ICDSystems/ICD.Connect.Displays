@@ -129,7 +129,6 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		#endregion
 
-
 		/// <summary>
 		/// Serialize this instance to a string.
 		/// </summary>
@@ -181,6 +180,11 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			return checksum;
 		}
 
+		public static bool CommandComparer(ISerialData commandA, ISerialData commandB)
+		{
+			return CommandComparer((NecProjectorCommand)commandA, (NecProjectorCommand)commandB);
+		}
+
 		public static bool CommandComparer(NecProjectorCommand commandA, NecProjectorCommand commandB)
 		{
 			if (commandA.CommandType == commandB.CommandType)
@@ -193,9 +197,9 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 			}
 
 			if ((commandA.CommandType == eCommandType.PowerOn ||
-			     commandA.CommandType == eCommandType.PowerOff) &&
-			    (commandB.CommandType == eCommandType.PowerOn ||
-			     commandB.CommandType == eCommandType.PowerOff))
+				 commandA.CommandType == eCommandType.PowerOff) &&
+				(commandB.CommandType == eCommandType.PowerOn ||
+				 commandB.CommandType == eCommandType.PowerOff))
 				return true;
 
 			return false;

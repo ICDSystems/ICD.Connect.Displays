@@ -165,6 +165,11 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			}
 		}
 
+		public static bool CommandComparer(ISerialData commandA, ISerialData commandB)
+		{
+			return CommandComparer((PlanarQeCommand)commandA, (PlanarQeCommand)commandB);
+		}
+
 		/// <summary>
 		/// Compares commands
 		/// To match, commands must have the same CommandCode,

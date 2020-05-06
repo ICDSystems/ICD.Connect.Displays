@@ -216,11 +216,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="command"></param>
 		/// <param name="comparer"></param>
 		[PublicAPI]
-		public void SendCommand<TData>([NotNull] TData command, [NotNull] Func<TData, TData, bool> comparer)
-			where TData : class, ISerialData
+		public void SendCommand([NotNull] ISerialData command, [NotNull] Func<ISerialData, ISerialData, bool> comparer)
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");
+
 			if (comparer == null)
 				throw new ArgumentNullException("comparer");
 
@@ -241,11 +241,11 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="comparer"></param>
 		/// <param name="priority"></param>
 		[PublicAPI]
-		public void SendCommand<TData>([NotNull] TData command, [NotNull] Func<TData, TData, bool> comparer, int priority)
-			where TData : class, ISerialData
+		public void SendCommand([NotNull] ISerialData command, [NotNull] Func<ISerialData, ISerialData, bool> comparer, int priority)
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");
+
 			if (comparer == null)
 				throw new ArgumentNullException("comparer");
 
