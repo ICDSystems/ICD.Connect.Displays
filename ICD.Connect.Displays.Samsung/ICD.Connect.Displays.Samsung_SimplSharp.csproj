@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Devices\Commercial\AbstractSamsungProDisplaySettings.cs" />
+    <Compile Include="Devices\Commercial\ISamsungProCommand.cs" />
     <Compile Include="Devices\Commercial\ISamsungProDisplay.cs" />
     <Compile Include="Devices\Commercial\ISamsungProDisplaySettings.cs" />
     <Compile Include="Devices\Commercial\SamsungProDisplay.cs" />
