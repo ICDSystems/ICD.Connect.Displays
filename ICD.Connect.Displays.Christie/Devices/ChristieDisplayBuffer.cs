@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.SerialBuffers;
 
 namespace ICD.Connect.Displays.Christie.Devices
 {
-	public sealed class ChristieDisplayBuffer : ISerialBuffer
+	public sealed class ChristieDisplayBuffer : AbstractSerialBuffer
 	{
-		/// <summary>
-		/// Raised when a complete message has been buffered.
-		/// </summary>
-		public event EventHandler<StringEventArgs> OnCompletedSerial;
-
 		private static readonly IcdHashSet<char> s_Headers = new IcdHashSet<char>
 		{
 			ChristieDisplay.RESPONSE_SUCCESS,
@@ -25,9 +17,6 @@ namespace ICD.Connect.Displays.Christie.Devices
 		};
 
 		private readonly StringBuilder m_RxData;
-		private readonly Queue<string> m_Queue;
-		private readonly SafeCriticalSection m_QueueSection;
-		private readonly SafeCriticalSection m_ParseSection;
 
 		/// <summary>
 		/// Constructor.
@@ -35,81 +24,40 @@ namespace ICD.Connect.Displays.Christie.Devices
 		public ChristieDisplayBuffer()
 		{
 			m_RxData = new StringBuilder();
-			m_Queue = new Queue<string>();
-
-			m_QueueSection = new SafeCriticalSection();
-			m_ParseSection = new SafeCriticalSection();
 		}
 
 		/// <summary>
-		/// Enqueues the serial data.
+		/// Override to clear any current state.
+		/// </summary>
+		protected override void ClearFinal()
+		{
+			m_RxData.Clear();
+		}
+
+		/// <summary>
+		/// Override to process the given item for chunking.
 		/// </summary>
 		/// <param name="data"></param>
-		public void Enqueue(string data)
+		protected override IEnumerable<string> Process(string data)
 		{
-			m_QueueSection.Execute(() => m_Queue.Enqueue(data));
-			Parse();
-		}
-
-		/// <summary>
-		/// Clears all queued data in the buffer.
-		/// </summary>
-		public void Clear()
-		{
-			m_ParseSection.Enter();
-			m_QueueSection.Enter();
-
-			try
+			foreach (char c in data)
 			{
-				m_RxData.Clear();
-				m_Queue.Clear();
-			}
-			finally
-			{
-				m_ParseSection.Leave();
-				m_QueueSection.Leave();
-			}
-		}
+				bool isHeader = s_Headers.Contains(c);
 
-		/// <summary>
-		/// Searches the enqueued serial data for the delimiter character.
-		/// Complete strings are raised via the OnCompletedString event.
-		/// </summary>
-		private void Parse()
-		{
-			if (!m_ParseSection.TryEnter())
-				return;
+				// Have to start with a header
+				if (m_RxData.Length == 0 && !isHeader)
+					continue;
 
-			try
-			{
-				string data = null;
+				// We hit a second header
+				if (m_RxData.Length > 0 && isHeader)
+					yield return m_RxData.Pop();
 
-				while (m_QueueSection.Execute(() => m_Queue.Dequeue(out data)))
-				{
-					foreach (char c in data)
-					{
-						bool isHeader = s_Headers.Contains(c);
+				m_RxData.Append(c);
 
-						// Have to start with a header
-						if (m_RxData.Length == 0 && !isHeader)
-							continue;
+				if (!IsComplete(m_RxData.ToString()))
+					continue;
 
-						// We hit a second header
-						if (m_RxData.Length > 0 && isHeader)
-							OnCompletedSerial.Raise(this, new StringEventArgs(m_RxData.Pop()));
-
-						m_RxData.Append(c);
-
-						if (!IsComplete(m_RxData.ToString()))
-							continue;
-
-						OnCompletedSerial.Raise(this, new StringEventArgs(m_RxData.Pop()));
-					}
-				}
-			}
-			finally
-			{
-				m_ParseSection.Leave();
+				yield return m_RxData.Pop();
 			}
 		}
 
