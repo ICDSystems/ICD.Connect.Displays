@@ -1,5 +1,4 @@
 ﻿using System;
-﻿using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;

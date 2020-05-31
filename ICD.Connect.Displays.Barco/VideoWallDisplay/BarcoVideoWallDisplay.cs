@@ -387,7 +387,7 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		/// <param name="command"></param>
 		private void SendCommand(BarcoVideoWallCommand command)
 		{
-			SendCommand(command, BarcoVideoWallCommand.Equals);
+			SendCommand(command, (a, b) => a == b);
 		}
 
 		#endregion

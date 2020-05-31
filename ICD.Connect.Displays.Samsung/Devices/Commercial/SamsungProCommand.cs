@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.Protocol.Data;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
