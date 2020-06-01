@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
@@ -46,7 +48,9 @@ namespace ICD.Connect.Displays.DisplayLift
 
 				m_LiftState = value;
 
-				Logger.Set("Lift State", eSeverity.Informational, m_LiftState);
+				Logger.LogSetTo(eSeverity.Informational, "LiftState", m_LiftState);
+				Activities.LogActivity(new Activity(Activity.ePriority.Medium, "Lift State", StringUtils.NiceName(m_LiftState),
+				                                eSeverity.Informational));
 
 				OnLiftStateChanged.Raise(this, new LiftStateChangedEventArgs(m_LiftState));
 

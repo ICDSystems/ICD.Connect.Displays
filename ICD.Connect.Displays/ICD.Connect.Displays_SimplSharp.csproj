@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Devices\AbstractDisplay.cs" />
     <Compile Include="Devices\AbstractProjector.cs" />
+    <Compile Include="Devices\DisplayActivities.cs" />
     <Compile Include="Devices\DisplayConsole.cs" />
     <Compile Include="Devices\DisplayPowerDeviceControl.cs" />
     <Compile Include="Devices\DisplayRouteDestinationControl.cs" />

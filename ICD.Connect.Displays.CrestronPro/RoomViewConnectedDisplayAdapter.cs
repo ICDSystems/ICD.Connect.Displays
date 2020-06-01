@@ -19,6 +19,7 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
+using ICD.Common.Logging.LoggingContexts;
 
 namespace ICD.Connect.Displays.CrestronPro
 {
@@ -76,7 +77,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_PowerState = value;
 
-				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
+				Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 
@@ -98,7 +99,7 @@ namespace ICD.Connect.Displays.CrestronPro
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
+				Logger.LogSetTo(eSeverity.Informational, "ActiveInput", m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
@@ -137,7 +138,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_Volume = value;
 
-				Logger.Set("Volume", eSeverity.Informational, m_Volume);
+				Logger.LogSetTo(eSeverity.Informational, "Volume", m_Volume);
 
 				OnVolumeChanged.Raise(this, new DisplayVolumeApiEventArgs(m_Volume));
 			}
@@ -156,7 +157,8 @@ namespace ICD.Connect.Displays.CrestronPro
 
 				m_IsMuted = value;
 
-				Logger.Set("Muted", eSeverity.Informational, m_IsMuted);
+				Logger.LogSetTo(eSeverity.Informational, "IsMuted", m_IsMuted);
+				Activities.LogActivity(DisplayActivities.GetMutedActivity(m_IsMuted));
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}

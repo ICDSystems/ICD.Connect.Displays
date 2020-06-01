@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
@@ -75,7 +76,7 @@ namespace ICD.Connect.Displays.Christie.Devices.JSeries
 
 				m_ChristiePowerState = value;
 
-				Logger.Set("Christie Power State", eSeverity.Informational, m_ChristiePowerState);
+				Logger.LogSetTo(eSeverity.Informational, "ChristiePowerState", m_ChristiePowerState);
 
 				PowerState = ChristiePowerStateToPowerState(m_ChristiePowerState);
 

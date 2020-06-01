@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -67,7 +68,8 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 
 				m_PowerState = value;
 
-				Logger.Set("Power State", eSeverity.Informational, m_PowerState);
+				Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
+				Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
 
 				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
 			}
@@ -87,7 +89,7 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 				int? oldInput = m_ActiveInput;
 				m_ActiveInput = value;
 
-				Logger.Set("Active Input", eSeverity.Informational, m_ActiveInput);
+				Logger.LogSetTo(eSeverity.Informational, "Active Input", m_ActiveInput);
 
 				if (oldInput.HasValue)
 					OnActiveInputChanged.Raise(this, new DisplayInputApiEventArgs(oldInput.Value, false));
