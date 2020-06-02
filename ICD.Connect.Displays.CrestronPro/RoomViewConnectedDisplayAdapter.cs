@@ -191,16 +191,6 @@ namespace ICD.Connect.Displays.CrestronPro
 		#endregion
 
 		/// <summary>
-		/// Constructor.
-		/// </summary>
-		public RoomViewConnectedDisplayAdapter()
-		{
-			Controls.Add(new DisplayRouteDestinationControl(this, 0));
-			Controls.Add(new DisplayPowerDeviceControl(this, 1));
-			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
-		}
-
-		/// <summary>
 		/// Release resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
@@ -515,7 +505,22 @@ namespace ICD.Connect.Displays.CrestronPro
 #endif
 		}
 
-#endregion
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(RoomViewConnectedDisplaySettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayRouteDestinationControl(this, 0));
+			addControl(new DisplayPowerDeviceControl(this, 1));
+			addControl(new DisplayVolumeDeviceControl(this, 2));
+		}
+
+		#endregion
 
 #region Display Callbacks
 

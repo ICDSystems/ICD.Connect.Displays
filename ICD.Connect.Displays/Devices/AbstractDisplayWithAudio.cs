@@ -10,6 +10,7 @@ using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Devices
 {
@@ -127,14 +128,6 @@ namespace ICD.Connect.Displays.Devices
 		#endregion
 
 		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractDisplayWithAudio()
-		{
-			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
-		}
-
-		/// <summary>
 		/// Clears resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
@@ -223,6 +216,23 @@ namespace ICD.Connect.Displays.Devices
 		protected virtual void UpdateCachedVolumeControlAvailableState()
 		{
 			VolumeControlAvailable = GetVolumeControlAvailable();
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(T settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		#endregion

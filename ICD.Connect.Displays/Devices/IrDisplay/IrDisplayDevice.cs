@@ -94,8 +94,6 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 		{
 			m_IrDriverProperties = new IrDriverProperties();
 			m_Commands = new IrDisplayCommands();
-
-			Controls.Add(new DisplayRouteDestinationControl(this, 0));
 		}
 
 		#region Methods
@@ -252,6 +250,19 @@ namespace ICD.Connect.Displays.Devices.IrDisplay
 			}
 
 			SetIrPort(port);
+		}
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(IrDisplaySettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayRouteDestinationControl(this, 0));
 		}
 
 		#endregion

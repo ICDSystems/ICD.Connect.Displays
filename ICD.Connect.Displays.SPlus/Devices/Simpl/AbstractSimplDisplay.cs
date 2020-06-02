@@ -102,15 +102,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		#endregion
 
 		/// <summary>
-		/// Constructor.
-		/// </summary>
-		protected AbstractSimplDisplay()
-		{
-			Controls.Add(new DisplayRouteDestinationControl(this, 0));
-			Controls.Add(new DisplayPowerDeviceControl(this, 1));
-		}
-
-		/// <summary>
 		/// Release resources.
 		/// </summary>
 		protected override void DisposeFinal(bool disposing)
@@ -192,6 +183,20 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			base.ApplySettingsFinal(settings, factory);
 
 			Trust = settings.Trust;
+		}
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(TSettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayRouteDestinationControl(this, 0));
+			addControl(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		#endregion

@@ -143,9 +143,6 @@ namespace ICD.Connect.Displays.Devices
 			};
 			m_ConnectionStateManager.OnIsOnlineStateChanged += PortOnIsOnlineStateChanged;
 			m_ConnectionStateManager.OnConnectedStateChanged += PortOnConnectedStateChanged;
-
-			Controls.Add(new DisplayRouteDestinationControl(this, 0));
-			Controls.Add(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		public virtual void ConfigurePort(IPort port)
@@ -495,6 +492,20 @@ namespace ICD.Connect.Displays.Devices
 			UpdateCachedOnlineStatus();
 
 			Trust = settings.Trust;
+		}
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(T settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayRouteDestinationControl(this, 0));
+			addControl(new DisplayPowerDeviceControl(this, 1));
 		}
 
 		#endregion

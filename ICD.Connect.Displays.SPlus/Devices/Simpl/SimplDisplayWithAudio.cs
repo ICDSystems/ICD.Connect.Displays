@@ -171,7 +171,6 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 		{
 			VolumeDeviceMin = ushort.MinValue;
 			VolumeDeviceMax = ushort.MaxValue;
-			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		/// <summary>
@@ -315,6 +314,19 @@ namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 			VolumeSafetyMin = settings.VolumeSafetyMin;
 			VolumeSafetyMax = settings.VolumeSafetyMax;
 			VolumeDefault = settings.VolumeDefault;
+		}
+
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(SimplDisplayWithAudioSettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
+		{
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		#endregion

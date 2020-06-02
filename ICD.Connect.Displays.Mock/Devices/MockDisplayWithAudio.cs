@@ -240,10 +240,6 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 			m_WarmingTimer = SafeTimer.Stopped(WarmingComplete);
 			m_CoolingTimer = SafeTimer.Stopped(CoolingComplete);
-
-			Controls.Add(new DisplayRouteDestinationControl(this, 0));
-			Controls.Add(new DisplayPowerDeviceControl(this, 1));
-			Controls.Add(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		/// <summary>
@@ -400,6 +396,10 @@ namespace ICD.Connect.Displays.Mock.Devices
 			SetVolume(Volume - 1);
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		private bool GetVolumeControlAvailable()
 		{
 			return PowerState == ePowerState.PowerOn;
@@ -410,22 +410,19 @@ namespace ICD.Connect.Displays.Mock.Devices
 			VolumeControlAvailable = GetVolumeControlAvailable();
 		}
 
+		private void WarmingComplete()
+		{
+			PowerState = ePowerState.PowerOn;
+		}
+
+		private void CoolingComplete()
+		{
+			PowerState = ePowerState.PowerOff;
+		}
+
 		#endregion
 
 		#region Settings
-
-		/// <summary>
-		/// Override to apply settings to the instance.
-		/// </summary>
-		/// <param name="settings"></param>
-		/// <param name="factory"></param>
-		protected override void ApplySettingsFinal(MockDisplayWithAudioSettings settings, IDeviceFactory factory)
-		{
-			base.ApplySettingsFinal(settings, factory);
-
-			m_WarmingTime = settings.WarmingTime;
-			m_CoolingTime = settings.CoolingTime;
-		}
 
 		/// <summary>
 		/// Override to clear the instance settings.
@@ -453,14 +450,32 @@ namespace ICD.Connect.Displays.Mock.Devices
 			settings.CoolingTime = m_CoolingTime;
 		}
 
-		private void WarmingComplete()
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(MockDisplayWithAudioSettings settings, IDeviceFactory factory)
 		{
-			PowerState = ePowerState.PowerOn;
+			base.ApplySettingsFinal(settings, factory);
+
+			m_WarmingTime = settings.WarmingTime;
+			m_CoolingTime = settings.CoolingTime;
 		}
 
-		private void CoolingComplete()
+		/// <summary>
+		/// Override to add controls to the device.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		/// <param name="addControl"></param>
+		protected override void AddControls(MockDisplayWithAudioSettings settings, IDeviceFactory factory, Action<IDeviceControl> addControl)
 		{
-			PowerState = ePowerState.PowerOff;
+			base.AddControls(settings, factory, addControl);
+
+			addControl(new DisplayRouteDestinationControl(this, 0));
+			addControl(new DisplayPowerDeviceControl(this, 1));
+			addControl(new DisplayVolumeDeviceControl(this, 2));
 		}
 
 		#endregion
