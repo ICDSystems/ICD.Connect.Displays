@@ -239,7 +239,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="data"></param>
 		private void SendNonFormattedCommand(string data)
 		{
-			SendNonFormattedCommand(data, (a, b) => a == b);
+			SendNonFormattedCommand(data, (a, b) => ExtractCommand(a) == ExtractCommand(b));
 		}
 
 		/// <summary>
