@@ -10,7 +10,6 @@ using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
@@ -49,13 +48,11 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		#endregion
 
 		private const int MAX_RETRY_ATTEMPTS = 500;
-		private const int CONNECTION_WAIT_TIMEOUT_MS = 3 * 1000;
+
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 
-		private bool m_IsIpControlled;
-		private bool? m_ExpectedPowerState;
-		private int m_TargetInput = 1;
+		private ePowerState? m_ExpectedPowerState;
 
 		/// <summary>
 		/// Maps index to an input command.
@@ -95,12 +92,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			base.ConfigurePort(port);
 
-			if (port is INetworkPort)
-			{
-				m_IsIpControlled = true;
-				//Todo: Connection State Manager for IP
-			}
-
 			ISerialBuffer buffer = new BoundedSerialBuffer(STX, ETX);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port);
@@ -127,16 +118,18 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void PowerOn()
 		{
+			m_ExpectedPowerState = ePowerState.PowerOn;
+
 			SendNonFormattedCommandPriority(POWER_ON, 0);
-			m_ExpectedPowerState = true;
 			SendNonFormattedCommand(QUERY_POWER);
 		}
 
 		[PublicAPI]
 		public override void PowerOff()
 		{
+			m_ExpectedPowerState = ePowerState.PowerOff;
+
 			SendNonFormattedCommandPriority(POWER_OFF, 1);
-			m_ExpectedPowerState = false;
 			SendNonFormattedCommand(QUERY_POWER);
 		}
 
@@ -179,19 +172,16 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			throw new NotSupportedException();
 		}
 
-		[PublicAPI]
 		public override void VolumeUpIncrement()
 		{
 			SetVolumeFinal(Volume + 1);
 		}
 
-		[PublicAPI]
 		public override void VolumeDownIncrement()
 		{
 			SetVolumeFinal(Volume - 1);
 		}
 
-		[PublicAPI]
 		protected override void SetVolumeFinal(float raw)
 		{
 			if (!VolumeControlAvailable)
@@ -199,34 +189,25 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			int volume = (int)Math.Round(raw);
 			string setVolCommand = GenerateSetVolumeCommand(volume);
+
 			SendNonFormattedCommand(setVolCommand);
 			SendNonFormattedCommand(QUERY_VOLUME);
 		}
 
-		[PublicAPI]
 		public override void SetActiveInput(int address)
 		{
-			if ((PowerState != ePowerState.PowerOn) && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
+			if (PowerState != ePowerState.PowerOn)
 				return;
+
 			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
-			m_TargetInput = address;
 		}
 
-		[PublicAPI]
+		/// <summary>
+		/// Sets the scaling mode.
+		/// </summary>
+		/// <param name="mode"></param>
 		public override void SetScalingMode(eScalingMode mode)
 		{
-			//This device does not support scaling modes. Do Nothing.
-		}
-
-		private static string ExtractCommand(string data)
-		{
-			return data.Substring(1, 3);
-		}
-
-		[PublicAPI]
-		private static string ExtractParameter(string data, int paramLength)
-		{
-			return data.Substring(5, paramLength);
 		}
 
 		#endregion
@@ -287,7 +268,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			if (args.Response == FAILURE)
+			if (args.Response.Contains(FAILURE))
 				ParseError(args);
 			else
 				ParseSuccess(args);
@@ -313,11 +294,16 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			string response = args.Response;
 			string command = ExtractCommand(response);
 
+			ResetRetryCount(command);
+
 			switch (command)
 			{
 				case "QPW":
-					string powered = ExtractParameter(response, 1);
-					PowerState = powered == "1" ? ePowerState.PowerOn : ePowerState.PowerOff;
+					PowerState = ExtractParameter(response, 1) == "1" ? ePowerState.PowerOn : ePowerState.PowerOff;
+					if (m_ExpectedPowerState == PowerState)
+						m_ExpectedPowerState = null;
+					else if (m_ExpectedPowerState != null)
+						SendNonFormattedCommand(QUERY_POWER);
 					break;
 
 				case "QAM":
@@ -343,27 +329,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 						ActiveInput = null;
 
 					break;
-
-				case "IMS":
-					if ((PowerState != ePowerState.PowerOn)&&
-						m_ExpectedPowerState != null &&
-						m_ExpectedPowerState.Value)
-					{
-						PowerState = ePowerState.PowerOn;
-						m_ExpectedPowerState = null;
-					}
-					else if ((PowerState == ePowerState.PowerOn)&&
-					         m_ExpectedPowerState != null &&
-					         !m_ExpectedPowerState.Value)
-					{
-						if (args.Data != null)
-							RetryCommand(args.Data.Serialize());
-					}
-					else
-					{
-						ActiveInput = m_TargetInput;
-					}
-					break;
 			}
 
 			if (args.Data != null)
@@ -384,17 +349,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			if ((PowerState == ePowerState.PowerOn)
-				&& ExtractCommand(args.Data.Serialize()) == "IMS"
-				&& m_ExpectedPowerState != null
-				&& !m_ExpectedPowerState.Value)
-			{
-				PowerState = ePowerState.PowerOff;
-				m_ExpectedPowerState = null;
-				ResetRetryCount(args.Data.Serialize());
-				return;
-			}
-
 			RetryCommand(args.Data.Serialize());
 		}
 
@@ -402,6 +356,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
 			IncrementRetryCount(command);
+
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
 				SendCommandPriority(new SerialData(command), 0);
 			else
@@ -414,47 +369,27 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		private void IncrementRetryCount(string command)
 		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				if (m_RetryCounts.ContainsKey(command))
-					m_RetryCounts[command]++;
-				else
-					m_RetryCounts.Add(command, 1);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+			m_RetryLock.Execute(() => m_RetryCounts[command] = GetRetryCount(command) + 1);
 		}
 
 		private void ResetRetryCount(string command)
 		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				m_RetryCounts.Remove(command);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+			m_RetryLock.Execute(() => m_RetryCounts.Remove(command));
 		}
 
 		private int GetRetryCount(string command)
 		{
-			m_RetryLock.Enter();
+			return m_RetryLock.Execute(() => m_RetryCounts.GetDefault(command));
+		}
 
-			try
-			{
-				return m_RetryCounts.ContainsKey(command) ? m_RetryCounts[command] : 0;
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+		private static string ExtractCommand(string data)
+		{
+			return data.Substring(1, 3);
+		}
+
+		private static string ExtractParameter(string data, int paramLength)
+		{
+			return data.Substring(5, paramLength);
 		}
 
 		#endregion
