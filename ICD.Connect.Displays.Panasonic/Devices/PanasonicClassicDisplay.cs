@@ -21,35 +21,30 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	{
 		#region Commands
 
-		//When the first char of the actual command is A-E, the combined notation interprets it as a part of 
-		// the hex notated first character, ie \x02AMT:0 becomes *MT:0
-		// so these commands are entirely in hex
-
 		private const char STX = '\x02';
 		private const char ETX = '\x03';
 
-		private const string FAILURE = "\x02\x45\x52\x34\x30\x31\x03";
+		private const string FAILURE = "ER401";
 
-		private const string POWER_ON = "\x02PON\x03";
-		private const string POWER_OFF = "\x02POF\x03";
-		private const string QUERY_POWER = "\x02QPW\x03";
+		private const string POWER_ON = "PON";
+		private const string POWER_OFF = "POF";
+		private const string QUERY_POWER = "QPW";
 
-		private const string MUTE_ON = "\x02\x41\x4d\x54\x3a\x31\x03";
-		private const string MUTE_OFF = "\x02\x41\x4d\x54\x3a\x30\x03";
-		private const string QUERY_MUTE = "\x02QAM\x03";
+		private const string MUTE_SET_TEMPLATE = "AMT:{0}";
+		private const string QUERY_MUTE = "QAM";
 
-		private const string VOLUME_SET_TEMPLATE = "\x02\x41\x56\x4c\x3a{0}\x03";
-		private const string QUERY_VOLUME = "\x02QAV\x03";
+		private const string VOLUME_SET_TEMPLATE = "AVL:{0}";
+		private const string QUERY_VOLUME = "QAV";
 
-		private const string INPUT_TOGGLE = "\x02IMS\x03";
-		private const string INPUT_SET_TEMPLATE = "\x02IMS:{0}\x03";
+		private const string INPUT_SET_TEMPLATE = "IMS:{0}";
+		private const string QUERY_INPUT = "QMI";
+
 		private const string INPUT_HDMI1 = "HM1";
 		private const string INPUT_HDMI2 = "HM2";
 		private const string INPUT_DVI = "DV1";
 		private const string INPUT_PC = "PC1";
 		private const string INPUT_VIDEO = "VD1";
 		private const string INPUT_USB = "UD1";
-		private const string QUERY_INPUT = "\x02QMI\x03";
 
 		#endregion
 
@@ -134,7 +129,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			SendNonFormattedCommandPriority(POWER_ON, 0);
 			m_ExpectedPowerState = true;
-			QueryPower();
+			SendNonFormattedCommand(QUERY_POWER);
 		}
 
 		[PublicAPI]
@@ -142,7 +137,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			SendNonFormattedCommandPriority(POWER_OFF, 1);
 			m_ExpectedPowerState = false;
-			QueryPower();
+			SendNonFormattedCommand(QUERY_POWER);
 		}
 
 		[PublicAPI]
@@ -150,7 +145,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (!VolumeControlAvailable)
 				return;
-			SendNonFormattedCommand(MUTE_ON);
+
+			SendNonFormattedCommand(string.Format(MUTE_SET_TEMPLATE, 1));
 			SendNonFormattedCommand(QUERY_MUTE);
 		}
 
@@ -159,7 +155,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (!VolumeControlAvailable)
 				return;
-			SendNonFormattedCommand(MUTE_OFF);
+
+			SendNonFormattedCommand(string.Format(MUTE_SET_TEMPLATE, 0));
 			SendNonFormattedCommand(QUERY_MUTE);
 		}
 
@@ -185,19 +182,13 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume + 1));
-			SendNonFormattedCommand(QUERY_VOLUME);
+			SetVolumeFinal(Volume + 1);
 		}
 
 		[PublicAPI]
 		public override void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume - 1));
-			SendNonFormattedCommand(QUERY_VOLUME);
+			SetVolumeFinal(Volume - 1);
 		}
 
 		[PublicAPI]
@@ -227,14 +218,13 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			//This device does not support scaling modes. Do Nothing.
 		}
 
-		[PublicAPI]
-		public static string ExtractCommand(string data)
+		private static string ExtractCommand(string data)
 		{
 			return data.Substring(1, 3);
 		}
 
 		[PublicAPI]
-		public static string ExtractParameter(string data, int paramLength)
+		private static string ExtractParameter(string data, int paramLength)
 		{
 			return data.Substring(5, paramLength);
 		}
@@ -242,12 +232,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		#endregion
 
 		#region Private Methods
-
-		private void QueryPower()
-		{
-			var command = string.Format(QUERY_POWER);
-			SendNonFormattedCommandPriority(command, 2);
-		}
 
 		/// <summary>
 		/// Queues the data to be sent to the physical display.
@@ -266,6 +250,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
+			data = string.Format("{0}{1}{2}", STX, data, ETX);
+
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
 		}
 
@@ -276,6 +262,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="priority"></param>
 		private void SendNonFormattedCommandPriority(string data, int priority)
 		{
+			data = string.Format("{0}{1}{2}", STX, data, ETX);
+
 			SendCommandPriority(new SerialData(data), priority);
 		}
 
