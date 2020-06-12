@@ -1,4 +1,5 @@
-﻿using ICD.Common.Logging.LoggingContexts;
+﻿using ICD.Common.Logging.Activities;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.Services.Logging;
 
 namespace ICD.Connect.Displays.Devices
