@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [14.0.1] - 2020-06-16
+### Changed
+ - PanasonicClassicDisplay - Fixed power state feedback issues
+ - PanasonicClassicDisplay - Fixed volume ramping issues
+
 ## [14.0.0] - 2020-03-20
 ### Added
  - Added Planar QE display driver
