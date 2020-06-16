@@ -9,7 +9,6 @@ using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
-using ICD.Connect.Protocol.Network.Ports;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
@@ -20,46 +19,39 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 	{
 		#region Commands
 
-		//When the first char of the actual command is A-E, the combined notation interprets it as a part of 
-		// the hex notated first character, ie \x02AMT:0 becomes *MT:0
-		// so these commands are entirely in hex
-
 		private const char STX = '\x02';
 		private const char ETX = '\x03';
 
-		private const string FAILURE = "\x02\x45\x52\x34\x30\x31\x03";
+		private const string FAILURE = "ER401";
 
-		private const string POWER_ON = "\x02PON\x03";
-		private const string POWER_OFF = "\x02POF\x03";
-		private const string QUERY_POWER = "\x02QPW\x03";
+		private const string POWER_ON = "PON";
+		private const string POWER_OFF = "POF";
+		private const string QUERY_POWER = "QPW";
 
-		private const string MUTE_ON = "\x02\x41\x4d\x54\x3a\x31\x03";
-		private const string MUTE_OFF = "\x02\x41\x4d\x54\x3a\x30\x03";
-		private const string QUERY_MUTE = "\x02QAM\x03";
+		private const string MUTE_SET_TEMPLATE = "AMT:{0}";
+		private const string QUERY_MUTE = "QAM";
 
-		private const string VOLUME_SET_TEMPLATE = "\x02\x41\x56\x4c\x3a{0}\x03";
-		private const string QUERY_VOLUME = "\x02QAV\x03";
+		private const string VOLUME_SET_TEMPLATE = "AVL:{0}";
+		private const string QUERY_VOLUME = "QAV";
 
-		private const string INPUT_TOGGLE = "\x02IMS\x03";
-		private const string INPUT_SET_TEMPLATE = "\x02IMS:{0}\x03";
+		private const string INPUT_SET_TEMPLATE = "IMS:{0}";
+		private const string QUERY_INPUT = "QMI";
+
 		private const string INPUT_HDMI1 = "HM1";
 		private const string INPUT_HDMI2 = "HM2";
 		private const string INPUT_DVI = "DV1";
 		private const string INPUT_PC = "PC1";
 		private const string INPUT_VIDEO = "VD1";
 		private const string INPUT_USB = "UD1";
-		private const string QUERY_INPUT = "\x02QMI\x03";
 
 		#endregion
 
 		private const int MAX_RETRY_ATTEMPTS = 500;
-		private const int CONNECTION_WAIT_TIMEOUT_MS = 3 * 1000;
+
 		private readonly Dictionary<string, int> m_RetryCounts = new Dictionary<string, int>();
 		private readonly SafeCriticalSection m_RetryLock = new SafeCriticalSection();
 
-		private bool m_IsIpControlled;
-		private bool? m_ExpectedPowerState;
-		private int m_TargetInput = 1;
+		private ePowerState? m_ExpectedPowerState;
 
 		/// <summary>
 		/// Maps index to an input command.
@@ -99,12 +91,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			base.ConfigurePort(port);
 
-			if (port is INetworkPort)
-			{
-				m_IsIpControlled = true;
-				//Todo: Connection State Manager for IP
-			}
-
 			ISerialBuffer buffer = new BoundedSerialBuffer(STX, ETX);
 			SerialQueue queue = new SerialQueue();
 			queue.SetPort(port as ISerialPort);
@@ -131,17 +117,19 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		[PublicAPI]
 		public override void PowerOn()
 		{
+			m_ExpectedPowerState = ePowerState.PowerOn;
+
 			SendNonFormattedCommandPriority(POWER_ON, 0);
-			m_ExpectedPowerState = true;
-			QueryPower();
+			SendNonFormattedCommand(QUERY_POWER);
 		}
 
 		[PublicAPI]
 		public override void PowerOff()
 		{
+			m_ExpectedPowerState = ePowerState.PowerOff;
+
 			SendNonFormattedCommandPriority(POWER_OFF, 1);
-			m_ExpectedPowerState = false;
-			QueryPower();
+			SendNonFormattedCommand(QUERY_POWER);
 		}
 
 		[PublicAPI]
@@ -149,7 +137,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (!VolumeControlAvailable)
 				return;
-			SendNonFormattedCommand(MUTE_ON);
+
+			SendNonFormattedCommand(string.Format(MUTE_SET_TEMPLATE, 1));
 			SendNonFormattedCommand(QUERY_MUTE);
 		}
 
@@ -158,7 +147,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (!VolumeControlAvailable)
 				return;
-			SendNonFormattedCommand(MUTE_OFF);
+
+			SendNonFormattedCommand(string.Format(MUTE_SET_TEMPLATE, 0));
 			SendNonFormattedCommand(QUERY_MUTE);
 		}
 
@@ -181,25 +171,16 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			throw new NotSupportedException();
 		}
 
-		[PublicAPI]
 		public override void VolumeUpIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume + 1));
-			SendNonFormattedCommand(QUERY_VOLUME);
+			SetVolumeFinal(Volume + 1);
 		}
 
-		[PublicAPI]
 		public override void VolumeDownIncrement()
 		{
-			if (!VolumeControlAvailable)
-				return;
-			SendNonFormattedCommand(GenerateSetVolumeCommand((int)Volume - 1));
-			SendNonFormattedCommand(QUERY_VOLUME);
+			SetVolumeFinal(Volume - 1);
 		}
 
-		[PublicAPI]
 		protected override void SetVolumeFinal(float raw)
 		{
 			if (!VolumeControlAvailable)
@@ -207,40 +188,22 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 			int volume = (int)Math.Round(raw);
 			string setVolCommand = GenerateSetVolumeCommand(volume);
+
 			SendNonFormattedCommand(setVolCommand);
 			SendNonFormattedCommand(QUERY_VOLUME);
 		}
 
-		[PublicAPI]
 		public override void SetActiveInput(int address)
 		{
-			if ((PowerState != ePowerState.PowerOn) && (m_ExpectedPowerState == null || !m_ExpectedPowerState.Value))
+			if (PowerState != ePowerState.PowerOn)
 				return;
+
 			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
-			m_TargetInput = address;
-		}
-
-		[PublicAPI]
-		public static string ExtractCommand(string data)
-		{
-			return data.Substring(1, 3);
-		}
-
-		[PublicAPI]
-		public static string ExtractParameter(string data, int paramLength)
-		{
-			return data.Substring(5, paramLength);
 		}
 
 		#endregion
 
 		#region Private Methods
-
-		private void QueryPower()
-		{
-			var command = string.Format(QUERY_POWER);
-			SendNonFormattedCommandPriority(command, 2);
-		}
 
 		/// <summary>
 		/// Queues the data to be sent to the physical display.
@@ -248,7 +211,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="data"></param>
 		private void SendNonFormattedCommand(string data)
 		{
-			SendNonFormattedCommand(data, (a, b) => a == b);
+			SendNonFormattedCommand(data, (a, b) => ExtractCommand(a) == ExtractCommand(b));
 		}
 
 		/// <summary>
@@ -259,6 +222,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="comparer"></param>
 		private void SendNonFormattedCommand(string data, Func<string, string, bool> comparer)
 		{
+			data = string.Format("{0}{1}{2}", STX, data, ETX);
+
 			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()));
 		}
 
@@ -269,6 +234,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="priority"></param>
 		private void SendNonFormattedCommandPriority(string data, int priority)
 		{
+			data = string.Format("{0}{1}{2}", STX, data, ETX);
+
 			SendCommandPriority(new SerialData(data), priority);
 		}
 
@@ -292,7 +259,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
 		{
-			if (args.Response == FAILURE)
+			if (args.Response.Contains(FAILURE))
 				ParseError(args);
 			else
 				ParseSuccess(args);
@@ -318,11 +285,16 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			string response = args.Response;
 			string command = ExtractCommand(response);
 
+			ResetRetryCount(command);
+
 			switch (command)
 			{
 				case "QPW":
-					string powered = ExtractParameter(response, 1);
-					PowerState = powered == "1" ? ePowerState.PowerOn : ePowerState.PowerOff;
+					PowerState = ExtractParameter(response, 1) == "1" ? ePowerState.PowerOn : ePowerState.PowerOff;
+					if (m_ExpectedPowerState == PowerState)
+						m_ExpectedPowerState = null;
+					else if (m_ExpectedPowerState != null)
+						SendNonFormattedCommand(QUERY_POWER);
 					break;
 
 				case "QAM":
@@ -348,27 +320,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 						ActiveInput = null;
 
 					break;
-
-				case "IMS":
-					if ((PowerState != ePowerState.PowerOn)&&
-						m_ExpectedPowerState != null &&
-						m_ExpectedPowerState.Value)
-					{
-						PowerState = ePowerState.PowerOn;
-						m_ExpectedPowerState = null;
-					}
-					else if ((PowerState == ePowerState.PowerOn)&&
-					         m_ExpectedPowerState != null &&
-					         !m_ExpectedPowerState.Value)
-					{
-						if (args.Data != null)
-							RetryCommand(args.Data.Serialize());
-					}
-					else
-					{
-						ActiveInput = m_TargetInput;
-					}
-					break;
 			}
 
 			if (args.Data != null)
@@ -389,17 +340,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			if ((PowerState == ePowerState.PowerOn)
-				&& ExtractCommand(args.Data.Serialize()) == "IMS"
-				&& m_ExpectedPowerState != null
-				&& !m_ExpectedPowerState.Value)
-			{
-				PowerState = ePowerState.PowerOff;
-				m_ExpectedPowerState = null;
-				ResetRetryCount(args.Data.Serialize());
-				return;
-			}
-
 			RetryCommand(args.Data.Serialize());
 		}
 
@@ -407,6 +347,7 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			Logger.Log(eSeverity.Debug, "Retry {0}, {1} times", command, GetRetryCount(command));
 			IncrementRetryCount(command);
+
 			if (GetRetryCount(command) <= MAX_RETRY_ATTEMPTS)
 				SendCommandPriority(new SerialData(command), 0);
 			else
@@ -419,47 +360,27 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		private void IncrementRetryCount(string command)
 		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				if (m_RetryCounts.ContainsKey(command))
-					m_RetryCounts[command]++;
-				else
-					m_RetryCounts.Add(command, 1);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+			m_RetryLock.Execute(() => m_RetryCounts[command] = GetRetryCount(command) + 1);
 		}
 
 		private void ResetRetryCount(string command)
 		{
-			m_RetryLock.Enter();
-
-			try
-			{
-				m_RetryCounts.Remove(command);
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+			m_RetryLock.Execute(() => m_RetryCounts.Remove(command));
 		}
 
 		private int GetRetryCount(string command)
 		{
-			m_RetryLock.Enter();
+			return m_RetryLock.Execute(() => m_RetryCounts.GetDefault(command));
+		}
 
-			try
-			{
-				return m_RetryCounts.ContainsKey(command) ? m_RetryCounts[command] : 0;
-			}
-			finally
-			{
-				m_RetryLock.Leave();
-			}
+		private static string ExtractCommand(string data)
+		{
+			return data.Substring(1, 3);
+		}
+
+		private static string ExtractParameter(string data, int paramLength)
+		{
+			return data.Substring(5, paramLength);
 		}
 
 		#endregion
