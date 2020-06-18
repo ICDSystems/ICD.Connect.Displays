@@ -6,10 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.0.0] - 2020-06-18
 ### Changed
- - Removed Aspect settings from IDisplay, and removed all aspect controls from all displays
  - MockDisplayWithAudio now inherits from AbstractMockDevice
  - Using new logging context
+
+### Removed
+ - Removed Aspect settings from IDisplay, and removed all aspect controls from all displays
 
 ## [14.0.1] - 2020-06-16
 ### Changed
