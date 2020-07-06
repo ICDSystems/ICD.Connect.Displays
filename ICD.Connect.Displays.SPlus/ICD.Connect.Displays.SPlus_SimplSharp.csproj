@@ -66,7 +66,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Devices\Simpl\AbstractSimplDisplay.cs" />
     <Compile Include="Devices\Simpl\AbstractSimplDisplaySettings.cs" />
     <Compile Include="Devices\Simpl\ISimplDisplay.cs" />

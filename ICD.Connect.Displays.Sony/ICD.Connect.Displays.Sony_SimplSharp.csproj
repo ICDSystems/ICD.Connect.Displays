@@ -70,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KrangPlugin.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SonyBraviaCommand.cs" />
     <Compile Include="SonyBraviaDisplay.cs" />

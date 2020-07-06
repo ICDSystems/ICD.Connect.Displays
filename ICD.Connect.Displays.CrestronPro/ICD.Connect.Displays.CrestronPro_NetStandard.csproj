@@ -25,7 +25,6 @@
     <None Remove="SIMPLSharpLogs\**" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="ObfuscationSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_NetStandard.csproj" />

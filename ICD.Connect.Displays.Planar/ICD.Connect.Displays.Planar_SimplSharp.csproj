@@ -74,7 +74,7 @@
     <Compile Include="Devices\PlanarQe\PlanarQeDisplay.cs" />
     <Compile Include="Devices\PlanarQe\PlanarQeDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

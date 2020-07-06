@@ -78,7 +78,7 @@
     <Compile Include="Devices\Commercial\SamsungProVideoWallDisplay.cs" />
     <Compile Include="Devices\Commercial\SamsungProVideoWallDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Devices\Consumer\SamsungDisplay.cs" />
     <Compile Include="Devices\Consumer\SamsungDisplaySerialBuffer.cs" />

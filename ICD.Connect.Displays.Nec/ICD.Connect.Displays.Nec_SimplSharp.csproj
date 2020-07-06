@@ -79,7 +79,7 @@
     <Compile Include="KrangPlugin.cs" />
     <None Include="Devices\NecDisplay\UHD-External_Control.pdf" />
     <None Include="Devices\NecProjector\ExternalControlManual-english.pdf" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

@@ -76,7 +76,7 @@
     <Compile Include="Devices\JSeries\ChristieJSeriesDisplayBuffer.cs" />
     <Compile Include="Devices\JSeries\ChristieJSeriesDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

@@ -86,7 +86,7 @@
     <Compile Include="Devices\AbstractDisplayWithAudio.cs" />
     <Compile Include="Devices\DisplayWithAudioConsole.cs" />
     <Compile Include="Devices\IDisplayWithAudio.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Devices\IDisplay.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplayCommands.cs" />
     <Compile Include="Devices\IrDisplay\IrDisplayDevice.cs" />
