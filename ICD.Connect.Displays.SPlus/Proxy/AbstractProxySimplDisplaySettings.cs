@@ -1,10 +1,10 @@
 ﻿using System;
 using ICD.Connect.Devices;
-using ICD.Connect.Settings.Proxies;
+using ICD.Connect.Devices.Proxies.Devices;
 
 namespace ICD.Connect.Displays.SPlus.Proxy
 {
-	public class AbstractProxySimplDisplaySettings : AbstractProxySettings, IProxySimplDisplaySettings
+	public class AbstractProxySimplDisplaySettings : AbstractProxyDeviceSettings, IProxySimplDisplaySettings
 	{
 		/// <summary>
 		/// Gets/sets the manufacturer for this device.
