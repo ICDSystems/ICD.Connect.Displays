@@ -99,9 +99,7 @@
     <Compile Include="DisplayLift\eLiftState.cs" />
     <Compile Include="DisplayLift\IDisplayLiftDevice.cs" />
     <Compile Include="DisplayLift\IDisplayLiftDeviceSettings.cs" />
-    <Compile Include="DisplayLift\IDisplayLiftExternalTelemetryProvider.cs" />
     <Compile Include="DisplayLift\IRelayDisplayLiftDeviceSettings.cs" />
-    <Compile Include="DisplayLift\IRelayDisplayLiftExternalTelemetryProvider.cs" />
     <Compile Include="DisplayLift\LiftStateChangedEventArgs.cs" />
     <Compile Include="DisplayLift\RelayDisplayLiftConsole.cs" />
     <Compile Include="DisplayLift\RelayDisplayLiftDevice.cs" />

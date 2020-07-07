@@ -1,24 +1,27 @@
 using System;
-using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Telemetry.Providers;
+using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Displays.DisplayLift
 {
-	[UsedImplicitly]
-	public sealed class DisplayLiftExternalTelemetryProvider : IDisplayLiftExternalTelemetryProvider
+	public sealed class DisplayLiftExternalTelemetryProvider : AbstractExternalTelemetryProvider<IDisplayLiftDevice>
 	{
+		[EventTelemetry(DisplayLiftTelemetryNames.LIFT_STATE_CHANGED)]
 		public event EventHandler<StringEventArgs> OnLiftStateChanged;
-		public event EventHandler<StringEventArgs> OnBootDelayChanged;
-		public event EventHandler<StringEventArgs> OnCoolingDelayChanged;
 
-		private IDisplayLiftDevice m_Parent;
+		[EventTelemetry(DisplayLiftTelemetryNames.BOOT_DELAY_CHANGED)]
+		public event EventHandler<StringEventArgs> OnBootDelayChanged;
+
+		[EventTelemetry(DisplayLiftTelemetryNames.COOL_DELAY_CHANGED)]
+		public event EventHandler<StringEventArgs> OnCoolingDelayChanged;
 
 		private string m_LiftState;
 		private string m_BootDelay;
 		private string m_CoolingDelay;
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.LIFT_STATE, null, DisplayLiftTelemetryNames.LIFT_STATE_CHANGED)]
 		public string LiftState
 		{
 			get { return m_LiftState; }
@@ -32,6 +35,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.BOOT_DELAY, null, DisplayLiftTelemetryNames.BOOT_DELAY_CHANGED)]
 		public string BootDelay
 		{
 			get { return m_BootDelay; }
@@ -45,6 +49,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.COOL_DELAY, null, DisplayLiftTelemetryNames.COOL_DELAY_CHANGED)]
 		public string CoolingDelay
 		{
 			get { return m_CoolingDelay; }
@@ -58,16 +63,25 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
-		public void SetParent(ITelemetryProvider provider)
+		/// <summary>
+		/// Sets the parent telemetry provider that this instance extends.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void SetParent(IDisplayLiftDevice parent)
 		{
-			Unsubscribe(m_Parent);
-			m_Parent = provider as IDisplayLiftDevice;
-			UpdateValues(m_Parent);
-			Subscribe(m_Parent);
+			base.SetParent(parent);
+
+			UpdateValues();
 		}
 
-		private void Subscribe(IDisplayLiftDevice parent)
+		/// <summary>
+		/// Subscribe to the parent events.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void Subscribe(IDisplayLiftDevice parent)
 		{
+			base.Subscribe(parent);
+
 			if (parent == null)
 				return;
 
@@ -76,8 +90,14 @@ namespace ICD.Connect.Displays.DisplayLift
 			parent.OnCoolingDelayChanged += ParentOnCoolingDelayChanged;
 		}
 
-		private void Unsubscribe(IDisplayLiftDevice parent)
+		/// <summary>
+		/// Unsubscribe from the parent events.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void Unsubscribe(IDisplayLiftDevice parent)
 		{
+			base.Unsubscribe(parent);
+
 			if (parent == null)
 				return;
 
@@ -101,7 +121,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			UpdateCoolingDelay();
 		}
 
-		private void UpdateValues(IDisplayLiftDevice parent)
+		private void UpdateValues()
 		{
 			UpdateLiftState();
 			UpdateBootDelay();
@@ -110,17 +130,17 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		private void UpdateLiftState()
 		{
-			LiftState = m_Parent.LiftState.ToString();
+			LiftState = Parent == null ? null : Parent.LiftState.ToString();
 		}
 
 		private void UpdateBootDelay()
 		{
-			BootDelay = m_Parent.BootDelay + "ms";
+			BootDelay = Parent == null ? null : Parent.BootDelay + "ms";
 		}
 
 		private void UpdateCoolingDelay()
 		{
-			CoolingDelay = m_Parent.CoolingDelay + "ms";
+			CoolingDelay = Parent == null ? null : Parent.CoolingDelay + "ms";
 		}
 	}
 }

@@ -1,22 +1,27 @@
 using System;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Telemetry.Providers;
+using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Providers.External;
 
 namespace ICD.Connect.Displays.DisplayLift
 {
-	public sealed class RelayDisplayLiftExternalTelemetryProvider : IRelayDisplayLiftExternalTelemetryProvider
+	public sealed class RelayDisplayLiftExternalTelemetryProvider : AbstractExternalTelemetryProvider<RelayDisplayLiftDevice>
 	{
+		[EventTelemetry(DisplayLiftTelemetryNames.LATCH_MODE_CHANGED)]
 		public event EventHandler<BoolEventArgs> OnLatchModeChanged;
-		public event EventHandler<StringEventArgs> OnExtendTimeChanged;
-		public event EventHandler<StringEventArgs> OnRetractTimeChanged;
 
-		private RelayDisplayLiftDevice m_Parent;
+		[EventTelemetry(DisplayLiftTelemetryNames.EXTEND_TIME_CHANGED)]
+		public event EventHandler<StringEventArgs> OnExtendTimeChanged;
+
+		[EventTelemetry(DisplayLiftTelemetryNames.RETRACT_TIME_CHANGED)]
+		public event EventHandler<StringEventArgs> OnRetractTimeChanged;
 
 		private bool m_LatchMode;
 		private string m_ExtendTime;
 		private string m_RetractTime;
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.LATCH_MODE, null, DisplayLiftTelemetryNames.LATCH_MODE_CHANGED)]
 		public bool LatchMode
 		{
 			get { return m_LatchMode; }
@@ -30,6 +35,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.EXTEND_TIME, null, DisplayLiftTelemetryNames.EXTEND_TIME_CHANGED)]
 		public string ExtendTime
 		{
 			get { return m_ExtendTime; }
@@ -43,6 +49,8 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
+		[PropertyTelemetry(DisplayLiftTelemetryNames.RETRACT_TIME, null,
+			DisplayLiftTelemetryNames.RETRACT_TIME_CHANGED)]
 		public string RetractTime
 		{
 			get { return m_RetractTime; }
@@ -56,16 +64,22 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
-		public void SetParent(ITelemetryProvider provider)
+		/// <summary>
+		/// Sets the parent telemetry provider that this instance extends.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void SetParent(RelayDisplayLiftDevice parent)
 		{
-			Unsubscribe(m_Parent);
-			m_Parent = provider as RelayDisplayLiftDevice;
-			Subscribe(m_Parent);
+			base.SetParent(parent);
 
 			UpdateValues();
 		}
 
-		private void Subscribe(RelayDisplayLiftDevice parent)
+		/// <summary>
+		/// Subscribe to the parent events.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void Subscribe(RelayDisplayLiftDevice parent)
 		{
 			if (parent == null)
 				return;
@@ -75,7 +89,11 @@ namespace ICD.Connect.Displays.DisplayLift
 			parent.OnRetractTimeChanged += ParentOnRetractTimeChanged;
 		}
 
-		private void Unsubscribe(RelayDisplayLiftDevice parent)
+		/// <summary>
+		/// Unsubscribe from the parent events.
+		/// </summary>
+		/// <param name="parent"></param>
+		protected override void Unsubscribe(RelayDisplayLiftDevice parent)
 		{
 			if (parent == null)
 				return;
@@ -109,17 +127,17 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		private void UpdateLatchMode()
 		{
-			LatchMode = m_Parent.LatchRelay;
+			LatchMode = Parent != null && Parent.LatchRelay;
 		}
 
 		private void UpdateExtendTime()
 		{
-			ExtendTime = m_Parent.ExtendTime + "ms";
+			ExtendTime = Parent == null ? null : Parent.ExtendTime + "ms";
 		}
 
 		private void UpdateRetractTime()
 		{
-			RetractTime = m_Parent.RetractTime + "ms";
+			RetractTime = Parent == null ? null : Parent.RetractTime + "ms";
 		}
 	}
 }
