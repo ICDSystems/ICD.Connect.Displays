@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.1.1] - 2020-08-13
+### Changed
+ - Telemetry namespace change
+
 ## [15.1.0] - 2020-07-14
 ### Changed
  - AbstractProxySimplDisplaySettings now inherits from AbstractProxyDeviceSettings instead of AbstractProxySettings
