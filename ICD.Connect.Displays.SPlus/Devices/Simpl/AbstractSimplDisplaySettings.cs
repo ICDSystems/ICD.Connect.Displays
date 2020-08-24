@@ -1,9 +1,9 @@
 ﻿using ICD.Common.Utils.Xml;
-using ICD.Connect.Devices.Simpl;
+using ICD.Connect.Devices.CrestronSPlus.Devices.SPlus;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public abstract class AbstractSimplDisplaySettings : AbstractSimplDeviceSettings
+	public abstract class AbstractSimplDisplaySettings : AbstractSPlusDeviceSettings
 	{
 		private const string TRUST_ELEMENT = "Trust";
 

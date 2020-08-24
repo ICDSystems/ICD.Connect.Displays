@@ -1,6 +1,6 @@
 ﻿using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
-using ICD.Connect.Devices.SPlusShims;
+using ICD.Connect.Devices.CrestronSPlus.SPlusShims;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
 using ICD.Connect.Displays.SPlus.EventArgs;
 

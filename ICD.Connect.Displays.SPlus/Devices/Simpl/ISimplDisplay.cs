@@ -1,12 +1,12 @@
 ﻿using System;
 using ICD.Connect.API.Attributes;
-using ICD.Connect.Devices.Simpl;
+using ICD.Connect.Devices.CrestronSPlus.Devices.SPlus;
 using ICD.Connect.Displays.SPlus.EventArgs;
 using ICD.Connect.Displays.SPlus.Proxy;
 
 namespace ICD.Connect.Displays.SPlus.Devices.Simpl
 {
-	public interface ISimplDisplay : ISimplDevice
+	public interface ISimplDisplay : ISPlusDevice
 	{
 
 		[ApiEvent(SPlusDisplayApi.EVENT_SET_POWER, SPlusDisplayApi.EVENT_SET_POWER_HELP)]

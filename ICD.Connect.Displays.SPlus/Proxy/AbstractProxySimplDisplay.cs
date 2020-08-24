@@ -2,13 +2,13 @@
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API;
 using ICD.Connect.API.Info;
-using ICD.Connect.Devices.Simpl;
+using ICD.Connect.Devices.CrestronSPlus.Devices.SPlus;
 using ICD.Connect.Displays.SPlus.Devices.Simpl;
 using ICD.Connect.Displays.SPlus.EventArgs;
 
 namespace ICD.Connect.Displays.SPlus.Proxy
 {
-	public abstract class AbstractProxySimplDisplay<TSettings> : AbstractSimplProxyDevice<TSettings>, ISimplDisplay
+	public abstract class AbstractProxySimplDisplay<TSettings> : AbstractSPlusProxyDevice<TSettings>, ISimplDisplay
 		where TSettings : IProxySimplDisplaySettings
 	{
 		public event EventHandler<SetPowerApiEventArgs> OnSetPower;
