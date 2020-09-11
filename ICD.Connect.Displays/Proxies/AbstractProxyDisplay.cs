@@ -48,15 +48,21 @@ namespace ICD.Connect.Displays.Proxies
 			[UsedImplicitly]
 			protected set
 			{
-				if (value == m_PowerState)
-					return;
+				try
+				{
+					if (value == m_PowerState)
+						return;
 
-				m_PowerState = value;
+					m_PowerState = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
-				Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
+					Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
 
-				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
+					OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState));
+				}
+				finally
+				{
+					Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
+				}
 			}
 		}
 
@@ -86,6 +92,15 @@ namespace ICD.Connect.Displays.Proxies
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractProxyDisplay()
+		{
+			// Initialize activities
+			PowerState = ePowerState.Unknown;
+		}
 
 		#region Methods
 

@@ -152,15 +152,21 @@ namespace ICD.Connect.Displays.CrestronPro
 			get { return m_IsMuted; }
 			private set
 			{
-				if (value == m_IsMuted)
-					return;
+				try
+				{
+					if (value == m_IsMuted)
+						return;
 
-				m_IsMuted = value;
+					m_IsMuted = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "IsMuted", m_IsMuted);
-				Activities.LogActivity(DisplayActivities.GetMutedActivity(m_IsMuted));
+					Logger.LogSetTo(eSeverity.Informational, "IsMuted", m_IsMuted);
 
-				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
+					OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
+				}
+				finally
+				{
+					Activities.LogActivity(DisplayActivities.GetMutedActivity(m_IsMuted));
+				}
 			}
 		}
 
@@ -177,7 +183,9 @@ namespace ICD.Connect.Displays.CrestronPro
 		/// <summary>
 		/// Indicates if volume control is currently available or not
 		/// </summary>
-		public bool VolumeControlAvailable { get { return m_VolumeControlAvailable; }
+		public bool VolumeControlAvailable
+		{
+			get { return m_VolumeControlAvailable; }
 			private set
 			{
 				if (value == m_VolumeControlAvailable)
@@ -186,9 +194,19 @@ namespace ICD.Connect.Displays.CrestronPro
 				m_VolumeControlAvailable = value;
 
 				OnVolumeControlAvailableChanged.Raise(this, new DisplayVolumeControlAvailableApiEventArgs(VolumeControlAvailable));
-			} }
+			}
+		}
 
 		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public RoomViewConnectedDisplayAdapter()
+		{
+			// Initialize activities
+			IsMuted = false;
+		}
 
 		/// <summary>
 		/// Release resources.

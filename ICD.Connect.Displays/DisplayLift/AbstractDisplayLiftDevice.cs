@@ -20,8 +20,6 @@ namespace ICD.Connect.Displays.DisplayLift
 	public abstract class AbstractDisplayLiftDevice<T> : AbstractDevice<T>, IDisplayLiftDevice
 		where T : IDisplayLiftDeviceSettings, new()
 	{
-		public delegate void PowerOnCallback();
-
 		public event EventHandler<LiftStateChangedEventArgs> OnLiftStateChanged;
 		public event EventHandler<IntEventArgs> OnBootDelayChanged;
 		public event EventHandler<IntEventArgs> OnCoolingDelayChanged;
@@ -29,41 +27,47 @@ namespace ICD.Connect.Displays.DisplayLift
 		private readonly IcdTimer m_BootDelayTimer;
 		private readonly IcdTimer m_CooldownDelayTimer;
 
-		private IDisplay m_Display;
-
 		private eLiftState m_LiftState;
 		private int m_BootDelay;
 		private int m_CoolingDelay;
 		private Action m_PostExtend;
 
+		#region Properties
+
 		[CanBeNull]
-		public IDisplay Display { get { return m_Display; } }
+		public IDisplay Display { get; private set; }
 
 		public eLiftState LiftState
 		{
 			get { return m_LiftState; }
 			protected set
 			{
-				if (m_LiftState == value)
-					return;
-
-				m_LiftState = value;
-
-				Logger.LogSetTo(eSeverity.Informational, "LiftState", m_LiftState);
-				Activities.LogActivity(new Activity(Activity.ePriority.Medium, "Lift State", StringUtils.NiceName(m_LiftState),
-				                                eSeverity.Informational));
-
-				OnLiftStateChanged.Raise(this, new LiftStateChangedEventArgs(m_LiftState));
-
-				switch (m_LiftState)
+				try
 				{
-					case eLiftState.BootDelay:
-						m_BootDelayTimer.Restart(m_BootDelayTimer.Remaining);
-						break;
+					if (m_LiftState == value)
+						return;
 
-					case eLiftState.CooldownDelay:
-						m_CooldownDelayTimer.Restart(m_CooldownDelayTimer.Remaining);
-						break;
+					m_LiftState = value;
+
+					Logger.LogSetTo(eSeverity.Informational, "LiftState", m_LiftState);
+
+					OnLiftStateChanged.Raise(this, new LiftStateChangedEventArgs(m_LiftState));
+
+					switch (m_LiftState)
+					{
+						case eLiftState.BootDelay:
+							m_BootDelayTimer.Restart(m_BootDelayTimer.Remaining);
+							break;
+
+						case eLiftState.CooldownDelay:
+							m_CooldownDelayTimer.Restart(m_CooldownDelayTimer.Remaining);
+							break;
+					}
+				}
+				finally
+				{
+					Activities.LogActivity(new Activity(Activity.ePriority.Medium, "Lift State", StringUtils.NiceName(m_LiftState),
+					                                    eSeverity.Informational));
 				}
 			}
 		}
@@ -94,6 +98,11 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		public long CoolingDelayRemaining { get { return m_CooldownDelayTimer.Remaining; } }
 
+		#endregion
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		protected AbstractDisplayLiftDevice()
 		{
 			m_BootDelayTimer = new IcdTimer();
@@ -101,7 +110,12 @@ namespace ICD.Connect.Displays.DisplayLift
 			m_BootDelayTimer.OnElapsed += BootDelayTimerOnElapsed;
 			m_CooldownDelayTimer.OnElapsed += CooldownDelayTimerOnElapsed;
 			ResetTimers();
+
+			// Initialize activities
+			LiftState = eLiftState.Unknown;
 		}
+
+		#region Methods
 
 		public void ExtendLift(Action postExtend)
 		{
@@ -162,6 +176,14 @@ namespace ICD.Connect.Displays.DisplayLift
 			}
 		}
 
+		#endregion
+
+		#region Private Methods
+
+		protected abstract void Extend();
+
+		protected abstract void Retract();
+
 		private void BootDelayTimerOnElapsed(object sender, EventArgs e)
 		{
 			Logger.Log(eSeverity.Debug, "Boot Delay Elapsed");
@@ -186,9 +208,7 @@ namespace ICD.Connect.Displays.DisplayLift
 			m_CooldownDelayTimer.Stop();
 		}
 
-		protected abstract void Extend();
-
-		protected abstract void Retract();
+		#endregion
 
 		#region Settings
 
@@ -217,12 +237,12 @@ namespace ICD.Connect.Displays.DisplayLift
 
 		public void SetDisplay(IDisplay display)
 		{
-			if (display == m_Display)
+			if (display == Display)
 				return;
 
-			Unsubscribe(m_Display);
-			m_Display = display;
-			Subscribe(m_Display);
+			Unsubscribe(Display);
+			Display = display;
+			Subscribe(Display);
 		}
 
 		protected override void ClearSettingsFinal()
@@ -236,7 +256,7 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Display = m_Display == null ? (int?)null : m_Display.Id;
+			settings.Display = Display == null ? (int?)null : Display.Id;
 			settings.BootDelay = BootDelay == 0 ? (int?)null : BootDelay;
 			settings.CoolingDelay = CoolingDelay == 0 ? (int?)null : CoolingDelay;
 		}
