@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;

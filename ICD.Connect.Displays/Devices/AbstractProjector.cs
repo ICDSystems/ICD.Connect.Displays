@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Displays.Settings;
+﻿using ICD.Connect.Devices.Controls.Power;
+using ICD.Connect.Displays.Settings;
 using System;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;

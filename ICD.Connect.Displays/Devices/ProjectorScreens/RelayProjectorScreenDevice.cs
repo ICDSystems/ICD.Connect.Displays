@@ -4,6 +4,7 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.RelayPort;
 using ICD.Connect.Settings;

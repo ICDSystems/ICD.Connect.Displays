@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;

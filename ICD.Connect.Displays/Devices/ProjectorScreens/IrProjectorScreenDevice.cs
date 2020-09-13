@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Protocol.Ports.IrPort;
 using ICD.Connect.Settings;

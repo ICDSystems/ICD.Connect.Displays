@@ -1,5 +1,6 @@
 ﻿using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices

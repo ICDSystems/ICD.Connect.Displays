@@ -1,4 +1,5 @@
 ﻿using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.EventArguments;
 
 namespace ICD.Connect.Displays.Devices

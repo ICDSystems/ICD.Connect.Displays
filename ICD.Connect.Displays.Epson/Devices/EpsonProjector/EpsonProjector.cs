@@ -5,6 +5,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Common.Utils.Timers;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;

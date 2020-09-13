@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 #if SIMPLSHARP

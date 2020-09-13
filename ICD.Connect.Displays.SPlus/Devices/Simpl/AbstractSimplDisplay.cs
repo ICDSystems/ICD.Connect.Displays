@@ -6,6 +6,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Devices.Simpl;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
