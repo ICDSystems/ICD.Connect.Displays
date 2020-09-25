@@ -9,6 +9,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Devices.Mock;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -79,43 +80,49 @@ namespace ICD.Connect.Displays.Mock.Devices
 			get { return m_PowerState; }
 			private set
 			{
-				if (value == m_PowerState)
-					return;
-
-				m_PowerState = value;
-
-				Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
-				Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
-
-				UpdateCachedVolumeControlAvailableState();
-
-				long expectedDuration = 0;
-
-				switch (value)
+				try
 				{
-					case ePowerState.Warming:
-						expectedDuration = m_WarmingTime;
-						break;
-					case ePowerState.Cooling:
-						expectedDuration = m_CoolingTime;
-						break;
+					if (value == m_PowerState)
+						return;
 
-					case ePowerState.PowerOn:
-						if (m_RequestedInput.HasValue)
-							SetActiveInput(m_RequestedInput.Value);
-						if (m_RequestedMute.HasValue)
-						{
-							if (m_RequestedMute.Value)
-								MuteOn();
-							else
-								MuteOff();
-						}
-						if (m_RequestedVolume.HasValue)
-							SetVolume(m_RequestedVolume.Value);
-						break;
+					m_PowerState = value;
+
+					Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
+
+					UpdateCachedVolumeControlAvailableState();
+
+					long expectedDuration = 0;
+
+					switch (value)
+					{
+						case ePowerState.Warming:
+							expectedDuration = m_WarmingTime;
+							break;
+						case ePowerState.Cooling:
+							expectedDuration = m_CoolingTime;
+							break;
+
+						case ePowerState.PowerOn:
+							if (m_RequestedInput.HasValue)
+								SetActiveInput(m_RequestedInput.Value);
+							if (m_RequestedMute.HasValue)
+							{
+								if (m_RequestedMute.Value)
+									MuteOn();
+								else
+									MuteOff();
+							}
+							if (m_RequestedVolume.HasValue)
+								SetVolume(m_RequestedVolume.Value);
+							break;
+					}
+
+					OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState, expectedDuration));
 				}
-
-				OnPowerStateChanged.Raise(this, new DisplayPowerStateApiEventArgs(m_PowerState, expectedDuration));
+				finally
+				{
+					Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
+				}
 			}
 		}
 
@@ -240,6 +247,9 @@ namespace ICD.Connect.Displays.Mock.Devices
 
 			m_WarmingTimer = SafeTimer.Stopped(WarmingComplete);
 			m_CoolingTimer = SafeTimer.Stopped(CoolingComplete);
+
+			// Initialize activities
+			PowerState = ePowerState.Unknown;
 		}
 
 		/// <summary>

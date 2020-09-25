@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Connect.API.Attributes;
 using ICD.Connect.Devices;
-using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Proxies;

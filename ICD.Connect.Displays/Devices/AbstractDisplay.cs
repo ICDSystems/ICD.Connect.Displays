@@ -9,6 +9,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
@@ -87,19 +88,25 @@ namespace ICD.Connect.Displays.Devices
 			get { return m_PowerState; }
 			protected set
 			{
-				if (value == m_PowerState)
-					return;
+				try
+				{
+					if (value == m_PowerState)
+						return;
 
-				m_PowerState = value;
+					m_PowerState = value;
 
-				Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
-				Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
+					Logger.LogSetTo(eSeverity.Informational, "PowerState", m_PowerState);
 
-				//todo: Fix this section?
-				if (m_PowerState == ePowerState.PowerOn)
-					QueryState();
+					//todo: Fix this section?
+					if (m_PowerState == ePowerState.PowerOn)
+						QueryState();
 
-				RaisePowerStateChanged(value);
+					RaisePowerStateChanged(value);
+				}
+				finally
+				{
+					Activities.LogActivity(PowerDeviceControlActivities.GetPowerActivity(m_PowerState));
+				}
 			}
 		}
 
@@ -143,6 +150,9 @@ namespace ICD.Connect.Displays.Devices
 			};
 			m_ConnectionStateManager.OnIsOnlineStateChanged += PortOnIsOnlineStateChanged;
 			m_ConnectionStateManager.OnConnectedStateChanged += PortOnConnectedStateChanged;
+
+			// Initialize activities
+			PowerState = ePowerState.Unknown;
 		}
 
 		public virtual void ConfigurePort(IPort port)

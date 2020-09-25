@@ -8,6 +8,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Settings;

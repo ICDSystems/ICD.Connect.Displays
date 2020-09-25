@@ -1,8 +1,8 @@
-﻿using ICD.Connect.Displays.Settings;
+﻿using ICD.Connect.Devices.Controls.Power;
+using ICD.Connect.Displays.Settings;
 using System;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Nodes;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Displays.EventArguments;
 using ICD.Connect.Settings;
 
