@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
@@ -24,11 +23,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		protected IDisplay Display { get { return m_Display; } }
 
 		#endregion
-
-		protected AbstractProjectorScreenDevice()
-		{
-			OnSettingsApplied += BaseOnSettingsApplied;
-		}
 
 		#region Methods
 
@@ -60,7 +54,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		protected override void DisposeFinal(bool disposing)
 		{
 			base.DisposeFinal(disposing);
-			OnSettingsApplied -= BaseOnSettingsApplied;
 			SetDisplay(null);
 		}
 
@@ -105,11 +98,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 		#endregion
 
 		#region Private Methods
-
-		private void BaseOnSettingsApplied(object sender, EventArgs eventArgs)
-		{
-			SetInitialState();
-		}
 
 		private void SetDisplay(IDisplay display)
 		{
@@ -196,6 +184,17 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 			base.CopySettingsFinal(settings);
 
 			settings.Display = m_Display == null ? null : (int?)m_Display.Id;
+		}
+
+		/// <summary>
+		/// Override to add actions on StartSettings
+		/// This should be used to start communications with devices and perform initial actions
+		/// </summary>
+		protected override void StartSettingsFinal()
+		{
+			base.StartSettingsFinal();
+
+			SetInitialState();
 		}
 
 		#endregion
