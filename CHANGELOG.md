@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed Aspect settings from IDisplay, and removed all aspect controls from all displays
 
+## [14.1.0] - 2020-10-06
+### Changed
+ - Implemented StartSettings() to start communications with devices
+ - Cleaned up AbstractProjectorScreenDevice to use new LifecycleState
+
 ## [14.0.1] - 2020-06-16
 ### Changed
  - PanasonicClassicDisplay - Fixed power state feedback issues

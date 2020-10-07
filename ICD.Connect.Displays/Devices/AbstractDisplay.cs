@@ -176,7 +176,7 @@ namespace ICD.Connect.Displays.Devices
 		[PublicAPI]
 		public void SetPort(ISerialPort port)
 		{
-			m_ConnectionStateManager.SetPort(port);
+			m_ConnectionStateManager.SetPort(port, false);
 		}
 
 		/// <summary>
@@ -516,6 +516,17 @@ namespace ICD.Connect.Displays.Devices
 
 			addControl(new DisplayRouteDestinationControl(this, 0));
 			addControl(new DisplayPowerDeviceControl(this, 1));
+		}
+
+		/// <summary>
+		/// Override to add actions on StartSettings
+		/// This should be used to start communications with devices and perform initial actions
+		/// </summary>
+		protected override void StartSettingsFinal()
+		{
+			base.StartSettingsFinal();
+
+			m_ConnectionStateManager.Start();
 		}
 
 		#endregion
