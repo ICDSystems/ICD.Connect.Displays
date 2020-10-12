@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed Aspect settings from IDisplay, and removed all aspect controls from all displays
 
+## [14.1.1] - 2020-10-12
+### Changed
+ - Removed legacy factory name from RelayProjectorScreen since it was preventing the current factory name from working
+
 ## [14.1.0] - 2020-10-06
 ### Changed
  - Implemented StartSettings() to start communications with devices

@@ -5,14 +5,9 @@ using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Displays.Devices.ProjectorScreens
 {
-	[KrangSettings(FACTORY_NAME, typeof(RelayProjectorScreenDevice))]
-	[KrangSettings(LEGACY_FACTORY_NAME, typeof(RelayProjectorScreenDevice))]
+	[KrangSettings("RelayProjectorScreen", typeof(RelayProjectorScreenDevice))]
 	public sealed class RelayProjectorScreenDeviceSettings : AbstractProjectorScreenDeviceSettings
 	{
-		private const string FACTORY_NAME = "RelayProjectorScreen";
-		private const string LEGACY_FACTORY_NAME = "DisplayScreenRelayControl";
-
-		
 		private const string DISPLAY_ON_RELAY_ID_ELEMENT = "DisplayOnRelay";
 		private const string DISPLAY_OFF_RELAY_ID_ELEMENT = "DisplayOffRelay";
 		private const string RELAY_LATCH_ELEMENT = "LatchRelay";
@@ -20,13 +15,6 @@ namespace ICD.Connect.Displays.Devices.ProjectorScreens
 
 		private const bool RELAY_LATCH_DEFAULT = false;
 		private const int RELAY_HOLD_TIME_DEFAULT = 500;
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-
 
 		[OriginatorIdSettingsProperty(typeof(IRelayPort))]
 		public int? DisplayOnRelay { get; set; }
