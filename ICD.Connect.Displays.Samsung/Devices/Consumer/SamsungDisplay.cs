@@ -405,6 +405,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <param name="args"></param>
 		private void ParseSuccess(SerialResponseEventArgs args)
 		{
+			if (args.Data == null)
+				return;
+
 			string command = RemoveCheckSum(args.Data.Serialize());
 
 			// HDMI
