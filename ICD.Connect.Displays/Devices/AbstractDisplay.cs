@@ -199,26 +199,6 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
-		/// Queues the command at the given priority level. Lower values are sent first.
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="priority"></param>
-		[PublicAPI]
-		public void SendCommandPriority([NotNull] ISerialData command, int priority)
-		{
-			if (command == null)
-				throw new ArgumentNullException("command");
-
-			if (SerialQueue == null)
-			{
-				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
-				return;
-			}
-
-			SerialQueue.EnqueuePriority(command, priority);
-		}
-
-		/// <summary>
 		/// Queues the command to be sent to the device.
 		/// Replaces an existing command if it matches the comparer.
 		/// </summary>
@@ -243,6 +223,26 @@ namespace ICD.Connect.Displays.Devices
 		}
 
 		/// <summary>
+		/// Queues the command at the given priority level. Lower values are sent first.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="priority"></param>
+		[PublicAPI]
+		public void SendCommandPriority([NotNull] ISerialData command, int priority)
+		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
+			if (SerialQueue == null)
+			{
+				Logger.Log(eSeverity.Error, "Unable to send command - SerialQueue is null");
+				return;
+			}
+
+			SerialQueue.EnqueuePriority(command, priority);
+		}
+
+		/// <summary>
 		/// Queues the command to be sent to the device at the given priority.
 		/// Replaces an existing command if it matches the comparer.
 		/// </summary>
@@ -250,7 +250,7 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="comparer"></param>
 		/// <param name="priority"></param>
 		[PublicAPI]
-		public void SendCommand([NotNull] ISerialData command, [NotNull] Func<ISerialData, ISerialData, bool> comparer, int priority)
+		public void SendCommandPriority([NotNull] ISerialData command, [NotNull] Func<ISerialData, ISerialData, bool> comparer, int priority)
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");

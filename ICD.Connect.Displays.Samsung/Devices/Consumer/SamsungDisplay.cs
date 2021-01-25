@@ -285,7 +285,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		{
 			data += GetCheckSum(data);
 
-			SendCommand(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()), priority);
+			SendCommandPriority(new SerialData(data), (a, b) => comparer(a.Serialize(), b.Serialize()), priority);
 		}
 
 		/// <summary>

@@ -488,12 +488,12 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 
 		private void SendCommand(eCommandType commandType, params string[] args)
 		{
-			SendCommand(new NecProjectorCommand(commandType, args), NecProjectorCommand.CommandComparer, GetPriorityForCommand(commandType));
+			SendCommandPriority(new NecProjectorCommand(commandType, args), NecProjectorCommand.CommandComparer, GetPriorityForCommand(commandType));
 		}
 
 		private void SendCommandCollapse(NecProjectorCommand command, int priority)
 		{
-			SendCommand(command, NecProjectorCommand.CommandComparer, priority);
+			SendCommandPriority(command, NecProjectorCommand.CommandComparer, priority);
 		}
 
 		public override void ConfigurePort(IPort port)
