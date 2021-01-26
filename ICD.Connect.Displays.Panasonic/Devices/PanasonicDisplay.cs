@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Audio.Controls.Volume;
 using ICD.Connect.Devices.Controls.Power;
@@ -58,7 +60,15 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		#endregion
 
-        /// <summary>
+	    #region Serial Queue Limit Constants
+
+	    private const int RETRY_LIMIT = 10;
+
+	    #endregion
+
+	    #region Fields
+
+	    /// <summary>
         /// Maps index to an input command.
         /// </summary>
 		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
@@ -66,7 +76,12 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 			{1, INPUT_HDMI}
 		};
 
-        #region Properties
+	    private readonly SafeCriticalSection m_RetrySection;
+	    private readonly Dictionary<ISerialData, int> m_BusyCommandsToRetryCount;
+
+	    #endregion
+
+	    #region Properties
 
 	    /// <summary>
 	    /// Returns the features that are supported by this display.
@@ -86,24 +101,37 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 	    #endregion
 
-        #region Methods
+	    #region Constructor
 
-       /// <summary>
-		/// Configures the given port for communication with the device.
-		/// </summary>
-		/// <param name="port"></param>
-        public override void ConfigurePort(IPort port)
-        {
-			base.ConfigurePort(port);
+	    /// <summary>
+	    /// Constructor.
+	    /// </summary>
+	    public PanasonicDisplay()
+	    {
+		    m_RetrySection = new SafeCriticalSection();
+		    m_BusyCommandsToRetryCount = new Dictionary<ISerialData, int>();
+	    }
 
-            ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
-            SerialQueue queue = new SerialQueue();
-            queue.SetPort(port as ISerialPort);
-            queue.SetBuffer(buffer);
-            queue.Timeout = 10 * 1000;
+	    #endregion
 
-            SetSerialQueue(queue);
-        }
+	    #region Methods
+
+	    /// <summary>
+	    /// Configures the given port for communication with the device.
+	    /// </summary>
+	    /// <param name="port"></param>
+	    public override void ConfigurePort(IPort port)
+	    {
+		    base.ConfigurePort(port);
+
+		    ISerialBuffer buffer = new BoundedSerialBuffer(0x02, 0x03);
+		    SerialQueue queue = new SerialQueue();
+		    queue.SetPort(port as ISerialPort);
+		    queue.SetBuffer(buffer);
+		    queue.Timeout = 10 * 1000;
+
+		    SetSerialQueue(queue);
+	    }
 
 	    /// <summary>
 	    /// Polls the physical device for the current state.
@@ -284,22 +312,30 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         /// <param name="sender"></param>
         /// <param name="args"></param>
         protected override void SerialQueueOnSerialResponse(object sender, SerialResponseEventArgs args)
-        {
-            if (args.Response == FAILURE_BUSY || args.Response == FAILURE_PARAMETER)
-                ParseError(args);
-            else
-                ParseSuccess(args);
-        }
+	    {
+		    switch (args.Response)
+		    {
+			    case FAILURE_PARAMETER:
+			    case FAILURE_BUSY:
+				    ParseError(args);
+				    break;
+			    default:
+				    ParseSuccess(args);
+					ResetRetryCount(args.Data);
+				    break;
+		    }
+	    }
 
-        /// <summary>
+	    /// <summary>
         /// Called when a command times out.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
         protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
         {
-			Logger.Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
-        }
+			Logger.Log(eSeverity.Error, "Command {0} timed out. Retrying...", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			RetryCommand(args.Data);
+		}
 
         /// <summary>
         /// Called when a command is successful.
@@ -387,23 +423,99 @@ namespace ICD.Connect.Displays.Panasonic.Devices
         /// <param name="args"></param>
         private void ParseError(SerialResponseEventArgs args)
         {
-            switch (args.Response)
-            {
-                case FAILURE_BUSY:
-					//todo: Retry commands sent when busy
-					Logger.Log(eSeverity.Error, "Error 401 Busy. Command {0} failed.",
-                        StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
-                    break;
-                case FAILURE_PARAMETER:
-					Logger.Log(eSeverity.Error, "Error 402 Invalid Parameter. Command {0} failed.",
-                        StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
-                    break;
-                default:
-					Logger.Log(eSeverity.Error, "Error Unknown. Command {0} failed.",
-                        StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
-                    break;
-            }
+	        switch (args.Response)
+	        {
+		        case FAILURE_BUSY:
+			        Logger.Log(eSeverity.Error, "Error 401 Busy. Command {0} failed.",
+			                   StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			        RetryCommand(args.Data);
+			        break;
+		        case FAILURE_PARAMETER:
+			        Logger.Log(eSeverity.Error, "Error 402 Invalid Parameter. Command {0} failed.",
+			                   StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			        break;
+		        default:
+			        Logger.Log(eSeverity.Error, "Error Unknown. Command {0} failed.",
+			                   StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			        break;
+	        }
         }
+
+        /// <summary>
+        /// Called when a command fails with: ER401 Busy
+        /// Times out after 10 retries.
+        /// </summary>
+        /// <param name="command"></param>
+        private void RetryCommand(ISerialData command)
+        {
+	        IncrementRetryCount(command);
+	        if (GetRetryCount(command) <= RETRY_LIMIT)
+		        SendCommandPriority(command, (a, b) => a.Equals(b), 0);
+	        else
+	        {
+		        Logger.Log(eSeverity.Error, "Command {0} failed too many times and hit the retry limit.",
+		                   StringUtils.ToMixedReadableHexLiteral(command.Serialize()));
+		        ResetRetryCount(command);
+	        }
+        }
+
+		/// <summary>
+		/// Gets the retry count for the given command.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
+	    private int GetRetryCount(ISerialData command)
+	    {
+		    m_RetrySection.Enter();
+
+		    try
+		    {
+			    return m_BusyCommandsToRetryCount.ContainsKey(command) ? m_BusyCommandsToRetryCount[command] : 0;
+		    }
+		    finally
+		    {
+			    m_RetrySection.Leave();
+		    }
+	    }
+
+		/// <summary>
+		/// Increments the retry count for the given command.
+		/// </summary>
+		/// <param name="command"></param>
+	    private void IncrementRetryCount(ISerialData command)
+	    {
+		    m_RetrySection.Enter();
+
+		    try
+		    {
+			    if (m_BusyCommandsToRetryCount.ContainsKey(command))
+				    m_BusyCommandsToRetryCount[command]++;
+				else
+					m_BusyCommandsToRetryCount.Add(command, 1);
+		    }
+		    finally
+		    {
+			    m_RetrySection.Leave();
+		    }
+	    }
+
+		/// <summary>
+		/// Resets the retry count for the given command.
+		/// </summary>
+		/// <param name="command"></param>
+	    private void ResetRetryCount(ISerialData command)
+	    {
+		    m_RetrySection.Enter();
+
+		    try
+		    {
+			    m_BusyCommandsToRetryCount.Remove(command);
+		    }
+		    finally
+		    {
+			    m_RetrySection.Leave();
+		    }
+	    }
 
         #endregion
     }
