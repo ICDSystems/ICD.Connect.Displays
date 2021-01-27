@@ -283,7 +283,7 @@ namespace ICD.Connect.Displays.Planar.Devices.PlanarQe
 			if (command == null)
 				throw new ArgumentNullException("command");
 
-			SendCommand(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
+			SendCommandPriority(command, PlanarQeCommand.CommandComparer, GetPriorityForCommand(command));
 		}
 
 		/// <summary>
