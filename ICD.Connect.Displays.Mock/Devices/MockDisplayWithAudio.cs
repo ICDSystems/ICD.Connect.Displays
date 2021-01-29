@@ -243,13 +243,11 @@ namespace ICD.Connect.Displays.Mock.Devices
 		/// </summary>
 		public MockDisplayWithAudio()
 		{
-			m_PowerState = ePowerState.PowerOff;
-
 			m_WarmingTimer = SafeTimer.Stopped(WarmingComplete);
 			m_CoolingTimer = SafeTimer.Stopped(CoolingComplete);
 
 			// Initialize activities
-			PowerState = ePowerState.Unknown;
+			PowerState = ePowerState.PowerOff;
 		}
 
 		/// <summary>

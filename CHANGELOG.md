@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - PanasonicDisplay now retries failed/timed-out commands
+ - Mock displays start in PoweredOff state
 
 ## [15.1.2] - 2020-09-24
 ### Changed
