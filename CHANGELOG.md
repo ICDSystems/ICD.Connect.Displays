@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+ - Fully implemented RelayDisplayLiftDevice CopySettings method.
  - PanasonicDisplay now retries failed/timed-out commands
  - Mock displays start in PoweredOff state
 

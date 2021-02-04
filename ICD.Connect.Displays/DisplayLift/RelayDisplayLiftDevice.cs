@@ -244,6 +244,10 @@ namespace ICD.Connect.Displays.DisplayLift
 		{
 			base.CopySettingsFinal(settings);
 
+			settings.ExtendTime = m_ExtendTime;
+			settings.RetractTime = m_RetractTime;
+			settings.DisplayExtendRelay = m_ExtendRelay.Id;
+			settings.DisplayRetractRelay = m_RetractRelay.Id;
 			settings.LatchRelay = m_LatchRelay;
 		}
 
