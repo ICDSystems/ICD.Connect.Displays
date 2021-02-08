@@ -44,11 +44,22 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		private const string VOLUME_UP     = VOLUME_PREFIX + "\x01\x00";
 		private const string VOLUME_DOWN   = VOLUME_PREFIX + "\x02\x00";
 
-		private const string INPUT_PREFIX = COMMAND_PREFIX + "\x0A\x00\x05";
-		private const string INPUT_HDMI_1 = INPUT_PREFIX + "\x00";
-		private const string INPUT_HDMI_2 = INPUT_PREFIX + "\x01";
-		private const string INPUT_HDMI_3 = INPUT_PREFIX + "\x02";
-		private const string INPUT_HDMI_4 = INPUT_PREFIX + "\x03";
+		private const string INPUT_PREFIX = COMMAND_PREFIX + "\x0A\x00";
+		private const string INPUT_HDMI_1 = INPUT_PREFIX + "\x05\x00";
+		private const string INPUT_HDMI_2 = INPUT_PREFIX + "\x05\x01";
+		private const string INPUT_HDMI_3 = INPUT_PREFIX + "\x05\x02";
+		private const string INPUT_HDMI_4 = INPUT_PREFIX + "\x05\x03";
+		private const string INPUT_AV_1 = INPUT_PREFIX + "\x01\x00";
+		private const string INPUT_AV_2 = INPUT_PREFIX + "\x01\x01";
+		private const string INPUT_AV_3 = INPUT_PREFIX + "\x01\x02";
+		private const string INPUT_SVIDEO_1 = INPUT_PREFIX + "\x02\x00";
+		private const string INPUT_SVIDEO_2 = INPUT_PREFIX + "\x02\x01";
+		private const string INPUT_SVIDEO_3 = INPUT_PREFIX + "\x02\x02";
+		private const string INPUT_COMPONENT_1 = INPUT_PREFIX + "\x03\x00";
+		private const string INPUT_COMPONENT_2 = INPUT_PREFIX + "\x03\x01";
+		private const string INPUT_COMPONENT_3 = INPUT_PREFIX + "\x03\x02";
+		private const string INPUT_TV = INPUT_PREFIX + "\x00\x00";
+
 
 		private const int PRIORITY_POWER_RETRY = 1;
 		private const int PRIORITY_POWER_INITIAL = 2;
@@ -64,7 +75,17 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			{1, INPUT_HDMI_1},
 			{2, INPUT_HDMI_2},
 			{3, INPUT_HDMI_3},
-			{4, INPUT_HDMI_4}
+			{4, INPUT_HDMI_4},
+			{11, INPUT_AV_1},
+			{12, INPUT_AV_2},
+			{13, INPUT_AV_3},
+			{21, INPUT_SVIDEO_1},
+			{22, INPUT_SVIDEO_2},
+			{23, INPUT_SVIDEO_3},
+			{31, INPUT_COMPONENT_1},
+			{32, INPUT_COMPONENT_2},
+			{33, INPUT_COMPONENT_3},
+			{40, INPUT_TV}
 		};
 
 		private int m_PowerRetries;
