@@ -1,5 +1,6 @@
 ﻿using System;
-﻿using ICD.Common.Properties;
+using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Services.Logging;
@@ -17,6 +18,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 	public abstract class AbstractSamsungProDisplay<T> : AbstractDisplayWithAudio<T>, ISamsungProDisplay
 		where T : ISamsungProDisplaySettings, new()
 	{
+		private const int MAX_RETRIES = 40;
+		private const long DISCONNECT_CLEAR_TIME = 10 * 1000;
+
 		private const byte POWER = 0x11;
 		private const byte VOLUME = 0x12;
 		private const byte MUTE = 0x13;
@@ -74,6 +78,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		};
 		// ReSharper restore StaticFieldInGenericType
 
+		private readonly Dictionary<ISamsungProCommand, int> m_CommandRetries;
+
 		#region Properties
 
 		/// <summary>
@@ -94,6 +100,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		#endregion
 
+		protected AbstractSamsungProDisplay()
+		{
+			m_CommandRetries = new Dictionary<ISamsungProCommand, int>(new SamsungProCommandEqualityComparer());
+		}
+
 		#region Methods
 
 		protected abstract byte GetWallIdForPowerCommand();
@@ -113,7 +124,10 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			base.ConfigurePort(port);
 
 			ISerialBuffer buffer = new SamsungProDisplayBuffer();
-			SerialQueue queue = new SerialQueue();
+			SerialQueue queue = new SerialQueue
+			{
+				DisconnectClearTime = DISCONNECT_CLEAR_TIME
+			};
 			queue.SetPort(port);
 			queue.SetBuffer(buffer);
 			queue.Timeout = 3 * 1000;
@@ -304,7 +318,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 								return;
 
 							if (response.Success)
-								ParseSuccess(response);
+								ParseSuccess(args);
 							else
 								ParseError(args);
 							break;
@@ -338,19 +352,37 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		protected override void SerialQueueOnTimeout(object sender, SerialDataEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} timed out.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+			ISamsungProCommand command = args.Data as ISamsungProCommand;
+			
+			if (command != null)
+				RetryCommand(command);
+			else
+				Log(eSeverity.Error, "Command {0} timed out, unable to retry.", StringUtils.ToHexLiteral(args.Data.Serialize()));
+		}
 
-			// Keep sending power query until fully powered on
-			if (SerialQueue != null && SerialQueue.TimeoutCount < 10)
-				SerialQueue.EnqueuePriority(new SamsungProCommand(POWER, GetWallIdForPowerCommand(), 0).ToQuery());
+		protected override void SerialQueueOnSendFailed(object sender, SerialDataEventArgs args)
+		{
+			ISamsungProCommand command = args.Data as ISamsungProCommand;
+
+			if (command != null)
+				RetryCommand(command);
+			else
+				Log(eSeverity.Error, "Command {0} failed to send, unable to retry.", StringUtils.ToHexLiteral(args.Data.Serialize()));
 		}
 
 		/// <summary>
 		/// Called when a command is successful.
 		/// </summary>
-		/// <param name="response"></param>
-		private void ParseSuccess(SamsungProResponse response)
+		/// <param name="args"></param>
+		private void ParseSuccess(SerialResponseEventArgs args)
 		{
+			// Clear retry counter
+			ISamsungProCommand command = args.Data as ISamsungProCommand;
+			if (command != null)
+				m_CommandRetries.Remove(command);
+			
+			
+			SamsungProResponse response = new SamsungProResponse(args.Response);
 			switch (response.Command)
 			{
 				case POWER:
@@ -406,7 +438,41 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="args"></param>
 		private void ParseError(SerialResponseEventArgs args)
 		{
-			Log(eSeverity.Error, "Command {0} failed.", StringUtils.ToMixedReadableHexLiteral(args.Data.Serialize()));
+			if (args.Data == null)
+				return;
+
+			var command = args.Data as SamsungProCommand;
+			
+			if (command == null)
+				Log(eSeverity.Error, "Command {0} failed, could not convert to SamsungProCommand",
+				    StringUtils.ToHexLiteral(args.Data.Serialize()));
+			else
+				RetryCommand(command);
+		}
+
+		/// <summary>
+		/// Retry the given command if it's not hit the retry counter
+		/// </summary>
+		/// <param name="command"></param>
+		private void RetryCommand([NotNull] ISamsungProCommand command)
+		{
+			if (command == null)
+				throw new ArgumentNullException("command");
+
+			int retries;
+			m_CommandRetries.TryGetValue(command, out retries);
+
+			if (retries >= MAX_RETRIES)
+			{
+				Log(eSeverity.Error, "Command {0} failed and hit max retries", StringUtils.ToHexLiteral(command.Serialize()));
+				return;
+			}
+
+			retries++;
+			m_CommandRetries[command] = retries;
+
+			Log(eSeverity.Informational, "Command {0} failed, retry attempt {1}", StringUtils.ToHexLiteral(command.Serialize()), retries);
+			SendCommand(command);
 		}
 
 		#endregion

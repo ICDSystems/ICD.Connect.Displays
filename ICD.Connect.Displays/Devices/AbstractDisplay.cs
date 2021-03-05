@@ -401,6 +401,7 @@ namespace ICD.Connect.Displays.Devices
 			serialQueue.OnSerialTransmission += SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse += SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout += SerialQueueOnTimeout;
+			serialQueue.OnSendFailed += SerialQueueOnSendFailed;
 
 			if (serialQueue.Port == null)
 				return;
@@ -420,6 +421,7 @@ namespace ICD.Connect.Displays.Devices
 			serialQueue.OnSerialTransmission -= SerialQueueOnSerialTransmission;
 			serialQueue.OnSerialResponse -= SerialQueueOnSerialResponse;
 			serialQueue.OnTimeout -= SerialQueueOnTimeout;
+			serialQueue.OnSendFailed -= SerialQueueOnSendFailed;
 
 			if (serialQueue.Port == null)
 				return;
@@ -447,6 +449,10 @@ namespace ICD.Connect.Displays.Devices
 		/// <param name="sender"></param>
 		/// <param name="args"></param>
 		protected abstract void SerialQueueOnTimeout(object sender, SerialDataEventArgs args);
+
+		protected virtual void SerialQueueOnSendFailed(object sender, SerialDataEventArgs args)
+		{
+		}
 
 		/// <summary>
 		/// Called when the serial queue online state changes.
@@ -581,6 +587,15 @@ namespace ICD.Connect.Displays.Devices
 
 			foreach (IConsoleCommand command in DisplayConsole.GetConsoleCommands(this))
 				yield return command;
+
+			yield return new GenericConsoleCommand<bool>("SetQueueDebug", "Sets serial queue debug state", b => SetQueueDebug(b));
+		}
+
+		private void SetQueueDebug(bool debug)
+		{
+			AbstractSerialQueue queue = SerialQueue as AbstractSerialQueue;
+			if (queue != null)
+				queue.Debug = debug;
 		}
 
 		/// <summary>
