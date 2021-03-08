@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
  - Removed Aspect settings from IDisplay, and removed all aspect controls from all displays
 
+## [14.1.2] - 2021-03-08
+### Changed
+ - Fixed issues with SamsungProDisplays over IP control where a disconnect on power on prevented input select commands from working
+
 ## [14.1.1] - 2020-10-12
 ### Changed
  - Removed legacy factory name from RelayProjectorScreen since it was preventing the current factory name from working
