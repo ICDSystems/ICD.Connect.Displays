@@ -520,8 +520,17 @@ namespace ICD.Connect.Displays.Devices
 		{
 			base.AddControls(settings, factory, addControl);
 
-			addControl(new DisplayRouteDestinationControl(this, 0));
+			AddDisplayDestinationControl(addControl);
 			addControl(new DisplayPowerDeviceControl(this, 1));
+		}
+
+		/// <summary>
+		/// Allows for displays to specify their own custom destination control or just use the default display one.
+		/// </summary>
+		/// <param name="addControl"></param>
+		protected virtual void AddDisplayDestinationControl(Action<IDeviceControl> addControl)
+		{
+			addControl(new DisplayRouteDestinationControl(this, 0));
 		}
 
 		/// <summary>

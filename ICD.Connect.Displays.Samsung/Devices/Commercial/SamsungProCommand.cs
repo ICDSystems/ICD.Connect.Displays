@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
@@ -9,12 +11,18 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		public const byte HEADER = 0xAA;
 
 		private readonly byte m_Command;
+		private readonly byte? m_SubCommand;
 		private readonly byte m_Id;
 
 		/// <summary>
 		/// Gets the command code.
 		/// </summary>
 		public byte Command { get { return m_Command; } }
+
+		/// <summary>
+		/// Gets the sub-command data.
+		/// </summary>
+		public byte? SubCommand { get { return m_SubCommand; } }
 
 		/// <summary>
 		/// Gets the command id.
@@ -26,9 +34,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="id"></param>
-		protected AbstractSamsungProCommand(byte command, byte id)
+		/// <param name="subCommand"></param>
+		protected AbstractSamsungProCommand(byte command, byte id, byte? subCommand)
 		{
 			m_Command = command;
+			m_SubCommand = subCommand;
 			m_Id = id;
 		}
 
@@ -61,12 +71,27 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 	public sealed class SamsungProCommand : AbstractSamsungProCommand
 	{
-		private readonly byte m_Data;
+		private readonly byte[] m_Data;
 
 		/// <summary>
 		/// Gets the command data.
 		/// </summary>
-		public byte Data { get { return m_Data; } }
+		public byte[] Data { get { return m_Data; } }
+
+		/// <summary>
+		/// Returns the length of the data plus the optional subcommand byte.
+		/// </summary>
+		private byte CommandLength
+		{
+			get
+			{
+				int output = Data.Length;
+				if (SubCommand != null)
+					output += 1;
+
+				return (byte)output;
+			}
+		}
 
 		/// <summary>
 		/// Creates the command for the given id.
@@ -75,7 +100,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="id"></param>
 		/// <param name="data"></param>
 		public SamsungProCommand(byte command, byte id, byte data)
-			: base(command, id)
+			: this(command, id, null, new[] {data})
+		{
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="id"></param>
+		/// <param name="subCommand"></param>
+		/// <param name="data"></param>
+		public SamsungProCommand(byte command, byte id, byte? subCommand, byte[] data)
+			: base(command, id, subCommand)
 		{
 			m_Data = data;
 		}
@@ -86,10 +123,23 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <returns></returns>
 		public override string Serialize()
 		{
-			byte[] bytes = {HEADER, Command, Id, 0x01, Data};
-			byte checksum = GetCheckSum(bytes);
+			List<byte> bytes = new List<byte>
+			{
+				HEADER,
+				Command,
+				Id,
+				CommandLength
+			};
 
-			return new string(bytes.Select(b => (char)b).ToArray()) + (char)checksum;
+			if (SubCommand.HasValue)
+				bytes.Add(SubCommand.Value);
+
+			bytes.AddRange(Data);
+
+			byte checksum = GetCheckSum(bytes);
+			bytes.Add(checksum);
+
+			return StringUtils.ToString(bytes);
 		}
 
 		/// <summary>
@@ -98,7 +148,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <returns></returns>
 		public SamsungProQuery ToQuery()
 		{
-			return new SamsungProQuery(Command, Id);
+			return new SamsungProQuery(Command, Id, SubCommand);
 		}
 	}
 
@@ -110,7 +160,18 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <param name="command"></param>
 		/// <param name="id"></param>
 		public SamsungProQuery(byte command, byte id)
-			: base(command, id)
+			: this(command, id, null)
+		{
+		}
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="id"></param>
+		/// <param name="subCommand"></param>
+		public SamsungProQuery(byte command, byte id, byte? subCommand)
+			: base(command, id, subCommand)
 		{
 		}
 
@@ -120,10 +181,22 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// <returns></returns>
 		public override string Serialize()
 		{
-			byte[] bytes = {HEADER, Command, Id, 0x00};
-			byte checksum = GetCheckSum(bytes);
+			List<byte> bytes = new List<byte>
+			{
+				HEADER,
+				Command,
+				Id,
+				// Command length
+				SubCommand.HasValue ? (byte)1 : (byte)0
+			};
 
-			return new string(bytes.Select(b => (char)b).ToArray()) + (char)checksum;
+			if (SubCommand.HasValue)
+				bytes.Add(SubCommand.Value);
+
+			byte checksum = GetCheckSum(bytes);
+			bytes.Add(checksum);
+
+			return StringUtils.ToString(bytes);
 		}
 	}
 }

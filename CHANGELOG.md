@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+ - Samsung Display - added support for URL Launcher input & implemented queries for gathering additional telemetry
 
 ## [15.3.0] - 2021-02-10
 ### Added

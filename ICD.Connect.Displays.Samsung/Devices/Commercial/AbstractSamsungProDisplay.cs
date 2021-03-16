@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Audio.Controls.Volume;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Displays.Samsung.Controls;
 using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
@@ -25,6 +31,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		private const byte VOLUME = 0x12;
 		private const byte MUTE = 0x13;
 		private const byte INPUT = 0x14;
+		private const byte LAUNCHER = 0xC7;
 
 		private const byte INPUT_HDMI_1 = 0x21;
 		private const byte INPUT_HDMI_1_PC = 0x22;
@@ -35,8 +42,16 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		private const byte INPUT_DISPLAYPORT = 0x25;
 		private const byte INPUT_DVI = 0x18;
 		private const byte INPUT_DVI_VIDEO = 0x1F;
+		private const byte INPUT_URL_LAUNCHER = 0x63;
 
 		private const ushort VOLUME_INCREMENT = 1;
+
+		private const byte LAUNCHER_MODE = 0x81;
+		private const byte LAUNCHER_MODE_MAGIC_INFO = 0x00;
+		private const byte LAUNCHER_MODE_URL_LAUNCHER = 0x01;
+		private const byte LAUNCHER_MODE_MAGIC_IWB = 0x02;
+
+		private const byte LAUNCHER_ADDRESS = 0x82;
 
 		// ReSharper disable StaticFieldInGenericType
 		/// <summary>
@@ -49,6 +64,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			{3, INPUT_HDMI_3},
 			{4, INPUT_DISPLAYPORT},
 			{5, INPUT_DVI},
+			{SamsungProDisplayDestinationControl.URL_LAUNCHER_INPUT, INPUT_URL_LAUNCHER }
 		};
 
 		private static readonly BiDictionary<int, byte> s_InputPcMap = new BiDictionary<int, byte>
@@ -58,11 +74,74 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			{3, INPUT_HDMI_3_PC},
 			{5, INPUT_DVI_VIDEO}
 		};
+
+		private static readonly Dictionary<eLauncherMode, byte[]> s_LauncherModeMap = new Dictionary<eLauncherMode, byte[]>
+		{
+			{eLauncherMode.Unknown, new byte[0] },
+			{eLauncherMode.MagicInfo, new byte[] { LAUNCHER_MODE_MAGIC_INFO } },
+			{eLauncherMode.Url, new byte[] { LAUNCHER_MODE_URL_LAUNCHER } },
+			{eLauncherMode.MagicIwb, new byte[] { LAUNCHER_MODE_MAGIC_IWB } }
+		};
 		// ReSharper restore StaticFieldInGenericType
 
 		private readonly Dictionary<ISamsungProCommand, int> m_CommandRetries;
 
+		private string m_AbsoluteUri;
+		private Uri m_LauncherUri;
+
+		private enum eLauncherMode
+		{
+			Unknown = 0,
+			MagicInfo = 1,
+			Url = 2,
+			MagicIwb = 3
+		}
+
+		#region Events
+
+		public event EventHandler<GenericEventArgs<Uri>> OnUrlLauncherSourceChanged;
+
+		#endregion
+
 		#region Properties
+
+		private eLauncherMode LauncherMode { get; set; }
+
+		private string LastRequestedUri { get; set; }
+
+		[CanBeNull]
+		private string AbsoluteUri
+		{
+			get { return m_AbsoluteUri; }
+			set
+			{
+				if (m_AbsoluteUri == value)
+					return;
+
+				m_AbsoluteUri = value;
+
+				try
+				{
+					LauncherUri = m_AbsoluteUri == null ? null : new Uri(m_AbsoluteUri);
+				}
+				catch (Exception)
+				{
+				}
+			}
+		}
+
+		public Uri LauncherUri
+		{
+			get { return m_LauncherUri; }
+			private set
+			{
+				if (value == m_LauncherUri)
+					return;
+
+				m_LauncherUri = value;
+				OnUrlLauncherSourceChanged.Raise(this, LauncherUri);
+			}
+		}
 
 		/// <summary>
 		/// Returns the features that are supported by this display.
@@ -209,9 +288,63 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SetVolume((ushort)(Volume - VOLUME_INCREMENT));
 		}
 
+		public void SetUrlLauncherSource(Uri source)
+		{
+			// Cache the requested source in case of command failure.
+			LastRequestedUri = source == null ? null : source.AbsoluteUri;
+
+			if (PowerState != ePowerState.PowerOn)
+				return;
+
+			// If the source is null clear the configured URL on the display.
+			if (source == null)
+			{
+				SendCommand(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_ADDRESS,
+				                                     new byte[] {0x00}));
+				return;
+			}
+
+			if (LauncherMode != eLauncherMode.Url)
+			{
+				Logger.Log(eSeverity.Warning, "Attempting to set launcher url while display is in mode {0} ... Changing to url launcher mode", LauncherMode);
+				SetLauncherMode(eLauncherMode.Url);
+			}
+
+			byte[] urlBytes = Encoding.ASCII.GetBytes(source.AbsoluteUri);
+			SendCommand(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_ADDRESS, urlBytes));
+		}
+
 		#endregion
 
 		#region Private Methods
+
+		/// <summary>
+		/// Allows for displays to specify their own custom destination control or just use the default display one.
+		/// </summary>
+		/// <param name="addControl"></param>
+		protected override void AddDisplayDestinationControl(Action<IDeviceControl> addControl)
+		{
+			addControl(new SamsungProDisplayDestinationControl(this, 0));
+		}
+
+		protected override void RaisePowerStateChanged(ePowerState state)
+		{
+			base.RaisePowerStateChanged(state);
+
+			// When we power on check to make sure the last requested uri actually made it to the display.
+			// If it didn't make it set the url again.
+			if (state == ePowerState.PowerOn && LastRequestedUri != null && LastRequestedUri != AbsoluteUri)
+			{
+				try
+				{
+					SetUrlLauncherSource(new Uri(LastRequestedUri));
+				}
+				catch (Exception e)
+				{
+					Logger.Log(eSeverity.Error, "Error updating URL launcher source for display - {0}", e.Message);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Polls the physical device for the current state.
@@ -232,6 +365,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SendCommandPriority(new SamsungProCommand(VOLUME, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(INPUT, GetWallIdForInputCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(MUTE, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_MODE, new byte[0]).ToQuery(), int.MinValue);
+			SendCommandPriority(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_ADDRESS, new byte[0]).ToQuery(), int.MinValue);
 		}
 
 		/// <summary>
@@ -251,19 +386,19 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			switch (command.Command)
 			{
 				case POWER:
-					PowerState = command.Data == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
+					PowerState = command.Data[0] == 1 ? ePowerState.PowerOn : ePowerState.PowerOff;
 					return;
 
 				case VOLUME:
-					Volume = command.Data;
+					Volume = command.Data[0];
 					return;
 
 				case MUTE:
-					IsMuted = command.Data == 1;
+					IsMuted = command.Data[0] == 1;
 					return;
 
 				case INPUT:
-					ActiveInput = s_InputMap.GetKey(command.Data);
+					ActiveInput = s_InputMap.GetKey(command.Data[0]);
 					return;
 			}
 		}
@@ -344,7 +479,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		/// Called when a command is successful.
 		/// </summary>
 		/// <param name="args"></param>
-		private void ParseSuccess(SerialResponseEventArgs args)
+		protected virtual void ParseSuccess(SerialResponseEventArgs args)
 		{
 			// Clear retry counter
 			ISamsungProCommand command = args.Data as ISamsungProCommand;
@@ -390,6 +525,34 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 										  ? s_InputPcMap.GetKey(inputCode)
 										  : (int?)null;
 					break;
+
+				case LAUNCHER:
+					if (response.Id != GetWallIdForInputCommand())
+						return;
+					switch (response.Subcommand)
+					{
+						case LAUNCHER_MODE:
+							switch (response.Values[0])
+							{
+								case LAUNCHER_MODE_MAGIC_INFO:
+									LauncherMode = eLauncherMode.MagicInfo;
+									break;
+
+								case LAUNCHER_MODE_URL_LAUNCHER:
+									LauncherMode = eLauncherMode.Url;
+									break;
+
+								case LAUNCHER_MODE_MAGIC_IWB:
+									LauncherMode = eLauncherMode.MagicIwb;
+									break;
+							}
+							break;
+
+						case LAUNCHER_ADDRESS:
+							AbsoluteUri = StringUtils.ToString(response.Values);
+							break;
+					}
+					break;
 			}
 		}
 
@@ -434,6 +597,44 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 			Logger.Log(eSeverity.Informational, "Command {0} failed, retry attempt {1}", StringUtils.ToHexLiteral(command.Serialize()), retries);
 			SendCommand(command);
+		}
+
+		private void SetLauncherMode(eLauncherMode mode)
+		{
+			if (PowerState != ePowerState.PowerOn)
+				return;
+
+			byte[] modeData;
+			s_LauncherModeMap.TryGetValue(mode, out modeData);
+
+			SendCommand(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_MODE, modeData));
+		}
+
+		#endregion
+
+		#region Console
+
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("Launcher Url", AbsoluteUri);
+		}
+
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+			{
+				yield return command;
+			}
+
+			yield return new GenericConsoleCommand<string>("SetUrl", "Sets the URL to be used in launcher mode", s => SetUrlLauncherSource(new Uri(s)));
+			yield return new GenericConsoleCommand<eLauncherMode>("SetLauncherMode", "Sets the launcher mode - <MagicInfo, Url, MagicIwb>", m => SetLauncherMode(m));
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
 		}
 
 		#endregion

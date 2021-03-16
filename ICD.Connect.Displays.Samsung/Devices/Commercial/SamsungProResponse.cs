@@ -1,11 +1,18 @@
 ﻿using System.Linq;
 using System.Text;
+using ICD.Common.Utils.Collections;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
 	public struct SamsungProResponse
 	{
 		private readonly byte[] m_Bytes;
+
+		private static readonly IcdHashSet<byte> s_CommandsWithSubCommands = new IcdHashSet<byte>
+		{
+			0xC7,
+			0x1B
+		};
 
 		public byte Header { get { return m_Bytes[0]; } }
 
@@ -27,19 +34,38 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		public byte Command { get { return m_Bytes[5]; } }
 
 		/// <summary>
+		/// The sub command code. Only applicable for certain commands.
+		/// </summary>
+		public byte Subcommand { get { return s_CommandsWithSubCommands.Contains(Command) ? m_Bytes[6] : (byte)0; } }
+
+		/// <summary>
 		/// The command result.
 		/// </summary>
 		public byte[] Values
 		{
 			get
 			{
-				int length = m_Bytes[3] - 2;
-				byte[] output = new byte[length];
+				// Responses with a sub-command byte shift the index of the value by 1
+				if (s_CommandsWithSubCommands.Contains(Command))
+				{
+					int length = m_Bytes[3] - 3;
+					byte[] output = new byte[length];
 
-				for (int index = 0; index < length; index++)
-					output[index] = m_Bytes[6 + index];
+					for (int index = 0; index < length; index++)
+						output[index] = m_Bytes[7 + index];
 
-				return output;
+					return output;
+				}
+				else
+				{
+					int length = m_Bytes[3] - 2;
+					byte[] output = new byte[length];
+
+					for (int index = 0; index < length; index++)
+						output[index] = m_Bytes[6 + index];
+
+					return output;
+				}
 			}
 		}
 
