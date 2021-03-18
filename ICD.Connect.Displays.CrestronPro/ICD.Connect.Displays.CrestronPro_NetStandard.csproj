@@ -35,11 +35,11 @@
     <ProjectReference Include="..\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
   </ItemGroup>
   <Target Name="ArchivePlugin" AfterTargets="AfterBuild">
-    <Delete Files="$(OutputPath)$(AssemblyName).kpz" />
-    <ZipDirectory DestinationFile="$(OutputPath)..\$(AssemblyName).kpz"
-                  SourceDirectory="$(OutputPath)"
+    <Delete Files="$(TargetDir)$(AssemblyName).kpz" />
+    <ZipDirectory DestinationFile="$(TargetDir)..\$(AssemblyName).kpz"
+                  SourceDirectory="$(TargetDir)"
                   Overwrite="true"/>
-    <Move SourceFiles="$(OutputPath)..\$(AssemblyName).kpz"
-          DestinationFolder="$(OutputPath)"/>
+    <Move SourceFiles="$(TargetDir)..\$(AssemblyName).kpz"
+          DestinationFolder="$(TargetDir)"/>
   </Target>
 </Project>
