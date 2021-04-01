@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Data;
 
@@ -135,7 +136,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecProjector
 		/// <returns></returns>
 		public string Serialize()
 		{
-			string command = string.Format(s_CommandCodes[CommandType], CommandArgs);
+			object[] parameters = CommandArgs.Cast<object>().ToArray();
+			string command = string.Format(s_CommandCodes[CommandType], parameters);
 
 			char checksum = (char)CalculateChecksum(command);
 
