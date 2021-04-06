@@ -22,7 +22,7 @@ namespace ICD.Connect.Displays.Sharp.Devices.Consumer
 		/// <summary>
 		/// TCP drops connection every 3 minutes without a command.
 		/// </summary>
-		private const long KEEP_ALIVE_INTERVAL = 2 * 60 * 1000;
+		private const long KEEP_ALIVE_INTERVAL = 1 * 60 * 1000;
 
 		private const int MAX_RETRY_ATTEMPTS = 500;
 
