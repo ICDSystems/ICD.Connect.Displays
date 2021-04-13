@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Displays.Samsung.Devices.Commercial;
+﻿using System.Linq;
+using ICD.Connect.Displays.Samsung.Devices.Commercial;
 using NUnit.Framework;
 
 namespace ICD.Connect.Displays.Samsung.Tests.Devices.Commercial
@@ -40,10 +41,10 @@ namespace ICD.Connect.Displays.Samsung.Tests.Devices.Commercial
 	public sealed class SamsungProCommandTest : AbstractSamsungProCommandTest
 	{
 		[TestCase(0x01)]
-		public void DataTest(byte data)
+		public void DataTest(params byte[] data)
 		{
-			SamsungProCommand instance = new SamsungProCommand(0x00, 0x00, data);
-			Assert.AreEqual(data, instance.Data);
+			SamsungProCommand instance = new SamsungProCommand(0x00, 0x00, null, data);
+			Assert.IsTrue(data.SequenceEqual(instance.Data));
 		}
 
 		protected override AbstractSamsungProCommand Instantiate(byte command, byte id)
