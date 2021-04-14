@@ -52,26 +52,22 @@ namespace ICD.Connect.Displays.Devices
 
 		private static void ConsolePowerOn(IDisplay instance)
 		{
-			if(instance == null)
-				return;
-
 			IPowerDeviceControl powerControl = instance.Controls.GetControl<IPowerDeviceControl>();
-			if(powerControl == null)
-				return;
-			
-			powerControl.PowerOn();
+
+			if (powerControl == null)
+				instance.PowerOn();
+			else
+				powerControl.PowerOn();
 		}
 		
 		private static void ConsolePowerOff(IDisplay instance)
 		{
-			if(instance == null)
-				return;
-
 			IPowerDeviceControl powerControl = instance.Controls.GetControl<IPowerDeviceControl>();
-			if(powerControl == null)
-				return;
-			
-			powerControl.PowerOff();
+
+			if (powerControl == null)
+				instance.PowerOff();
+			else
+				powerControl.PowerOff();
 		}
 	}
 }
