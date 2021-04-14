@@ -9,6 +9,7 @@ using ICD.Connect.API.Commands;
 using ICD.Connect.API.Info;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices.Controls.Power;
+using ICD.Connect.Devices.EventArguments;
 using ICD.Connect.Devices.Proxies.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Displays.EventArguments;
@@ -162,7 +163,7 @@ namespace ICD.Connect.Displays.Proxies
 			switch (name)
 			{
 				case DisplayApi.EVENT_POWER_STATE:
-					PowerState = result.GetValue<ePowerState>();
+					PowerState = result.GetValue<PowerDeviceControlPowerStateEventData>().PowerState;
 					break;
 
 				case DisplayApi.HELP_EVENT_ACTIVE_INPUT:
