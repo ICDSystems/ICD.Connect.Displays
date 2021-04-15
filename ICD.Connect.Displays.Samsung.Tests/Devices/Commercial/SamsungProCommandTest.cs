@@ -40,7 +40,7 @@ namespace ICD.Connect.Displays.Samsung.Tests.Devices.Commercial
 	[TestFixture]
 	public sealed class SamsungProCommandTest : AbstractSamsungProCommandTest
 	{
-		[TestCase(0x01)]
+		[TestCase((byte)0x01)]
 		public void DataTest(params byte[] data)
 		{
 			SamsungProCommand instance = new SamsungProCommand(0x00, 0x00, null, data);
