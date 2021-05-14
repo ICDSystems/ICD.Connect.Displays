@@ -5,8 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.4.0] - 2021-05-14
 ### Added
  - Samsung Display - added support for URL Launcher input & implemented queries for gathering additional telemetry
+ 
+### Changed
+ - Reducing Sharp keep-alive interval to 1 minute, potential fix for connection drops
+ - Fixed conversion exception in proxy display
+ - Fixed a bug where the display console did not work for proxy displays
 
 ## [15.3.0] - 2021-02-10
 ### Added
