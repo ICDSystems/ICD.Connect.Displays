@@ -78,9 +78,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		private static readonly Dictionary<eLauncherMode, byte[]> s_LauncherModeMap = new Dictionary<eLauncherMode, byte[]>
 		{
 			{eLauncherMode.Unknown, new byte[0] },
-			{eLauncherMode.MagicInfo, new byte[] { LAUNCHER_MODE_MAGIC_INFO } },
-			{eLauncherMode.Url, new byte[] { LAUNCHER_MODE_URL_LAUNCHER } },
-			{eLauncherMode.MagicIwb, new byte[] { LAUNCHER_MODE_MAGIC_IWB } }
+			{eLauncherMode.MagicInfo, new[] { LAUNCHER_MODE_MAGIC_INFO } },
+			{eLauncherMode.Url, new[] { LAUNCHER_MODE_URL_LAUNCHER } },
+			{eLauncherMode.MagicIwb, new[] { LAUNCHER_MODE_MAGIC_IWB } }
 		};
 		// ReSharper restore StaticFieldInGenericType
 

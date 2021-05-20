@@ -10,7 +10,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		byte Id { get; }
 	}
 
-	public class SamsungProCommandEqualityComparer : IEqualityComparer<ISamsungProCommand>
+	public sealed class SamsungProCommandEqualityComparer : IEqualityComparer<ISamsungProCommand>
 	{
 		public bool Equals(ISamsungProCommand x, ISamsungProCommand y)
 		{
