@@ -565,13 +565,11 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			if (args.Data == null)
 				return;
 
-			var command = args.Data as SamsungProCommand;
-
+			ISamsungProCommand command = args.Data as ISamsungProCommand;
 			if (command == null)
-				Logger.Log(eSeverity.Error, "Command {0} failed, could not convert to SamsungProCommand",
-				           StringUtils.ToHexLiteral(args.Data.Serialize()));
-			else
-				RetryCommand(command);
+				throw new InvalidOperationException("Unexpected command type");
+
+			RetryCommand(command);
 		}
 
 		/// <summary>
