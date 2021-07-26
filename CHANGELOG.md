@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - Fixed a bug where SamsingProDisplay would error out on failed queries instead of retrying the query
+ - Added default IP ports for NEC, Panasonic, Samsung Pro, and Sharp displays
 
 ## [15.4.0] - 2021-05-14
 ### Added

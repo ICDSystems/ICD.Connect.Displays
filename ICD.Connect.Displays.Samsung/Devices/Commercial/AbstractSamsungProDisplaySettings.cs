@@ -16,6 +16,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		{
 			if (networkProperties == null)
 				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 1515);
 		}
 
 		/// <summary>

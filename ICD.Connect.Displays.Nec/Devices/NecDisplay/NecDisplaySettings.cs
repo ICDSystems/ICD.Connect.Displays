@@ -50,6 +50,8 @@ namespace ICD.Connect.Displays.Nec.Devices.NecDisplay
 		{
 			if (networkProperties == null)
 				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 7142);
 		}
 
 		/// <summary>

@@ -21,6 +21,8 @@ namespace ICD.Connect.Displays.Sharp.Devices.Commercial
 		{
 			if (networkProperties == null)
 				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 10008);
 		}
 
 		/// <summary>

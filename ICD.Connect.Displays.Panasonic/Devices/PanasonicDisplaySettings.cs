@@ -18,6 +18,8 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 		{
 			if (networkProperties == null)
 				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 1024);
 		}
 
 		/// <summary>
