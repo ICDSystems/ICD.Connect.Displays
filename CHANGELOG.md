@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.4.1] - 2021-07-26
 ### Changed
  - Fixed a bug where SamsingProDisplay would error out on failed queries instead of retrying the query
  - Added default IP ports for NEC, Panasonic, Samsung Pro, and Sharp displays
