@@ -7,7 +7,7 @@ using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.CrestronConnected;
 using ICD.Connect.Misc.CrestronPro;
@@ -48,7 +48,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 		public event EventHandler<DisplayVolumeControlAvailableApiEventArgs> OnVolumeControlAvailableChanged;
 
-#if SIMPLSHARP
+#if !NETSTANDARD
 		private RoomViewConnectedDisplay m_Display;
 #endif
 
@@ -543,7 +543,7 @@ namespace ICD.Connect.Displays.CrestronPro
 
 #region Display Callbacks
 
-#if SIMPLSHARP
+#if !NETSTANDARD
 		/// <summary>
 		/// Subscribe to the display events.
 		/// </summary>
