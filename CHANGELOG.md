@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+ - Fix an issue with LG displays where power save mode would cause an inaccurate tracked power state.
 
 ## [15.4.1] - 2021-07-26
 ### Changed

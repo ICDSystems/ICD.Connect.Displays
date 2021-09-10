@@ -214,7 +214,10 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		{
 			LgDigitalSignageAcknowledgement acknowledgement;
 			if (!LgDigitalSignageAcknowledgement.Deserialize(args.Response, out acknowledgement))
+			{
+				HandleUnsolicitedResponse(args.Response);
 				return;
+			}
 
 			switch (acknowledgement.Ack)
 			{
@@ -237,6 +240,13 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+		}
+
+		private void HandleUnsolicitedResponse(string data)
+		{
+			// Power save
+			if (data.Contains("Emergency Remount"))
+				PowerState = ePowerState.PowerOff;
 		}
 
 		private void ParseSuccess(LgDigitalSignageTransmission data)
