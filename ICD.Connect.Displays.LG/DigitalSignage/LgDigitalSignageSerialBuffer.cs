@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.SerialBuffers;
 
@@ -40,7 +41,7 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 		{
 			while (data.Length > 0)
 			{
-				int index = data.IndexOf('x');
+				int index = data.IndexOfAny(new [] {'x', '\n'});
 
 				// Easy case
 				if (index < 0)
@@ -49,12 +50,23 @@ namespace ICD.Connect.Displays.LG.DigitalSignage
 					break;
 				}
 
-				// Hard case
+				char delimiter = data[index];
 				string acks = m_RxData.Pop() + data.Substring(0, index + 1);
 				data = data.Substring(index + 1);
 
-				foreach (Match match in Regex.Matches(acks, LgDigitalSignageAcknowledgement.ACK_REGEX))
-					yield return match.Value;
+				switch (delimiter)
+                {
+					// Command response
+					case 'x':
+						foreach (Match match in Regex.Matches(acks, LgDigitalSignageAcknowledgement.ACK_REGEX))
+							yield return match.Value;
+						break;
+
+					// Unsolicited
+					case '\n':
+						yield return acks.Trim();
+						break;
+                }
 			}
 		}
 

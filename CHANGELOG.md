@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [15.4.2] - 2021-10-04
+### Changed
+ - Fix an issue with LG displays where power save mode would cause an inaccurate tracked power state.
+
 ## [15.4.1] - 2021-07-26
 ### Changed
  - Fixed a bug where SamsingProDisplay would error out on failed queries instead of retrying the query
