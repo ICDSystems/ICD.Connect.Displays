@@ -1,4 +1,4 @@
-﻿﻿using ICD.Common.Utils;
+﻿using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
