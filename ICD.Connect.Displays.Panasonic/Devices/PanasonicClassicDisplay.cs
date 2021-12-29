@@ -195,9 +195,6 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 
 		public override void SetActiveInput(int address)
 		{
-			if (PowerState != ePowerState.PowerOn)
-				return;
-
 			SendNonFormattedCommand(string.Format(INPUT_SET_TEMPLATE, s_InputMap[address]));
 		}
 
@@ -319,6 +316,10 @@ namespace ICD.Connect.Displays.Panasonic.Devices
 					else
 						ActiveInput = null;
 
+					break;
+
+				case "IMS":
+					SendNonFormattedCommand(QUERY_INPUT);
 					break;
 			}
 
