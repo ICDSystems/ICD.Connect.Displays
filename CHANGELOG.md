@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [15.4.3] - 2021-12-29
 ### Changed
  - Fix issue with PanasonicClassicDisplay where input changes would not be retried during the display warming period.
 

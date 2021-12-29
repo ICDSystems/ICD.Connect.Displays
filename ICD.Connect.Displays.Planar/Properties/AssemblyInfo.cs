@@ -4,4 +4,4 @@ using System.Reflection;
 [assembly: AssemblyCompany("ICD Systems")]
 [assembly: AssemblyProduct("ICD.Connect.Displays.Planar")]
 [assembly: AssemblyCopyright("Copyright © ICD Systems 2021")]
-[assembly: AssemblyVersion("15.4.2.0")]
+[assembly: AssemblyVersion("15.4.3.0")]
