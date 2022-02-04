@@ -1,4 +1,5 @@
-﻿using ICD.Common.Utils.Xml;
+﻿using System;
+using ICD.Common.Utils.Xml;
 using ICD.Connect.Displays.Settings;
 using ICD.Connect.Protocol.Network.Settings;
 using ICD.Connect.Protocol.Settings;
@@ -57,6 +58,10 @@ namespace ICD.Connect.Displays.Barco.VideoWallDisplay
 		/// <param name="networkProperties"></param>
 		protected override void UpdateNetworkDefaults(SecureNetworkProperties networkProperties)
 		{
+			if (networkProperties == null)
+				throw new ArgumentNullException("networkProperties");
+
+			networkProperties.ApplyDefaultValues(null, 23500);
 		}
 
 		/// <summary>
