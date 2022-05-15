@@ -78,6 +78,12 @@
     <Compile Include="Devices\Commercial\SamsungProDisplay.cs" />
     <Compile Include="Devices\Commercial\SamsungProVideoWallDisplay.cs" />
     <Compile Include="Devices\Commercial\SamsungProVideoWallDisplaySettings.cs" />
+    <Compile Include="Devices\Consumer\AbstractSamsungDisplay.cs" />
+    <Compile Include="Devices\Consumer\AbstractSamsungDisplaySettings.cs" />
+    <Compile Include="Devices\Consumer\ISamsungDisplaySettings.cs" />
+    <Compile Include="Devices\Consumer\SamsungCommand.cs" />
+    <Compile Include="Devices\Consumer\SamsungFrameDisplay.cs" />
+    <Compile Include="Devices\Consumer\SamsungFrameDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -47,7 +47,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			foreach (char c in data)
 			{
 				// Clear leading nonsense
-				if (c == SamsungDisplay.SUCCESS[0] || c == SamsungDisplay.FAILURE[0])
+				if (c == SamsungCommand.SUCCESS[0] || c == SamsungCommand.FAILURE[0])
 					m_RxData.Clear();
 
 				m_RxData.Append(c);
@@ -56,7 +56,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 
 				string serial = m_RxData.Pop();
 
-				if (serial == SamsungDisplay.SUCCESS || serial == SamsungDisplay.FAILURE)
+				if (serial == SamsungCommand.SUCCESS || serial == SamsungCommand.FAILURE)
 					yield return serial;
 				else
 					OnJunkData.Raise(this);
