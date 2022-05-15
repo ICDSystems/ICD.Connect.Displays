@@ -18,6 +18,7 @@ using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialBuffers;
 using ICD.Connect.Protocol.SerialQueues;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 {
@@ -104,6 +105,8 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		#endregion
 
 		#region Properties
+
+		private bool DisableLauncher { get; set; }
 
 		private eLauncherMode LauncherMode { get; set; }
 
@@ -290,6 +293,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		public void SetUrlLauncherSource(Uri source)
 		{
+			if (DisableLauncher)
+				throw new InvalidOperationException("Launcher is Disabled");
+
 			// Cache the requested source in case of command failure.
 			LastRequestedUri = source == null ? null : source.AbsoluteUri;
 
@@ -365,8 +371,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			SendCommandPriority(new SamsungProCommand(VOLUME, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(INPUT, GetWallIdForInputCommand(), 0).ToQuery(), int.MinValue);
 			SendCommandPriority(new SamsungProCommand(MUTE, GetWallIdForVolumeCommand(), 0).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_MODE, new byte[0]).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_ADDRESS, new byte[0]).ToQuery(), int.MinValue);
+			if (!DisableLauncher)
+			{
+				SendCommandPriority(
+				                    new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_MODE, new byte[0]).ToQuery(),
+				                    int.MinValue);
+				SendCommandPriority(
+				                    new SamsungProCommand(LAUNCHER, GetWallIdForInputCommand(), LAUNCHER_ADDRESS, new byte[0])
+					                    .ToQuery(), int.MinValue);
+			}
 		}
 
 		/// <summary>
@@ -599,6 +612,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		private void SetLauncherMode(eLauncherMode mode)
 		{
+			if (DisableLauncher)
+				throw new InvalidOperationException("Launcher is Disabled");
+
 			if (PowerState != ePowerState.PowerOn)
 				return;
 
@@ -610,13 +626,52 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 
 		#endregion
 
+		#region Settings
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(T settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			DisableLauncher = settings.DisableLauncher;
+		}
+
+		/// <summary>
+		/// Override to apply properties to the settings instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(T settings)
+		{
+			base.CopySettingsFinal(settings);
+
+			settings.DisableLauncher = DisableLauncher;
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			DisableLauncher = false;
+		}
+
+		#endregion
+
 		#region Console
 
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Launcher Url", AbsoluteUri);
+			addRow("Disable Launcher", DisableLauncher);
+			if (!DisableLauncher)
+				addRow("Launcher Url", AbsoluteUri);
 		}
 
 		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
@@ -626,8 +681,15 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 				yield return command;
 			}
 
-			yield return new GenericConsoleCommand<string>("SetUrl", "Sets the URL to be used in launcher mode", s => SetUrlLauncherSource(new Uri(s)));
-			yield return new GenericConsoleCommand<eLauncherMode>("SetLauncherMode", "Sets the launcher mode - <MagicInfo, Url, MagicIwb>", m => SetLauncherMode(m));
+			if (!DisableLauncher)
+			{
+				yield return
+					new GenericConsoleCommand<string>("SetUrl", "Sets the URL to be used in launcher mode",
+					                                  s => SetUrlLauncherSource(new Uri(s)));
+				yield return
+					new GenericConsoleCommand<eLauncherMode>("SetLauncherMode", "Sets the launcher mode - <MagicInfo, Url, MagicIwb>",
+					                                         m => SetLauncherMode(m));
+			}
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()

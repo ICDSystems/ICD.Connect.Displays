@@ -34,6 +34,12 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 		[PublicAPI]
 		public byte WallId { get; set; }
 
+		/// <summary>
+		/// Disable system information polling
+		/// Use with displays that do not support it
+		/// </summary>
+		private bool DisableSystemInfo { get; set; }
+
 		#endregion
 
 		#region Methods
@@ -61,11 +67,20 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 				return;
 
 			// Telemetry queries
-			SendCommandPriority(new SamsungProCommand(SERIAL, WallId, 0).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_MAC_ADDRESS_CONFIGURATION, new byte[0]).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_NETWORK_CONFIGURATION, new byte[0]).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_IP_MODE_CONFIGURATION, new byte[0]).ToQuery(), int.MinValue);
-			SendCommandPriority(new SamsungProCommand(SOFTWARE_VERSION, WallId, 0).ToQuery(), int.MinValue);
+			if (!DisableSystemInfo)
+			{
+				SendCommandPriority(new SamsungProCommand(SERIAL, WallId, 0).ToQuery(), int.MinValue);
+				SendCommandPriority(
+				                    new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_MAC_ADDRESS_CONFIGURATION,
+				                                          new byte[0]).ToQuery(), int.MinValue);
+				SendCommandPriority(
+				                    new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_NETWORK_CONFIGURATION, new byte[0])
+					                    .ToQuery(), int.MinValue);
+				SendCommandPriority(
+				                    new SamsungProCommand(SYSTEM_CONFIGURATION, WallId, SYSTEM_IP_MODE_CONFIGURATION, new byte[0])
+					                    .ToQuery(), int.MinValue);
+				SendCommandPriority(new SamsungProCommand(SOFTWARE_VERSION, WallId, 0).ToQuery(), int.MinValue);
+			}
 		}
 
 		#endregion
@@ -178,6 +193,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			base.ClearSettingsFinal();
 
 			WallId = 0;
+			DisableSystemInfo = false;
 		}
 
 		/// <summary>
@@ -189,6 +205,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			base.CopySettingsFinal(settings);
 
 			settings.WallId = WallId;
+			settings.DisableSystemInfo = DisableSystemInfo;
 		}
 
 		/// <summary>
@@ -201,6 +218,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Commercial
 			base.ApplySettingsFinal(settings, factory);
 
 			WallId = settings.WallId;
+			DisableSystemInfo = settings.DisableSystemInfo;
 		}
 
 		#endregion
