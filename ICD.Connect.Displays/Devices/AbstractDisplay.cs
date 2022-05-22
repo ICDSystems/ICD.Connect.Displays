@@ -101,6 +101,8 @@ namespace ICD.Connect.Displays.Devices
 					if (m_PowerState == ePowerState.PowerOn)
 						QueryState();
 
+					HandlePowerStateChanged(value);
+
 					RaisePowerStateChanged(value);
 				}
 				finally
@@ -327,6 +329,10 @@ namespace ICD.Connect.Displays.Devices
 		/// Polls the physical device for the current state.
 		/// </summary>
 		protected virtual void QueryState()
+		{
+		}
+
+		protected virtual void HandlePowerStateChanged(ePowerState state)
 		{
 		}
 
