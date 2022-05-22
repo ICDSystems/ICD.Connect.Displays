@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -11,11 +12,30 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 {
 	public sealed class SamsungFrameDisplay : AbstractSamsungDisplay<SamsungFrameDisplaySettings>
 	{
+		public event EventHandler<BoolEventArgs> OnArtModeChanged;
+
 		private bool m_ArtMode;
 
-		public bool ArtMode { get { return m_ArtMode; } private set { m_ArtMode = value; } }
+		public bool ArtMode
+		{
+			get
+			{
+				return m_ArtMode;
+			}
+			private set
+			{
+				if (m_ArtMode == value)
+					return;
 
-		public bool ArtModeDefault { get; set; }
+				m_ArtMode = value;
+
+				OnArtModeChanged.Raise(this, value);
+			}
+		}
+
+		public bool ArtModeDefault { get; private set; }
+
+		public bool? ArtModeAtPowerOn { get; private set; }
 
 		public void SetArtMode(bool artMode)
 		{
@@ -128,6 +148,14 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			base.SerialQueueOnSerialTransmission(sender, args);
 		}
 
+		protected override void HandlePowerStateChanged(ePowerState state)
+		{
+			base.HandlePowerStateChanged(state);
+
+			if (state == ePowerState.PowerOn && ArtModeAtPowerOn.HasValue)
+				ArtMode = ArtModeAtPowerOn.Value;
+		}
+
 		#endregion
 
 		#region Settings
@@ -142,6 +170,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			base.ApplySettingsFinal(settings, factory);
 
 			ArtModeDefault = settings.ArtModeDefault;
+			ArtModeAtPowerOn = settings.ArtModeAtPowerOn;
+
+			
 		}
 
 		/// <summary>
@@ -153,6 +184,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			base.CopySettingsFinal(settings);
 
 			settings.ArtModeDefault = ArtModeDefault;
+			settings.ArtModeAtPowerOn = ArtModeAtPowerOn;
 		}
 
 		/// <summary>
@@ -163,6 +195,18 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 			base.ClearSettingsFinal();
 
 			ArtModeDefault = false;
+			ArtModeAtPowerOn = null;
+		}
+
+		/// <summary>
+		/// Override to add actions on StartSettings
+		/// This should be used to start communications with devices and perform initial actions
+		/// </summary>
+		protected override void StartSettingsFinal()
+		{
+			base.StartSettingsFinal();
+
+			ArtMode = ArtModeDefault;
 		}
 
 		#endregion
@@ -176,8 +220,9 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
-			addRow("Art Mode", ArtMode);
-			addRow("Art Mode Default", ArtModeDefault);
+			addRow("ArtMode", ArtMode);
+			addRow("ArtMode Default", ArtModeDefault);
+			addRow("ArtMode at Power On", ArtModeAtPowerOn);
 		}
 
 		/// <summary>
