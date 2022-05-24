@@ -235,6 +235,10 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 				yield return command;
 
 			yield return new GenericConsoleCommand<bool>("SetArtMode", "Sets art mode true/false", a => SetArtMode(a));
+			yield return
+				new GenericConsoleCommand<bool>("SetArtModeAtPwrOn", "Sets the art mode at power on true/false",
+				                                a => ArtModeAtPowerOn = a);
+			yield return new ConsoleCommand("ClearArtModeAtPowerOn", "Clears art mode at power on setting", () => ArtModeAtPowerOn = null);
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
