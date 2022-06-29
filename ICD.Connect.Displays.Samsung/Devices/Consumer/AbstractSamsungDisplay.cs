@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
-using System;
 using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
@@ -17,10 +12,6 @@ using ICD.Connect.Protocol.Data;
 using ICD.Connect.Protocol.EventArguments;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Protocol.SerialQueues;
-using ICD.Connect.Devices.Controls.Power;
-using ICD.Connect.Displays.Devices;
-using ICD.Connect.Displays.Settings;
-
 namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 {
 	public abstract class AbstractSamsungDisplay<T> : AbstractDisplayWithAudio<T> where T : ISamsungDisplaySettings, new()
@@ -28,6 +19,7 @@ namespace ICD.Connect.Displays.Samsung.Devices.Consumer
 		/// <summary>
 		/// Maps index to an input command.
 		/// </summary>
+		// ReSharper disable once StaticMemberInGenericType
 		private static readonly BiDictionary<int, string> s_InputMap = new BiDictionary<int, string>
 		{
 			{1, SamsungCommand.INPUT_HDMI_1},
