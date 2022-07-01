@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - SamsungPro Added disable option for Launcher and SystemInfo telemetry
  - Added SamsungFrameDisplay with Art Mode options
  - Added virtual HandlePowerStateChange method to AbstractDisplay
+ - Updated Crestron SDK to 2.18.96
 
 ## [15.4.4] - 2022-05-23
 ### Changed
