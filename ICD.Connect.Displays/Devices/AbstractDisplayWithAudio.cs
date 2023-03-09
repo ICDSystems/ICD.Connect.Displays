@@ -85,6 +85,8 @@ namespace ICD.Connect.Displays.Devices
 				m_IsMuted = value;
 
 				Logger.LogSetTo(eSeverity.Informational, "IsMuted", m_IsMuted);
+				
+				HandleIsMutedChanged(m_IsMuted);
 
 				OnMuteStateChanged.Raise(this, new DisplayMuteApiEventArgs(m_IsMuted));
 			}
@@ -217,6 +219,13 @@ namespace ICD.Connect.Displays.Devices
 		protected virtual void UpdateCachedVolumeControlAvailableState()
 		{
 			VolumeControlAvailable = GetVolumeControlAvailable();
+		}
+
+		/// <summary>
+		/// Called when the state of IsMuted changes
+		/// </summary>
+		protected virtual void HandleIsMutedChanged(bool isMuted)
+		{
 		}
 
 		#endregion
