@@ -80,7 +80,7 @@ namespace ICD.Connect.Displays.Sony.BraviaSerial
         private SonyBraviaSerialResponse(eAnswer answer, [CanBeNull] IEnumerable<char> data)
         {
             m_Answer = answer;
-            m_Data = data == null ? Array.Empty<char>() : data.ToArray();
+            m_Data = data == null ? new char[]{} : data.ToArray();
         }
 
         /// <summary>

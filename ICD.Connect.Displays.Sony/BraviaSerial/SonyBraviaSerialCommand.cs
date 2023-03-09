@@ -210,7 +210,7 @@ namespace ICD.Connect.Displays.Sony.BraviaSerial
                         CommandType));
             }
 
-            builder.Append(GetChecksum(builder));
+            builder.Append(GetChecksum(builder.ToString()));
 
             return builder.ToString();
         }
@@ -218,16 +218,15 @@ namespace ICD.Connect.Displays.Sony.BraviaSerial
         /// <summary>
         /// Get the checksum for the command in the given string builder
         /// </summary>
-        /// <param name="builder"></param>
+        /// <param name="command"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private static char GetChecksum([NotNull] StringBuilder builder)
+        public static char GetChecksum([NotNull] string command)
         {
-            if (builder == null) 
+            if (command == null) 
                 throw new ArgumentNullException("builder");
 
-            char[] characters = new char[builder.Length];
-            builder.CopyTo(0, characters, 0, builder.Length);
+            char[] characters = command.ToCharArray();
 
             return GetChecksum(characters);
         }
