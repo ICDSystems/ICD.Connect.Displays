@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added SonyBraviaSerialDisplay for Bravia displays controlled over RS-232
  
+###Changed
+ - Removed Obfuscation
+ 
 ### Changed
  - AbstractDisplayWithAudio add HandleIsMutedChanged protected virtual method
 

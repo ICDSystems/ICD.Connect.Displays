@@ -78,7 +78,6 @@
     <Compile Include="BraviaSerial\SonyBraviaSerialDisplaySettings.cs" />
     <Compile Include="BraviaSerial\SonyBraviaSerialResponse.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="BraviaIp\Simple IP Control for BRAVIA 2014 v0.6.pdf" />
     <None Include="Properties\ControlSystem.cfg" />

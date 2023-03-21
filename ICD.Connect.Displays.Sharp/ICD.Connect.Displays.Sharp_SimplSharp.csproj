@@ -76,7 +76,6 @@
     <Compile Include="Devices\Prosumer\SharpProsumerDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
     <None Include="Devices\Prosumer\PN-UH601_701_Operation_Manual.pdf" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Devices\Consumer\SharpDisplay.cs" />
     <Compile Include="Devices\Consumer\SharpDisplayCommands.cs" />

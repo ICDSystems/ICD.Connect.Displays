@@ -68,7 +68,6 @@
     <Compile Include="DigitalSignage\LgDigitalSignageTransmission.cs" />
     <Compile Include="KrangPlugin.cs" />
     <None Include="LG Digital Signage.pdf" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

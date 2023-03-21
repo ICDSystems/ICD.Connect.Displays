@@ -65,7 +65,6 @@
     <Compile Include="Devices\PanasonicClassicDisplay.cs" />
     <Compile Include="Devices\PanasonicClassicDisplaySettings.cs" />
     <Compile Include="KrangPlugin.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Devices\PanasonicDisplay.cs" />
     <Compile Include="Devices\PanasonicDisplaySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

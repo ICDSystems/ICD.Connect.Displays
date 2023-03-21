@@ -69,7 +69,6 @@
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Devices\MockDisplayWithAudio.cs" />
     <Compile Include="Devices\MockDisplayWithAudioSettings.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
