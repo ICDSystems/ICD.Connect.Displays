@@ -5,14 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [15.6.0] - 2023-03-22
 ### Added
  - Added SonyBraviaSerialDisplay for Bravia displays controlled over RS-232
  
-###Changed
- - Removed Obfuscation
- 
 ### Changed
  - AbstractDisplayWithAudio add HandleIsMutedChanged protected virtual method
+ - Removed Obfuscation
 
 ## [15.5.0] - 2022-07-01
 ### Added
